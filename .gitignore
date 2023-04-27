@@ -1,0 +1,5 @@
+# Adding google authentication credenttial files for the auto emailing application.
+token.json
+client_secret.json
+__pycache__/
+client_secret.json:Zone.Identifier
