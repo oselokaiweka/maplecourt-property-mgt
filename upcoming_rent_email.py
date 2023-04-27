@@ -136,7 +136,7 @@ def send_upcoming_rent_email():
                     for job in my_cron:
                         if job.comment == 'upcoming_rent_email':
                             print(job)
-                            job.setall('0 9 * * *')
+                            job.setall('0 10 * * *')
                             my_cron.write()
                             print(f"The '{job.comment}' cron job has been successfully reset as follows:")
                             print(job)
