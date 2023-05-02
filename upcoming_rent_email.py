@@ -178,7 +178,7 @@ def send_upcoming_rent_email():
 
 
 
-def read_mc_transaction_email(sender, start_date, stop_date, subject):
+def read_mc_transaction(sender, start_date, stop_date, subject):
     try:
         creds = get_credentials()
         service = build('gmail', 'v1', credentials=creds)
@@ -290,4 +290,4 @@ if __name__ == "__main__":
     stop_date = datetime.now().strftime("%Y/%m/%d")
     with open('start_date.txt','r') as f:
         start_date = f.read().strip()
-    read_mc_transaction_email('GeNS@gtbank.com', start_date, stop_date, 'GeNS Transaction *')
+    read_mc_transaction('GeNS@gtbank.com', start_date, stop_date, 'GeNS Transaction *')
