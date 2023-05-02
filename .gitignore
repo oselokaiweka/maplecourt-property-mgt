@@ -3,3 +3,4 @@ token.json
 client_secret.json
 __pycache__/
 client_secret.json:Zone.Identifier
+read_email.ipynb

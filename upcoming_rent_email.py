@@ -2,6 +2,7 @@
 import base64 #for encoding and decoding data in base64 format
 import time
 import datetime
+from datetime import datetime, timedelta
 import json
 import os
 import subprocess
@@ -13,8 +14,13 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from crontab import CronTab
 import psutil
+import decimal
+from bs4 import BeautifulSoup
+
+
 
 def start_mysql_service(sudopass):
     # Check if the MySQL process is running
@@ -27,16 +33,30 @@ def start_mysql_service(sudopass):
     print("Starting MySQL service...")
     command = f"echo '{sudopass}' | sudo -S service mysql start"
     subprocess.run(command, shell=True)
-        
 
-SCOPES = ["https://www.googleapis.com/auth/gmail.send"] #scope limits gmail access to 'send' only
 
+
+def obtain_pool_connection():
+    db_pass = os.environ.get('DB_PASS')
+    db_config = {"host":"localhost", "user":"admin", "password":db_pass, "database":"maplecourt", "autocommit":True}
+    pool = mysqlconpool(pool_name="mc_pool", pool_size=30, **db_config)  
+    try:
+        connection = pool.get_connection()
+        print(f"connected to {pool.pool_name} pool successfully." )
+    except:
+        pool.add_connection()
+        print(f"Added a new connection to the {pool.pool_name} pool.")
+        connection = pool.get_connection()
+        print(f"connected to {pool.pool_name} pool successfully.")
+    return connection 
+ 
 
 
 def get_credentials():
     creds  = None
-    if os.path.exists('token.json'):
-        with open('token.json', 'r') as token:
+    SCOPES = scopes
+    if os.path.exists('/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/token.json'):
+        with open('/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/token.json', 'r') as token:
             creds = Credentials.from_authorized_user_info(json.load(token), SCOPES)
 
     if not creds or not creds.valid:
@@ -47,7 +67,7 @@ def get_credentials():
             try:
                 creds.refresh(Request())
                 print("Credentials refreshed successfully")
-                with open("token.json", "w") as token:
+                with open("/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/token.json", "w") as token:
                     token.write(creds.to_json())
             except Exception as e:
                 print("Failed to refresh credentials:", e)
@@ -58,31 +78,23 @@ def get_credentials():
                 flow = InstalledAppFlow.from_client_secrets_file("/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/client_secret.json", SCOPES)
                 creds = flow.run_local_server(port=0)
                 # Save the credentials for the next run
-                with open("token.json", "w") as token:
+                with open("/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/token.json", "w") as token:
                     token.write(creds.to_json())
                 print("Application authorized successfully.")
             except Exception as e:
                 print("Failed to authorize application:", e)
                 
     else:
-        print("Valid credentials obtaineed.")    
+        print("Valid credentials obtained.")    
     return creds
 
 
-
+ 
 def send_upcoming_rent_email():
-    # Start MySQL service with password
-    sudo_password = os.environ.get('SUDO_PASS')
-    start_mysql_service(sudo_password)
-
+    
     # Variables to schedule cron job
-    plus_hour = (datetime.datetime.now())+(datetime.timedelta(hours=1)) # Current time plus onee hour.
+    plus_hour = (datetime.now())+(timedelta(hours=1)) # Current time plus one hour.
     my_cron = CronTab(user="oseloka")
-
-    # Variables for DB connection
-    db_pass = os.environ.get('DB_PASS')
-    db_config = {"host":"localhost", "user":"admin", "password":db_pass, "database":"maplecourt", "autocommit":True}
-    pool = mysqlconpool(pool_name="mc_pool", pool_size=30, **db_config)
 
     # Query statement to fetch records of upcominng rentals that are 1 or 2 or 3 months away.
     upcoming_rent_records = """SELECT concat(T.FirstName,' ',T.LastName) as TenantName, 
@@ -94,14 +106,7 @@ def send_upcoming_rent_email():
     or StopDate = date_add(curdate(), interval 3 month);"""
 
     try:
-        connection = pool.get_connection()
-        print(f"connected to {pool.pool_name} pool successfully" )
-    except:
-        pool.add_connection()
-        print(f"Added a new connection to the {pool.pool_name} pool ")
-        connection = pool.get_connection()
-        print(f"connected to {pool.pool_name} pool successfully" )
-    try:
+        connection = CONNECTION 
         cursor = connection.cursor()
         cursor.execute(upcoming_rent_records)
         records = cursor.fetchall()
@@ -122,7 +127,7 @@ def send_upcoming_rent_email():
             message.attach(MIMEText(body, "Plain"))
             print(f"Creating email for {tenant_name}")
 
-            #Send email message and reset cron job to 9am everyday in case it has been moodifiied by the exception.
+            #Send email message and reset cron job to 9am everyday in case it has been modifiied by the exception.
             try:
                 creds = get_credentials()
                 service = build('gmail', 'v1', credentials=creds)
@@ -167,11 +172,122 @@ def send_upcoming_rent_email():
     
 
     finally:
-        #Return connection back to the pool.add_connection
+        #Close cursor
+        cursor.close()
+        print("Cursor is closed.")
+
+
+
+def read_mc_transaction_email(sender, start_date, stop_date, subject):
+    try:
+        creds = get_credentials()
+        service = build('gmail', 'v1', credentials=creds)
+        
+        #start_time_formatted = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S').strftime('%Y/%m/%d %H:%M:%S')
+        #stop_time_formatted = datetime.strptime(stop_time, '%Y-%m-%d %H:%M:%S').strftime('%Y/%m/%d %H:%M:%S')
+        query = f"from:{sender} after:{start_date} before:{stop_date} subject:{subject}"
+        result = service.users().messages().list(userId='me',q=query).execute()
+        messages = result.get('messages')
+
+        records = [] #List to coontain entire insert values as a list of tuplles for insert. 
+
+        # Iterate through mail between the speecified date range to obtain email subject and body. 
+        for message in messages:
+            msg = service.users().messages().get(userId='me', id=message['id'], format='full').execute()
+            payload = msg['payload']
+            headers = payload['headers']
+            for header in headers:
+                name = header['name']
+                value = header['value']        
+                if name == 'Subject':
+                    subject = value
+            subject_list = subject.split()  # Subject_list is email subject converted to list in order to retrieve amountt and alert type.
+
+            if 'parts' in payload:
+                for part in payload['parts']:
+                    if 'data' in part['body']:
+                        data = part['body']['data']
+                        break
+            else:
+                if 'data' in payload['body']:
+                    data = payload['body']['data']
+                else:
+                    continue # skip this message if it doesn't have base64-encoded data
+        
+            body = base64.urlsafe_b64decode(data).decode('utf-8')
+            soup = BeautifulSoup(body,'html.parser')
+            email_body = soup.get_text(separator=' ').strip()
+            email_body = email_body.split()
+            # You can print email_body to see structure of string in order to understand how the following variables are retrieved. 
+            
+            # Get transaction amount and convert to decimal to insert into decimal col in db table.
+            amount = (subject_list[5][:-1]).replace(',','')
+            amount = decimal.Decimal(amount)
+
+            # Get alert type from the email subject. 
+            alert_type = (subject_list[3][1:-1])
+            
+            # Get date and time of transaction and convert to MySQL date format.
+            date_time = (email_body[0]+' '+email_body[1])
+            date_time = datetime.strptime(date_time, '%d-%m-%Y %H:%M')
+            date_time = date_time.strftime('%Y-%m-%d %H:%M:%S')
+
+            # Get transaction reference details..
+            reference = ' '.join(email_body[email_body.index('Remarks')+ 1: email_body.index('Time')])
+
+            # Get current balance and convert to decimal to insert into decimal col in db table.
+            current_bal = (email_body[email_body.index('Current')+4]).replace(',','')
+            current_bal = decimal.Decimal(current_bal)
+
+            # Get available balance and convert to decimal to insert into decimal col in db table.
+            available_bal = (email_body[email_body.index('Available')+4]).replace(',','')
+            available_bal = decimal.Decimal(available_bal)
+
+            record = (date_time , alert_type , amount , reference , current_bal , available_bal)
+            records.append(record)
+                   
+    except HttpError as e:
+        print('encountered an error', e)
+        return
+
+    try:
+        connection = CONNECTION
+        cursor = connection.cursor()
+        print('Cursor created.')
+        insert_querry = """insert into Cashflow 
+        (Date, TransactionType, Amount, Reference, CurrentBal, AvailableBal) 
+        values (%s, %s, %s, %s, %s, %s)"""
+        for record in records:
+            print(record)
+            cursor.execute(insert_querry, record)
+        connection.commit()
         connection.close()
-        print("Connection returned to pool")
+        print('Records where successfully inserted.')
+    except connector.Error as error:
+        print("Data insert operation failed, ", error)
+        return
+
+    try:
+        # Update start_date value with stop_date value so next time the script runs it will begin from where it stopped in the last run.
+        with open("/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/start_date.txt", "w") as start_date_file:
+                start_date_file.write(stop_date)
+    except Exception as e:
+        # Unable to reschedule the start date, however data duplication is resticted in database so only new records will be inserted.
+        print("Unable to reschedule the start date, however data duplication is resticted in database so only new records will be inserted.")
+
+
+
 
 
 
 if __name__ == "__main__":  
+    # Start MySQL service with password
+    sudo_password = os.environ.get('SUDO_PASS')
+    start_mysql_service(sudo_password)
+    scopes = ["https://www.googleapis.com/auth/gmail.send","https://www.googleapis.com/auth/gmail.readonly"] #scope limits gmail access to 'send' and 'read' only.
+    CONNECTION = obtain_pool_connection()
     send_upcoming_rent_email() 
+    stop_date = datetime.now().strftime("%Y/%m/%d")
+    with open('start_date.txt','r') as f:
+        start_date = f.read().strip()
+    read_mc_transaction_email('GeNS@gtbank.com', start_date, stop_date, 'GeNS Transaction *')
