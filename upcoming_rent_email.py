@@ -108,8 +108,13 @@ def send_upcoming_rent_email():
     try:
         connection = CONNECTION 
         cursor = connection.cursor()
+        print('Checking for upcoming rent...\n')
         cursor.execute(upcoming_rent_records)
         records = cursor.fetchall()
+        if records == True:
+            print('Upcoming rent data found.\n')
+        else:
+            print('No upcoming rent data found.\n')
         for record in records:
             tenant_name = record[0]
             email = record[1]
@@ -125,7 +130,7 @@ def send_upcoming_rent_email():
             message["To"] = email
             body = f"Dear {tenant_name},\n\nThis is a friendly reminder that your rent expires on {due_date}.\nWe are happy with your tenancy and hereby extend you an offer to renew your tenancy as detailed below:\n\nRENT:  NGN{rent_amount}\nSERVICE CHARGE:  NGN{service_charge}\nTOTAL:  NGN{payment_total}\n\nKindly respond to this email stating if you will be renwing or not renewing.\nPlease note that accepting to renew is accepting to make full payment on or before {due_date}.\n\nFailure to respond will be treated as decline to this offer.\n\nThank you for your prompt response.\n\nThank You and Best Regards, \nADMIN - CHROMETRO NIG\nMAPLE COURT APARTMENTS"
             message.attach(MIMEText(body, "Plain"))
-            print(f"Creating email for {tenant_name}")
+            print(f"Creating email for {tenant_name}...\n")
 
             #Send email message and reset cron job to 9am everyday in case it has been modifiied by the exception.
             try:
@@ -134,7 +139,7 @@ def send_upcoming_rent_email():
 
                 create_message = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
                 send_message = (service.users().messages().send(userId="me", body=create_message).execute())
-                print(f"Email sent to {tenant_name} successfully!")
+                print(f"Email sent to {tenant_name} successfully!\n")
 
                 # Reset cron job to 9am everyday.
                 try:
@@ -144,7 +149,7 @@ def send_upcoming_rent_email():
                             job.setall('0 10 * * *')
                             my_cron.write()
                             print(f"The '{job.comment}' cron job has been successfully reset as follows:")
-                            print(job)
+                            print(f"{job}\n")
 
                 except Exception as e:
                     print("Unable to reset cron job to 9am everyday.")
@@ -174,7 +179,8 @@ def send_upcoming_rent_email():
     finally:
         #Close cursor
         cursor.close()
-        print("Cursor is closed.")
+        print("Cursor is closed.\n")
+        
 
 
 
@@ -182,9 +188,8 @@ def read_mc_transaction(sender, start_date, stop_date, subject):
     try:
         creds = get_credentials()
         service = build('gmail', 'v1', credentials=creds)
-        
-        #start_time_formatted = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S').strftime('%Y/%m/%d %H:%M:%S')
-        #stop_time_formatted = datetime.strptime(stop_time, '%Y-%m-%d %H:%M:%S').strftime('%Y/%m/%d %H:%M:%S')
+        print('Checking for property management expenses data...\n')
+
         query = f"from:{sender} after:{start_date} before:{stop_date} subject:{subject}"
         result = service.users().messages().list(userId='me',q=query).execute()
         messages = result.get('messages')
@@ -245,9 +250,13 @@ def read_mc_transaction(sender, start_date, stop_date, subject):
 
             record = (date_time , alert_type , amount , reference , current_bal , available_bal)
             records.append(record)
+        records = sorted(records, reverse = False)
+        print('Data Extracted, Transformed and ready for Loading...')
+        print()
                    
     except HttpError as e:
         print('encountered an error', e)
+        print()
         return
 
     try:
@@ -255,25 +264,28 @@ def read_mc_transaction(sender, start_date, stop_date, subject):
         cursor = connection.cursor()
         print('Cursor created.')
         insert_querry = """insert into Cashflow 
-        (Date, TransactionType, Amount, Reference, CurrentBal, AvailableBal) 
+        (Date, Type, Amount, Reference, CurrentBal, AvailableBal) 
         values (%s, %s, %s, %s, %s, %s)"""
         for record in records:
-            print(record)
             cursor.execute(insert_querry, record)
         connection.commit()
         connection.close()
-        print('Records where successfully inserted.')
+        print('ETL complete!\nRecords where successfully inserted ;)\n')
+    
     except connector.Error as error:
         print("Data insert operation failed, ", error)
+        print()
         return
 
     try:
         # Update start_date value with stop_date value so next time the script runs it will begin from where it stopped in the last run.
         with open("/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/start_date.txt", "w") as start_date_file:
                 start_date_file.write(stop_date)
+        print("Next ETL operation has been scheduled for tomorrow.")
     except Exception as e:
         # Unable to reschedule the start date, however data duplication is resticted in database so only new records will be inserted.
         print("Unable to reschedule the start date, however data duplication is resticted in database so only new records will be inserted.")
+        
 
 
 
