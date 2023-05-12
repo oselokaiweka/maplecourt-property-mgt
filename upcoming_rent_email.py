@@ -178,7 +178,7 @@ def send_upcoming_rent_email():
 
 def read_mc_transaction(sender, start_date, stop_date, subject):
     try:
-        print('Obtaining credential to read transaction data')
+        print('Obtaining credential to read transaction data...')
         creds = get_credentials()
         service = build('gmail', 'v1', credentials=creds)
         print('Checking for property management expenses data...')
@@ -190,7 +190,7 @@ def read_mc_transaction(sender, start_date, stop_date, subject):
         records = [] #List to coontain entire insert values as a list of tuplles for insert. 
 
         # Iterate through mail between the speecified date range to obtain email subject and body. 
-        if messages == True:
+        if messages:
             for message in messages:
                 msg = service.users().messages().get(userId='me', id=message['id'], format='full').execute()
                 payload = msg['payload']
@@ -252,20 +252,35 @@ def read_mc_transaction(sender, start_date, stop_date, subject):
 
 
 def data_insert(records):
-    if records == True:
+    if records:
         try:
             connection = CONNECTION
             cursor = connection.cursor()
             print('Cursor created.')
             insert_querry = """insert into Cashflow 
             (Date, Type, Amount, Reference, CurrentBal, AvailableBal) 
-            values (%s, %s, %s, %s, %s, %s)"""
+            values (%s, %s, %s, 
+            replace(
+                replace(
+                    replace(
+                        regexp_replace(
+                            replace(
+                                replace(
+                                    regexp_replace(upper(%s), '[0-9]{9,}', ' ' )
+                                , 'REF ', ' ')
+                            , 'REF: ', ' ')
+                        , 'REF:[^\s]+', ' ')
+                    , '|', ' ')
+                , 'VIA GTWORLD', ' ')
+            , 'VIA GAPSLITE', ' '),
+            %s, %s)"""
+            
             for record in records:
                 cursor.execute(insert_querry, record)
             connection.commit()
             connection.close()
             print('ETL complete!\nRecords where successfully inserted ;)\n')
-        
+            
         except connector.Error as error:
             print("Data insert operation failed, ", error)
             print()
