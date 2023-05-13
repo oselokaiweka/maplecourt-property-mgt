@@ -48,7 +48,11 @@ def obtain_pool_connection(db_pass):
         print(f"connected to {pool.pool_name} pool successfully.\n")
     return connection 
  
-
+def start_mysql_event_scheduler():
+    connection = CONNECTION 
+    cursor = connection.cursor()
+    cursor.execute("SET GLOBAL event_scheduler =  ON;")
+    cursor.close
 
 def get_credentials():
     creds  = None
@@ -107,6 +111,7 @@ def send_upcoming_rent_email():
     try:
         connection = CONNECTION 
         cursor = connection.cursor()
+
         print('Checking for upcoming rent...')
         cursor.execute(upcoming_rent_records)
         records = cursor.fetchall()
@@ -312,6 +317,8 @@ if __name__ == "__main__":
 
     db_password = os.environ.get('DB_PASS')
     CONNECTION = obtain_pool_connection(db_password)
+
+    start_mysql_event_scheduler()
 
     send_upcoming_rent_email() 
 
