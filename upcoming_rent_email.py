@@ -48,11 +48,20 @@ def obtain_pool_connection(db_pass):
         print(f"connected to {pool.pool_name} pool successfully.\n")
     return connection 
  
+
+
 def start_mysql_event_scheduler():
     connection = CONNECTION 
     cursor = connection.cursor()
-    cursor.execute("SET GLOBAL event_scheduler =  ON;")
-    cursor.close
+    try:
+        print('Starting DB event scheduler...')
+        cursor.execute("SET GLOBAL event_scheduler =  ON;")
+        cursor.close
+        print('Event scheduler is started and cursor is closed.\n')
+    except Exception as e:
+        print(f'Unable to start DB event scheduler,\n{e}.')
+
+
 
 def get_credentials():
     creds  = None
@@ -307,6 +316,8 @@ def data_insert(records):
 
 
 if __name__ == "__main__":
+    print(f'PROCESS RUN TIMESTAMP: {datetime.now()}\n')
+    
     DIR_PATH = "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt"
 
     # Start MySQL service with password
