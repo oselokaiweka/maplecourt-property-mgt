@@ -260,7 +260,7 @@ def read_mc_transaction(sender, start_date, stop_date, subject):
             print('No new transaction data present.')
             return       
     except HttpError as e:
-        print(f'encountered an error, {e}\n')
+        print(f'Encountered an error, {e}\n')
         return
 
 
