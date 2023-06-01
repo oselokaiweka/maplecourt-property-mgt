@@ -124,7 +124,7 @@ def send_upcoming_rent_email():
         print('Checking for upcoming rent...')
         cursor.execute(upcoming_rent_records)
         records = cursor.fetchall()
-        if records == True:
+        if records:
             print('Upcoming rent data found.\n')
             for record in records:
                 tenant_name = record[0]
