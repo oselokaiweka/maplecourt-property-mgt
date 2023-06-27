@@ -40,19 +40,19 @@ if mysqldump -u admin -p$PASSWORD $DATABASE > $DUMPFILE_SQL; then
 	echo "$DATABASE dump file successfully downloaded for archiving"
 
 	# Compress downloaded file
-        if gzip -c $DUMPFILE_SQL > $DUMPFILE_GZ; then
-        	echo "$DATABASE backup successfully compressed and archived"
-        	echo $USERPASS | sudo -S rm $DUMPFILE_SQL
+    if gzip -c $DUMPFILE_SQL > $DUMPFILE_GZ; then
+        echo "$DATABASE backup successfully compressed and archived"
+        echo $USERPASS | sudo -S rm $DUMPFILE_SQL
 
 		# Delete old backups longer than 30 days
-		echo $USERPASS | sudo -S find $BACKUP_DIRECTORY -mtime +$PERIOD -delete
+		echo $USERPASS | sudo -S find $DUMPFILE_GZ -mtime +$PERIOD -delete
 
 
 
-    	else
-        	echo "Error creating $DATABASE backup file, process terminated"
-        	echo $USERPASSrm | sudo -S rm $DUMPFILE_SQL
-    	fi
+    else
+        echo "Error creating $DATABASE backup file, process terminated"
+        echo $USERPASSrm | sudo -S rm $DUMPFILE_SQL
+    fi
 
 
 
