@@ -115,7 +115,8 @@ def send_upcoming_rent_email():
     join Rentals R using (UnitID) 
     where StopDate = date_add(curdate(), interval 1 month) 
     or StopDate = date_add(curdate(), interval 2 month)
-    or StopDate = date_add(curdate(), interval 3 month);"""
+    or StopDate = date_add(curdate(), interval 3 month)
+    or StopDate = curdate();"""
 
     try:
         connection = CONNECTION 
@@ -139,7 +140,7 @@ def send_upcoming_rent_email():
                 message["Subject"] = "Upcoming Rent Renewal"
                 message["From"] = "admin@chrometronig.com"
                 message["To"] = email
-                body = f"Dear {tenant_name},\n\nThis is a friendly reminder that your rent expires on {due_date}.\nWe are happy with your tenancy and hereby extend you an offer to renew your tenancy as detailed below:\n\nRENT:  NGN{rent_amount}\nSERVICE CHARGE:  NGN{service_charge}\nTOTAL:  NGN{payment_total}\n\nKindly respond to this email stating if you will be renwing or not renewing.\nPlease note that accepting to renew is accepting to make full payment on or before {due_date}.\n\nFailure to respond will be treated as decline to this offer.\n\nThank you for your prompt response.\n\nThank You and Best Regards, \nADMIN - CHROMETRO NIG\nMAPLE COURT APARTMENTS"
+                body = f"Dear {tenant_name},\n\nThis is a friendly reminder that your tenancy expires on {due_date}.\nWe are happy with your tenancy and hereby extend you an offer to renew your tenancy as detailed below:\n\nOUTSTANDING RENT:  NGN{rent_amount}\nSERVICE CHARGE:  NGN{service_charge}\nTOTAL:  NGN{payment_total}\n\nKindly respond to this email stating if you will be renwing or not renewing.\nPlease note that accepting to renew is accepting to make full payment on or before {due_date}.\n\nFailure to respond will be treated as decline to this offer.\n\nThank you for your prompt response.\n\nThank You and Best Regards, \nADMIN - CHROMETRO NIG\nMAPLE COURT APARTMENTS"
                 message.attach(MIMEText(body, "Plain"))
                 print(f"Creating email for {tenant_name}...\n")
 
