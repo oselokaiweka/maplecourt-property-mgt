@@ -317,7 +317,7 @@ def data_insert(records):
 
 
 if __name__ == "__main__":
-    print(f'PROCESS RUN TIMESTAMP: {datetime.now()}\n')
+    print(f'PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n')
     
     DIR_PATH = "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt"
 
