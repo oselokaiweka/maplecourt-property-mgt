@@ -51,7 +51,7 @@ if mysqldump -u admin -p$PASSWORD $DATABASE > $DUMPFILE_SQL; then
 
     else
         echo "Error creating $DATABASE backup file, process terminated"
-        echo $USERPASSrm | sudo -S rm $DUMPFILE_SQL
+        echo $USERPASS | sudo -S rm $DUMPFILE_SQL
     fi
 
 

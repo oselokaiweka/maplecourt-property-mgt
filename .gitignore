@@ -8,3 +8,4 @@ Payments_MgtFee__dataCleaning.sql
 Payments_MgtFee__dataCleaning2.sql
 management_fee_calculator.sql
 mc_db_model.mwb.bak
+service_charge_report.py
