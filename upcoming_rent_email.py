@@ -21,13 +21,13 @@ def send_upcoming_rent_email(pool):
 
     # Query statement to fetch records of upcominng rentals that are 1 or 2 or 3 months away.
     upcoming_rent_records = """SELECT concat(T.FirstName,' ',T.LastName) as TenantName, 
-    T.Email, R.RentPrice, R.ServiceCharge, R.StopDate, (R.RentPrice + R.ServiceCharge) as Total
-    FROM Tenants T inner
-    join Rentals R using (UnitID) 
-    where StopDate = date_add(curdate(), interval 1 month) 
-    or StopDate = date_add(curdate(), interval 2 month)
-    or StopDate = date_add(curdate(), interval 3 month)
-    or StopDate = curdate();"""
+    T.Email, U.RentPrice, U.ServiceCharge, R.StopDate, (U.RentPrice + U.ServiceCharge) as Total
+    FROM Units U inner join Tenants T using (UnitID)
+    inner join Rentals R using (TenantID) 
+    where R.StopDate = date_add(curdate(), interval 1 month) 
+    or R.StopDate = date_add(curdate(), interval 2 month)
+    or R.StopDate = date_add(curdate(), interval 3 month)
+    or R.StopDate = curdate();"""
 
     try:
         connection = pool.get_connection()
