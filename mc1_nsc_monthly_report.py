@@ -164,10 +164,10 @@ if __name__ == '__main__':
 
     # INFLOW FUNCTION
     inf_monthstart = datetime.now().replace(day=1)
-    MC1L1_SC_NSC_MGT_LIST = get_landlord_inflow(pool, inf_monthstart)
+    inflow_records = get_landlord_inflow(pool, inf_monthstart)
 
     # GENERATE PDF FUNCTION
     generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total, # <<< NSC VARIABLES
                 mgtfee_table_data, total_mgt_fee, first_day_prev_month_str, # <<< MGT FEE VARIABLES
                 sc_table_data, sc_summary_list, all_total, oct_sc_table_data, oct_sc_summary_list, # <<< SC VARIABLES
-                MC1L1_SC_NSC_MGT_LIST) # <<< INFLOW VARIABLES
+                inflow_records) # <<< INFLOW VARIABLES
