@@ -105,41 +105,57 @@ def get_landlord_inflow(pool, inf_monthstart):
         records = cursor.fetchall()
 
         # Initializing list with default values so I dont get a nonetype error if the record is empty
-        MC1L1_SC_NSC_MGT_LIST = [0,0,0,0]
-        MC2L1_SC_NSC_MGT_LIST = [0,0,0,0]
-        MC2L2_SC_NSC_MGT_LIST = [0,0,0,0]
-        MC2L3_SC_NSC_MGT_LIST = [0,0,0,0]
+        MC1L1_SC_NSC_MGT_list = [0,0,0,0]
+        MC2L1_SC_NSC_MGT_list = [0,0,0,0]
+        MC2L2_SC_NSC_MGT_list = [0,0,0,0]
+        MC2L3_SC_NSC_MGT_list = [0,0,0,0]
 
         if records:
-            print(f'Total number of records: {len(records)}\n')
+    
             MC1L1_SC    = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'SC']
+            MC1L1_NSC   = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'NSC']
+            MC1L1_MGT   = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'MGT']
+           
             mnth_MC1L1_SC = round(float(sum(record[3] for record in MC1L1_SC if record[1] >= datetime.now().date().replace(day=1))),2)
             all_MC1L1_SC = round(float(sum(record[3] for record in MC1L1_SC)),2)
-
-            MC1L1_NSC   = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'NSC']
             sum_MC1L1_NSC = round(float(sum(record[3] for record in MC1L1_NSC)),2)
-            
-            MC1L1_MGT   = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'MGT']
             curr_MC1L1_MGT = round(float(sum(record[3] for record in MC1L1_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
-            
+
             MC2L1_SC    = [record for record in records if record[6] == 2 and record[5] == 1 and record[4] == 'SC']
             MC2L1_NSC   = [record for record in records if record[6] == 2 and record[5] == 1 and record[4] == 'NSC']
             MC2L1_MGT   = [record for record in records if record[6] == 2 and record[5] == 1 and record[4] == 'MGT']
+           
+            mnth_MC2L1_SC = round(float(sum(record[3] for record in MC2L1_SC if record[1] >= datetime.now().date().replace(day=1))),2)
+            all_MC2L1_SC = round(float(sum(record[3] for record in MC2L1_SC)),2)
+            sum_MC2L1_NSC = round(float(sum(record[3] for record in MC2L1_NSC)),2)
+            curr_MC2L1_MGT = round(float(sum(record[3] for record in MC2L1_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
+
             MC2L2_SC    = [record for record in records if record[6] == 2 and record[5] == 2 and record[4] == 'SC']
             MC2L2_NSC   = [record for record in records if record[6] == 2 and record[5] == 2 and record[4] == 'NSC']
             MC2L2_MGT   = [record for record in records if record[6] == 2 and record[5] == 2 and record[4] == 'MGT']
+            
+            mnth_MC2L2_SC = round(float(sum(record[3] for record in MC2L2_SC if record[1] >= datetime.now().date().replace(day=1))),2)
+            all_MC2L2_SC = round(float(sum(record[3] for record in MC2L2_SC)),2)
+            sum_MC2L2_NSC = round(float(sum(record[3] for record in MC2L2_NSC)),2)
+            curr_MC2L2_MGT = round(float(sum(record[3] for record in MC2L2_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
+
             MC2L3_SC    = [record for record in records if record[6] == 2 and record[5] == 3 and record[4] == 'SC']
             MC2L3_NSC   = [record for record in records if record[6] == 2 and record[5] == 3 and record[4] == 'NSC']
             MC2L3_MGT   = [record for record in records if record[6] == 2 and record[5] == 3 and record[4] == 'MGT']
+           
+            mnth_MC2L3_SC = round(float(sum(record[3] for record in MC2L3_SC if record[1] >= datetime.now().date().replace(day=1))),2)
+            all_MC2L3_SC = round(float(sum(record[3] for record in MC2L3_SC)),2)
+            sum_MC2L3_NSC = round(float(sum(record[3] for record in MC2L3_NSC)),2)
+            curr_MC2L3_MGT = round(float(sum(record[3] for record in MC2L3_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
+
+            MC1L1_SC_NSC_MGT_list = [mnth_MC1L1_SC, all_MC1L1_SC, sum_MC1L1_NSC, curr_MC1L1_MGT]
+            MC2L1_SC_NSC_MGT_list = [mnth_MC2L1_SC, all_MC2L1_SC, sum_MC2L1_NSC, curr_MC2L1_MGT]
+            MC2L2_SC_NSC_MGT_list = [mnth_MC2L2_SC, all_MC2L2_SC, sum_MC2L2_NSC, curr_MC2L2_MGT]
+            MC2L3_SC_NSC_MGT_list = [mnth_MC2L3_SC, all_MC2L3_SC, sum_MC2L3_NSC, curr_MC2L3_MGT]
+
+            inflow_records = [MC1L1_SC_NSC_MGT_list, MC2L1_SC_NSC_MGT_list, MC2L2_SC_NSC_MGT_list, MC2L3_SC_NSC_MGT_list]
             
-            MC1L1_SC_NSC_MGT_LIST = [mnth_MC1L1_SC, all_MC1L1_SC, sum_MC1L1_NSC, curr_MC1L1_MGT]
-            MC2L1_SC_NSC_MGT_LIST = []
-            MC2L2_SC_NSC_MGT_LIST = []
-            MC2L3_SC_NSC_MGT_LIST = []
-            
-        return MC1L1_SC_NSC_MGT_LIST
-        
-        
+        return inflow_records
         
     except Exception as e:
         print(e)
