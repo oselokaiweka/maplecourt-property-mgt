@@ -100,7 +100,7 @@ def mc1_sc_report(pool, sc_start1):
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:
         dir_path = os.environ.get('DIR_PATH')
-        with open(dir_path+"/sc_net.txt", "r") as net_file: # Get balance brought forward saved in json file
+        with open(dir_path+"/sc_net.json", "r") as net_file: # Get balance brought forward saved in json file
             net_summary = json.load(net_file)
         prev_net = net_summary['prev_net']
     except Exception as e:
@@ -151,7 +151,7 @@ def mc1_sc_report(pool, sc_start1):
                 next_month_end = datetime(prev_date.year, prev_date.month + 2, 1) - timedelta(days=1)
                 net_summary['prev_net'] = curr_net if datetime.now() >= next_month_end else prev_net
                 net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
-                with open(dir_path+"/sc_net.txt", "w") as net_file:
+                with open(dir_path+"/sc_net.json", "w") as net_file:
                     json.dump(net_summary, net_file, indent=4) # Use indent for pretty formatting
             except Exception as e:
                 print('Unable to update bal brought forward json file\n', e)
