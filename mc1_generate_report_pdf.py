@@ -65,8 +65,8 @@ def generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_tot
     elements.append(logo)
 
     # Initializing date variable
-    current_date = datetime.date.today()
-    today = current_date.strftime("%d-%m-%Y")
+    curr_date = datetime.date.today()
+    today = curr_date.strftime("%d-%m-%Y")
 
     # Add document titles
     property_name = Paragraph(f"MAPLE COURT 1 - JABI", left_aligned_title)
@@ -81,7 +81,7 @@ def generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_tot
     bill_to.spaceAfter = 2
     elements.append(bill_to)
 
-    invoice_id = Paragraph(f"Invoice id: PMG/MC1/F1-7/9-10/23", left_aligned_normal_bold)
+    invoice_id = Paragraph(f"Invoice id: PMG/MC1/F1-7/{curr_date.month}/{curr_date.year}", left_aligned_normal_bold)
     invoice_id.spaceAfter = 5
     elements.append(invoice_id)
 
@@ -95,10 +95,10 @@ def generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_tot
 
     summary_table_data = [
         ['SUMMARY', 'REF CODE','AMOUNT(NGN)'],
-        ['OCTOBER - NOVEMBER SERVICE CHARGE:', 'MC1L1 SC', '525,000.00'],
-        ['NOVEMBER INCIDENTALS:', 'MC1L1 NSC', '25,000.00'], 
-        ['SEPTEMBER - OCTOBER REIMBURSABLE:', 'MC1L1 NSC', f'{nsc_grand_total}'],
-        ['SEPTEMBER - OCTOBER MANAGEMENT FEE:', 'MC1L1 MGT', f'{total_mgt_fee}' ],
+        [f"{curr_date.replace(month=curr_date.month + 1).strftime('%B')} SERVICE CHARGE:", 'MC1L1 SC', '525,000.00'],
+        [f"{curr_date.replace(month=curr_date.month + 1).strftime('%B')} INCIDENTALS:", 'MC1L1 NSC', '25,000.00'], 
+        [f"{curr_date.strftime('%B')} REIMBURSABLE:", 'MC1L1 NSC', f'{nsc_grand_total}'],
+        [f"{curr_date.strftime('%B')} MANAGEMENT FEE:", 'MC1L1 MGT', f'{total_mgt_fee}' ],
         ['TOTAL:', '' ,'N 1,086,068.87']
     ]
     
