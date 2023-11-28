@@ -24,7 +24,7 @@ R.StartDate as 'Rent Start', R.StopDate as 'Rent Stop', U.CurrentRent
 from Rentals R inner join Tenants T on T.TenantID = R.TenantID
 inner join Units U on U.UnitID = R.UnitID
 where R.UnitCode like 'MC1%'
-and R.StopDate > date_sub(date_format(current_date(), '%Y-%m-01'), interval 2 month) 
+and R.StopDate > date_format(current_date(), '%Y-%m-01')
 order by U.UnitCode;
 """
 
@@ -120,6 +120,6 @@ def mc1_mgt_report(pool, period_start, period_stop):
     
 if __name__ == '__main__':
     pool = POOL
-    period_start = '2023-09-01'
-    period_stop = '2023-10-31'
+    period_start = None
+    period_stop = None
     mc1_mgt_report(pool, period_start, period_stop)

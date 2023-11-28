@@ -12,9 +12,9 @@ from reportlab.platypus import PageTemplate, BaseDocTemplate, PageBreak, NextPag
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Frame
 
 def generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total, # <<< NSC VARIABLES
-                 mgtfee_table_data, total_mgt_fee, first_day_prev_month_str,         # <<< MGT FEE VARIABLES
-                sc_table_data, sc_summary_list, all_total, oct_sc_table_data, oct_sc_summary_list, # SC VARIABLES 
-                inflow_records):      # <<< INFLOW VARIABLES    
+                mgtfee_table_data, total_mgt_fee, first_day_prev_month_str, # <<< MGT FEE VARIABLES
+                sc_table_data, sc_summary_list, # <<< SC VARIABLES 
+                inflow_records): # <<< INFLOW VARIABLES    
     
     pdf = SimpleDocTemplate('MC1_REPORT.PDF', pagesize=LEGAL) # Creates a PDF document
     elements = [] # Creates a list to store the content
@@ -123,7 +123,7 @@ def generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_tot
         ['SUB-TOTAL', f'{sc_summary_list[0]:,.2f}'],
         ['7.5% MANAGEMENT FEE', f'{sc_summary_list[1]:,.2f}'],
         ['GRAND TOTAL', f'{sc_summary_list[2]:,.2f}'],
-        ['BALANCE BROUGHT FORWARD', f'{187372.26:,.2f}'], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
+        ['BALANCE BROUGHT FORWARD', inflow_records[0][1] - total_sc_expenses], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
         ['TOTAL RECEIVED (Aug-Sept SC & N300k Diesel)', f'{825000:,.2f}'],
         ['NET TOTAL', f'{94569.38:,.2f}']
     ]
