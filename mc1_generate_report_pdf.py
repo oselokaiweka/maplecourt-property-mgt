@@ -81,7 +81,7 @@ def generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_tot
     bill_to.spaceAfter = 2
     elements.append(bill_to)
 
-    invoice_id = Paragraph(f"Invoice id: PMG/MC1/F1-7/9-10/23", left_aligned_normal_bold)
+    invoice_id = Paragraph(f"Invoice id: PMG/MC1/F1-7/{today.month}/{today.year}", left_aligned_normal_bold)
     invoice_id.spaceAfter = 5
     elements.append(invoice_id)
 
