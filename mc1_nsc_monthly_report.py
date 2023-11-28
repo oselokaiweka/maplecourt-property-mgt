@@ -1,8 +1,9 @@
 # This script retrieves MC1NSC records from two maplecourt database tables that contain 
 # all business transactions.
 from math import ceil, floor
+import os, json
 from mysql_pool import POOL
-from datetime import datetime
+from datetime import datetime, timedelta
 from mc_inflow import get_landlord_inflow
 from mc1_mgt_fee_report import mc1_mgt_report
 from mc1_generate_report_pdf import generate_pdf
@@ -85,30 +86,36 @@ def mc1_nsc_report(pool, date1, filters):
     get_non_service_charge_data = """select ID, Date, Description, Amount 
     from maplecourt.MC1nsc_expenses where date >= %s;"""
 
+    nsc_start =  date1 if date1 is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
+    # In order to maintain track of total service charge since app start date a json file to write prev_net (used for bal brought forward) at the end of every month is created.
+    # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
+    # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:
-        cursor.execute(data_insert_query, (date1, date1))
-        print('pass 1')
-        cursor.execute(get_non_service_charge_data, (date1,))
+        dir_path = os.environ.get('DIR_PATH')
+        with open(dir_path+"/mc_app_config.json", "r") as net_file: # Get balance brought forward saved in json file
+            net_summary = json.load(net_file)
+        nsc_net_summary = net_summary['nsc']
+        prev_net = net_summary['prev_net']
+    except Exception as e:
+        print('Unable to retrieve balance brought forward')
+        prev_net = 0.0
+
+    try:
+        cursor.execute(data_insert_query, (nsc_start, nsc_start))
+        cursor.execute(get_non_service_charge_data, (nsc_start,))
         records = cursor.fetchall()
+
         if records:
             # Filter records based on specific description
             filtered_records = [record for record in records if record[2] not in filters]
-            print(f'Total number of records: {len(records)}')
-            print(f'Total number of filtered records: {len(filtered_records)}\n')
-
-            # Expenses sub-total befor applying 10% increase for easy comparison
+            nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
             subtotal_1 = sum(record[3] for record in filtered_records)
-            #Variable to hold sub-total after applying 10% markup
-            subtotal_2 = 0 
+            subtotal_2 = 0 # ub-total after applying 10% markup
+            columns = cursor.column_names
             serial_num = 1
 
-            columns = cursor.column_names
-            # create variable to hold table data as list of lits with the first being the header
-            nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
-
-            print(f'S/N  :  {columns[0]:5}  :  {columns[1]:10} : {columns[2]:25} : {columns[3]} : AMOUNT2')
-            print('-----------------------------------------------------------------------------')
-
+            print(f'S/N  :  {columns[0]:5}  :  {columns[1]:10} : {columns[2]:45} : {columns[3]} : AMOUNT2')
+            print('------------------------------------------------------------------------------------------------------')
             for record in filtered_records:
                 # Format date to display date only
                 id = record[0]
@@ -120,20 +127,41 @@ def mc1_nsc_report(pool, date1, filters):
                 amount2 = f"{amount2:,.2f}" # Formating digits to two decimal places.
                 nsc_table_data.append([serial_num, id, formatted_date, description, amount2])
                 serial_num += 1
-
                 # Print statement for easy analysis of original amounts against marked up amounts.
-                print(f'{serial_num:3}  : {id:10} : {formatted_date:10}  :  {description:25} : {amount:10}  : {amount2:8}')
-            print('---------------------------------------------------------------------------')
-            print(f'Subtotal 1                                       :  {subtotal_1}  :')
-            print(f'Subtotal 2                                       :             :   {subtotal_2}')
+                print(f'{serial_num:3}  :  {id:10}  :  {formatted_date:10}  :  {description:45}  :  {amount:10}  :  {amount2:8}')
+            print('------------------------------------------------------------------------------------------------------')
+            print(f"{'Subtotal 1':78}  :  {subtotal_1:-10,.2f}")
+            print(f"{'Subtotal 2':78}  :  {subtotal_2:-10,.2f}")
+
             nsc_management_fee = subtotal_2 * 0.075
             nsc_grand_total = subtotal_2 + nsc_management_fee
+            curr_net = prev_net + nsc_grand_total
+
             nsc_subtotal = f'{subtotal_2:,.2f}'
             nsc_management_fee = f'{nsc_management_fee:,.2f}'
             nsc_grand_total = f'{nsc_grand_total:,.2f}'
+
+            print(f"{'Management fee':78}  :  {nsc_management_fee:-10,.2f}")
+            print(f"{'Grand total':78}  :  {nsc_grand_total:-10,.2f}")
+            print(f"{'Net balance':78}  :  {curr_net:-10,.2f}")   
+
+            try:
+                # Update json file
+                nsc_net_summary['curr_net'] = curr_net
+                nsc_net_summary['curr_date'] = datetime.now().strftime('%Y-%m-%d')
+                # Set previous net to current net if date is >= end of the following month since the last prev net was set.
+                prev_date = datetime.strptime(nsc_net_summary['prev_date'], '%Y-%m-%d')
+                next_month_end = datetime(prev_date.year, prev_date.month + 2, 1) - timedelta(days=1)
+                nsc_net_summary['prev_net'] = curr_net if datetime.now() >= next_month_end else prev_net
+                nsc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
+                with open(dir_path+"/mc_app_config.json", "w") as net_file:
+                    json.dump(net_summary, net_file, indent=4) # Use indent for pretty formatting
+            except Exception as e:
+                print('Unable to update bal brought forward json file\n', e)                   
             return nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total
         else:
             print('No records retrieved.\n')
+            return nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total
         
     except Exception as e:
         print(e)
@@ -148,19 +176,17 @@ if __name__ == '__main__':
     
     # NON-SERVICE CHARGE FUNCTION
     filters = ['ROOF MAINT', 'ROOF MAINTENANCE', 'POP LIGHTING ', 'POP LIGHTING MAT ', 'FENCE WIRE BAL', 'CUT MASQ TREE', 'KITCHEN POLISH BAL', 'CUT TREE GT', 'CUT TREE BAL GT']
-    date1 = '2023-09-03'
+    date1 = None
     nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total = mc1_nsc_report(pool, date1, filters )
     
     # MANAGEMENT FEE FUNCTION
-    date1 = '2023-09-01'
-    date2 = '2023-10-31'
+    date1 = None
+    date2 = None
     mgtfee_table_data, total_mgt_fee, first_day_prev_month_str = mc1_mgt_report(pool, date1, date2)
 
-    # SERVICE CHARGE PARAMETER
-    monthstart = '2023-09-12'
-
-    # SERVICE CHARGE FUNCTION
-    sc_table_data, sc_summary_list, all_total, oct_sc_table_data, oct_sc_summary_list = mc1_sc_report(pool, monthstart)
+    # SERVICE CHARGE FUNCTION CALL
+    sc_start = None # Use month start if None is specified. 
+    sc_table_data, sc_summary_list = mc1_sc_report(pool, sc_start)
 
     # INFLOW FUNCTION
     inf_monthstart = datetime.now().replace(day=1)
@@ -169,5 +195,5 @@ if __name__ == '__main__':
     # GENERATE PDF FUNCTION
     generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total, # <<< NSC VARIABLES
                 mgtfee_table_data, total_mgt_fee, first_day_prev_month_str, # <<< MGT FEE VARIABLES
-                sc_table_data, sc_summary_list, all_total, oct_sc_table_data, oct_sc_summary_list, # <<< SC VARIABLES
+                sc_table_data, sc_summary_list, # <<< SC VARIABLES
                 inflow_records) # <<< INFLOW VARIABLES

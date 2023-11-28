@@ -1,0 +1,17 @@
+{
+    "sc": {
+        "prev_net": 10.0,
+        "prev_date": "2023-10-31",
+        "curr_net": 610793.36275,
+        "curr_date": "2023-11-28"
+    },
+    "nsc": {
+        "prev_net": 10.0,
+        "prev_date": "2023-10-31",
+        "curr_net": 610793.36275,
+        "curr_date": "2023-11-28"
+    },
+    "expenses_daily_etl": {
+        "start_date": "2023/11/28"
+    }
+}
