@@ -95,10 +95,10 @@ def generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_tot
 
     summary_table_data = [
         ['SUMMARY', 'REF CODE','AMOUNT(NGN)'],
-        [f"{curr_date.month.strftime('%M'} SERVICE CHARGE:", 'MC1L1 SC', '525,000.00'],
-        ['NOVEMBER INCIDENTALS:', 'MC1L1 NSC', '25,000.00'], 
-        ['SEPTEMBER - OCTOBER REIMBURSABLE:', 'MC1L1 NSC', f'{nsc_grand_total}'],
-        ['SEPTEMBER - OCTOBER MANAGEMENT FEE:', 'MC1L1 MGT', f'{total_mgt_fee}' ],
+        [f"{curr_date.replace(month=curr_date.month + 1).strftime('%B')} SERVICE CHARGE:", 'MC1L1 SC', '525,000.00'],
+        [f"{curr_date.replace(month=curr_date.month + 1).strftime('%B')} INCIDENTALS:", 'MC1L1 NSC', '25,000.00'], 
+        [f"{curr_date.strftime('%B')} REIMBURSABLE:", 'MC1L1 NSC', f'{nsc_grand_total}'],
+        [f"{curr_date.strftime('%B')} MANAGEMENT FEE:", 'MC1L1 MGT', f'{total_mgt_fee}' ],
         ['TOTAL:', '' ,'N 1,086,068.87']
     ]
     
