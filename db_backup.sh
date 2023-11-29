@@ -12,7 +12,6 @@ USERPASS=$SUDO_PASS
 
 # Initializing local variables
 BACKUP_DIRECTORY=/home/oseloka/db_backups
-
 DATABASE=maplecourt
 
 DUMPFILE_SQL=$BACKUP_DIRECTORY/$DATABASE-$(date +%d-%m-%Y_%H-%M-%S).sql
@@ -22,18 +21,14 @@ DUMPFILE_GZ=$BACKUP_DIRECTORY/$DATABASE-$(date +%d-%m-%Y_%H-%M-%S).gz
 # Backup retention period
 PERIOD=1
 
-
 # Check if mysql process is running if not then start process
 if ! pgrep mysql >/dev/null; then
 	echo "MySQL process is stopped. Starting process..."
 	echo $USERPASS | sudo -S service mysql start
 	echo "MySQL process is now running"
-
-
 else
 	echo "MySQl process is already running"
 fi
-
 
 # Download sql dump file
 if mysqldump -u admin -p$PASSWORD $DATABASE > $DUMPFILE_SQL; then
@@ -45,17 +40,11 @@ if mysqldump -u admin -p$PASSWORD $DATABASE > $DUMPFILE_SQL; then
         echo $USERPASS | sudo -S rm $DUMPFILE_SQL
 
 		# Delete old backups longer than 30 days
-		echo $USERPASS | sudo -S find $DUMPFILE_GZ -mtime +$PERIOD -delete
-
-
-
+		echo $USERPASS | sudo -S find $BACKUP_DIRECTORY/$DATABASE* -mtime +$PERIOD -exec rm {} \; 
     else
         echo "Error creating $DATABASE backup file, process terminated"
         echo $USERPASS | sudo -S rm $DUMPFILE_SQL
     fi
-
-
-
 else
 	echo "Encountered and error, $DATABASE backup process failed"
 fi
