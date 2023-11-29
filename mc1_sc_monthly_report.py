@@ -154,8 +154,8 @@ def mc1_sc_report(pool, sc_start1):
             except Exception as e:
                 print('Unable to update bal brought forward json file\n', e)
             
-            sc_summary_list = [subtotal, management_fee, grand_total, curr_net]
-            return sc_table_data, sc_summary_list
+            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total, "curr_net": curr_net}
+            return sc_table_data, sc_summary_dict
         else:
             print('No records retrieved.\n')
             sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
@@ -163,8 +163,8 @@ def mc1_sc_report(pool, sc_start1):
             management_fee = 0.0
             grand_total = 0.0
             curr_net = prev_net
-            sc_summary_list = [subtotal, management_fee, grand_total, curr_net]
-            return sc_table_data, sc_summary_list
+            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total, "curr_net": curr_net}
+            return sc_table_data, sc_summary_dict
         
     except Exception as e:
         print(e)

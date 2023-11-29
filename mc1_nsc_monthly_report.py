@@ -92,10 +92,10 @@ def mc1_nsc_report(pool, date1, filters):
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:
         dir_path = os.environ.get('DIR_PATH')
-        with open(dir_path+"/mc_app_config.json", "r") as net_file: # Get balance brought forward saved in json file
-            net_summary = json.load(net_file)
-        nsc_net_summary = net_summary['nsc']
-        prev_net = net_summary['prev_net']
+        with open(dir_path+"/mc_app_config.json", "r") as config_file: # Get balance brought forward saved in json file
+            config_data = json.load(config_file)
+        nsc_net_summary = config_data['nsc']
+        prev_net = nsc_net_summary['prev_net']
     except Exception as e:
         print('Unable to retrieve balance brought forward')
         prev_net = 0.0
@@ -133,35 +133,39 @@ def mc1_nsc_report(pool, date1, filters):
             print(f"{'Subtotal 1':78}  :  {subtotal_1:-10,.2f}")
             print(f"{'Subtotal 2':78}  :  {subtotal_2:-10,.2f}")
 
-            nsc_management_fee = subtotal_2 * 0.075
+            nsc_subtotal = subtotal_2
+            nsc_management_fee = nsc_subtotal * 0.075
             nsc_grand_total = subtotal_2 + nsc_management_fee
-            curr_net = prev_net + nsc_grand_total
-
-            nsc_subtotal = f'{subtotal_2:,.2f}'
-            nsc_management_fee = f'{nsc_management_fee:,.2f}'
-            nsc_grand_total = f'{nsc_grand_total:,.2f}'
+            nsc_curr_net = prev_net + nsc_grand_total
 
             print(f"{'Management fee':78}  :  {nsc_management_fee:-10,.2f}")
             print(f"{'Grand total':78}  :  {nsc_grand_total:-10,.2f}")
-            print(f"{'Net balance':78}  :  {curr_net:-10,.2f}")   
+            print(f"{'Net balance':78}  :  {nsc_curr_net:-10,.2f}")   
 
             try:
                 # Update json file
-                nsc_net_summary['curr_net'] = curr_net
+                nsc_net_summary['curr_net'] = nsc_curr_net
                 nsc_net_summary['curr_date'] = datetime.now().strftime('%Y-%m-%d')
                 # Set previous net to current net if date is >= end of the following month since the last prev net was set.
                 prev_date = datetime.strptime(nsc_net_summary['prev_date'], '%Y-%m-%d')
                 next_month_end = datetime(prev_date.year, prev_date.month + 2, 1) - timedelta(days=1)
-                nsc_net_summary['prev_net'] = curr_net if datetime.now() >= next_month_end else prev_net
+                nsc_net_summary['prev_net'] = nsc_curr_net if datetime.now() >= next_month_end else prev_net
                 nsc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
-                with open(dir_path+"/mc_app_config.json", "w") as net_file:
-                    json.dump(net_summary, net_file, indent=4) # Use indent for pretty formatting
+                with open(dir_path+"/mc_app_config.json", "w") as config_file:
+                    json.dump(config_data, config_file, indent=4) # Use indent for pretty formatting
             except Exception as e:
-                print('Unable to update bal brought forward json file\n', e)                   
-            return nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total
+                print('Unable to update bal brought forward json file\n', e)  
+            nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
+            return nsc_table_data, nsc_summary_dict
         else:
             print('No records retrieved.\n')
-            return nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total
+            nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
+            nsc_subtotal = 0.0
+            nsc_management_fee = 0.0
+            nsc_grand_total = 0.0
+            nsc_curr_net = prev_net
+            nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
+            return nsc_table_data, nsc_summary_dict
         
     except Exception as e:
         print(e)
@@ -177,23 +181,23 @@ if __name__ == '__main__':
     # NON-SERVICE CHARGE FUNCTION
     filters = ['ROOF MAINT', 'ROOF MAINTENANCE', 'POP LIGHTING ', 'POP LIGHTING MAT ', 'FENCE WIRE BAL', 'CUT MASQ TREE', 'KITCHEN POLISH BAL', 'CUT TREE GT', 'CUT TREE BAL GT']
     date1 = None
-    nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total = mc1_nsc_report(pool, date1, filters )
+    nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, date1, filters )
     
     # MANAGEMENT FEE FUNCTION
     date1 = None
     date2 = None
-    mgtfee_table_data, total_mgt_fee, first_day_prev_month_str = mc1_mgt_report(pool, date1, date2)
+    mgtfee_table_data, mgtfee_summary_dict = mc1_mgt_report(pool, date1, date2)
 
     # SERVICE CHARGE FUNCTION CALL
     sc_start = None # Use month start if None is specified. 
-    sc_table_data, sc_summary_list = mc1_sc_report(pool, sc_start)
+    sc_table_data, sc_summary_dict = mc1_sc_report(pool, sc_start)
 
     # INFLOW FUNCTION
     inf_monthstart = datetime.now().replace(day=1)
     inflow_records = get_landlord_inflow(pool, inf_monthstart)
 
     # GENERATE PDF FUNCTION
-    generate_pdf(nsc_table_data, nsc_subtotal, nsc_management_fee, nsc_grand_total, # <<< NSC VARIABLES
-                mgtfee_table_data, total_mgt_fee, first_day_prev_month_str, # <<< MGT FEE VARIABLES
-                sc_table_data, sc_summary_list, # <<< SC VARIABLES
+    generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
+                mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
+                sc_table_data, sc_summary_dict, # <<< SC VARIABLES
                 inflow_records) # <<< INFLOW VARIABLES
