@@ -106,10 +106,13 @@ def mc1_mgt_report(pool, period_start, period_stop):
                     print(f'{unit} : {tenant} : {rentstart} : {rentstop} : {rentprice} : {mgtfee_per_day} : {period} : {mgtfee_for_period}')
                 else:
                     continue
-            total_mgt_fee = f"{total_mgt_fee:,.2f}" # Formatting digits
-            return mgtfee_table_data, total_mgt_fee, mgt_period_start
+            print(f"{total_mgt_fee:,.2f}") # Formatting digits
+            mgtfee_summary_dict = {"total_mgt_fee":total_mgt_fee, "period_start":mgt_period_start}
+            return mgtfee_table_data, mgtfee_summary_dict
         else:
             print('No record found')
+            mgtfee_summary_dict = {"total_mgt_fee":total_mgt_fee, "period_start":mgt_period_start}
+            return mgtfee_table_data, mgtfee_summary_dict
     except Exception as e:
         print(e)
     finally:

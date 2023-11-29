@@ -3,7 +3,9 @@
         "prev_net": 10.0,
         "prev_date": "2023-10-31",
         "curr_net": 610793.36275,
-        "curr_date": "2023-11-28"
+        "curr_date": "2023-11-28",
+        "service_charge": 320833,
+        "incidentals": 25000
     },
     "nsc": {
         "prev_net": 10.0,
@@ -13,5 +15,6 @@
     },
     "expenses_daily_etl": {
         "start_date": "2023/11/28"
-    }
+    },
+    "mgt_fee_%": 7.5
 }
