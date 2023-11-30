@@ -147,7 +147,7 @@ def mc1_nsc_report(pool, date1, filters):
                 nsc_net_summary['curr_date'] = datetime.now().strftime('%Y-%m-%d')
                 # Set previous net to current net if date is >= end of the following month since the last prev net was set.
                 prev_date = datetime.strptime(nsc_net_summary['prev_date'], '%Y-%m-%d')
-                next_month_end = datetime(prev_date.year, prev_date.month + 2, 1) - timedelta(days=1)
+                next_month_end = datetime(prev_date.year + (1 if prev_date.month == 12 else 0), (prev_date.month + 2) % 12 if prev_date.month != 10 else 12, 1) - timedelta(days=1) 
                 nsc_net_summary['prev_net'] = nsc_curr_net if datetime.now() >= next_month_end else prev_net
                 nsc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
                 with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
