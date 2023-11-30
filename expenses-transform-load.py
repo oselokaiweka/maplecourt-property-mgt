@@ -13,8 +13,8 @@ from datetime import datetime
 import mysql.connector as connector
 
 # Defining the file path for stdout and stderr redirection
-stdout_file = "/home/oseloka/chrometro-expenses-data/stdout.txt"
-stderr_file = "/home/oseloka/chrometro-expenses-data/stderr.txt"
+stdout_file = "/home/oseloka/chrometro-expenses-data/company_statement_etl_stdout.txt"
+stderr_file = "/home/oseloka/chrometro-expenses-data/company_statement_etl_stderr.txt"
 
 # Open the files in write mode to redirect the output
 with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
@@ -122,7 +122,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
         print(f'PROCESS START TIME...........................................................................: {start_timer}\n')
 
         # Execute data extraction and transformation then return value into data insert arguement
-        csv_file = "/home/oseloka/chrometro-expenses-data/CHROMETRO_NIGERIA_LTD.csv"
+        csv_file = "/home/oseloka/chrometro-expenses-data/company_statement.csv"
         df = data_transformation(csv_file)
 
         # Execute data insert

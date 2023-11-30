@@ -8,6 +8,7 @@ from mc_inflow import get_landlord_inflow
 from mc1_mgt_fee_report import mc1_mgt_report
 from mc1_generate_report_pdf import generate_pdf
 from mc1_sc_monthly_report import mc1_sc_report
+dir_path = os.environ.get('DIR_PATH')
 
 def mc1_nsc_report(pool, date1, filters):
     # Obtain pool connection if available or add connection then obtain pool connection.
@@ -28,58 +29,56 @@ def mc1_nsc_report(pool, date1, filters):
 
     # Query statement that retrieves records for mc1 expenses for the given start 
     # and end date from two db tables.
-    data_insert_query = """insert ignore into maplecourt.MC1nsc_expenses 
-    (Date, Description, Amount, StatementID)
-    select Date, Description, Amount, ID from (
-    with 
-    cte_biz as (select 
-    date(Date) as Date, 
-    trim(leading ' ' from
-        substring_index(
-            substring_index(
-                substring_index(
-                    substring_index(
-                        upper(Reference), 
-                    'MC1NSC', -1), 
-                ' TO ', 1), 
-            'FROM', 1),
-        'MC1 NSC', -1)
-    ) as Description, 
-    sum(Amount) as Amount,
-    min(ID) as ID
-    from maplecourt.Statement_biz 
-    where Type =  'Debit'
-    and lower(Reference) like '%mc1%nsc%'
-    and lower(Reference) not like '%f6%'
-    and Date between %s and current_date()
-    group by Description, Date
-    ),
-    cte_priv as (select 
-    date(Date) as Date, 
-    trim(leading ' ' from 
-        substring_index(
-            substring_index(
-                substring_index(
-                    substring_index(
-                        upper(Reference), 
-                    'MC1NSC', -1), 
-                ' TO ', 1), 
-            'FROM', 1),
-        'MC1 NSC', -1)
-    ) as Description, 
-    sum(Amount) as Amount,
-    min(ID) as ID
-    from maplecourt.Statement_priv 
-    where Type =  'Debit'
-    and lower(Reference) like '%mc1%nsc%'
-    and lower(Reference) not like '%f6%'
-    and Date between %s and current_date()
-    group by Description, Date
-    )
-    select * from cte_biz
-    union
-    select * from cte_priv
-    ) as combined_statement;
+    data_insert_query = """
+        insert ignore into maplecourt.MC1nsc_expenses (Date, Description, Amount, StatementID)
+        select Date, Description, Amount, ID from (
+            with 
+                cte_biz as (
+                    select 
+                        date(Date) as Date, 
+                        trim(leading ' ' from substring_index(
+                            substring_index(
+                                substring_index(
+                                    substring_index(
+                                        upper(Reference), 
+                                    'MC1NSC', -1), 
+                                ' TO ', 1), 
+                            'FROM', 1),
+                        'MC1 NSC', -1)) as Description, 
+                        sum(Amount) as Amount,
+                        min(ID) as ID
+                    from maplecourt.Statement_biz 
+                    where Type = 'Debit'
+                    and ((lower(Reference) like '%mc1%nsc%')
+                    or (lower(Reference) like '%mc1%_sc%'))
+                    and Date between %s and current_date()
+                    group by Description, Date
+                ),
+                cte_priv as (
+                    select 
+                        date(Date) as Date, 
+                        trim(leading ' ' from substring_index(
+                            substring_index(
+                                substring_index(
+                                    substring_index(
+                                        upper(Reference), 
+                                    'MC1NSC', -1), 
+                                ' TO ', 1), 
+                            'FROM', 1),
+                        'MC1 NSC', -1)) as Description, 
+                        sum(Amount) as Amount,
+                        min(ID) as ID
+                    from maplecourt.Statement_priv 
+                    where Type = 'Debit'
+                    and ((lower(Reference) like '%mc1%nsc%')
+                    or (lower(Reference) like '%mc1%_sc%'))
+                    and Date between %s and current_date()
+                    group by Description, Date
+                )
+            select * from cte_biz
+            union
+            select * from cte_priv
+        ) as combined_statement;
     """
    
     # Query to retrieve relevant non-service charge records for reporting (refactor date to month start)
@@ -90,12 +89,12 @@ def mc1_nsc_report(pool, date1, filters):
     # In order to maintain track of total service charge since app start date a json file to write prev_net (used for bal brought forward) at the end of every month is created.
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
-    try:
-        dir_path = os.environ.get('DIR_PATH')
-        with open(dir_path+"/mc_app_config.json", "r") as config_file: # Get balance brought forward saved in json file
-            config_data = json.load(config_file)
-        nsc_net_summary = config_data['nsc']
+    try:        
+        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get balance brought forward saved in json file
+            app_data = json.load(app_data_file)
+        nsc_net_summary = app_data['nsc']
         prev_net = nsc_net_summary['prev_net']
+        mgt_fee_percent = app_data['mgt_fee_%']
     except Exception as e:
         print('Unable to retrieve balance brought forward')
         prev_net = 0.0
@@ -107,12 +106,12 @@ def mc1_nsc_report(pool, date1, filters):
 
         if records:
             # Filter records based on specific description
-            filtered_records = [record for record in records if record[2] not in filters]
+            filtered_records = [record for record in records if all(filter not in record[2] for filter in filters)]
             nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
             subtotal_1 = sum(record[3] for record in filtered_records)
             subtotal_2 = 0 # ub-total after applying 10% markup
             columns = cursor.column_names
-            serial_num = 1
+            serial_num = 0
 
             print(f'S/N  :  {columns[0]:5}  :  {columns[1]:10} : {columns[2]:45} : {columns[3]} : AMOUNT2')
             print('------------------------------------------------------------------------------------------------------')
@@ -121,8 +120,8 @@ def mc1_nsc_report(pool, date1, filters):
                 id = record[0]
                 formatted_date = record[1].strftime('%Y-%m-%d')
                 description = record[2]
-                amount = record[3]
-                amount2 = 100 * floor(float(amount) * 1.1 / 100) # Applying 10% markup to the nearest 100 on amount
+                amount = float(record[3])
+                amount2 = 100 * floor(amount * 1.1 / 100) if '.' not in description else amount # Applying 10% markup to the nearest 100 on amount
                 subtotal_2 += amount2
                 amount2 = f"{amount2:,.2f}" # Formating digits to two decimal places.
                 nsc_table_data.append([serial_num, id, formatted_date, description, amount2])
@@ -134,7 +133,7 @@ def mc1_nsc_report(pool, date1, filters):
             print(f"{'Subtotal 2':78}  :  {subtotal_2:-10,.2f}")
 
             nsc_subtotal = subtotal_2
-            nsc_management_fee = nsc_subtotal * 0.075
+            nsc_management_fee = nsc_subtotal * mgt_fee_percent / 100
             nsc_grand_total = subtotal_2 + nsc_management_fee
             nsc_curr_net = prev_net + nsc_grand_total
 
@@ -151,8 +150,8 @@ def mc1_nsc_report(pool, date1, filters):
                 next_month_end = datetime(prev_date.year, prev_date.month + 2, 1) - timedelta(days=1)
                 nsc_net_summary['prev_net'] = nsc_curr_net if datetime.now() >= next_month_end else prev_net
                 nsc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
-                with open(dir_path+"/mc_app_config.json", "w") as config_file:
-                    json.dump(config_data, config_file, indent=4) # Use indent for pretty formatting
+                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
+                    json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
             except Exception as e:
                 print('Unable to update bal brought forward json file\n', e)  
             nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
@@ -179,9 +178,9 @@ if __name__ == '__main__':
     pool = POOL
     
     # NON-SERVICE CHARGE FUNCTION
-    filters = ['ROOF MAINT', 'ROOF MAINTENANCE', 'POP LIGHTING ', 'POP LIGHTING MAT ', 'FENCE WIRE BAL', 'CUT MASQ TREE', 'KITCHEN POLISH BAL', 'CUT TREE GT', 'CUT TREE BAL GT']
+    filters = ['CLEARED']
     date1 = None
-    nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, date1, filters )
+    nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, date1, filters)
     
     # MANAGEMENT FEE FUNCTION
     date1 = None

@@ -85,15 +85,15 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     invoice_id.spaceAfter = 5
     elements.append(invoice_id)
 
-    # Retrieve relevant fixed values from mc_app_config.json file
+    # Retrieve relevant fixed values from mc_app_data.json file
     try:
-        with open(dir_path+"/mc_app_config.json", "r") as config_file: # Get balance brought forward saved in json file
-            config_data = json.load(config_file)
-        sc_config_summary = config_data['sc']
+        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get app data from json file
+            app_data = json.load(app_data_file)
+        sc_config_summary = app_data['sc']
         service_charge = float(sc_config_summary['service_charge'])
         incidentals =  float(sc_config_summary['incidentals'])
     except Exception as e:
-        print('Unable to retrieve balance brought forward')
+        print('Unable to retrieve app data')
 
     # Create a summary table for all sections
     summary_table_style = common_table_style + [
@@ -133,7 +133,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
         ['SUB-TOTAL', f"{sc_summary_dict['subtotal']:,.2f}"],
         ['7.5% MANAGEMENT FEE', f"{sc_summary_dict['mgt_fee']:,.2f}"],
         ['GRAND TOTAL', f"{sc_summary_dict['grand_total']:,.2f}"],
-        ['BALANCE BROUGHT FORWARD', inflow_records[0][1] - f"{sc_summary_dict['curr_net']:,.2f}"], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
+        ['BALANCE BROUGHT FORWARD', f"{inflow_records[0][1] - sc_summary_dict['curr_net']:,.2f}"], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
         ['TOTAL RECEIVED (Aug-Sept SC & N300k Diesel)', f'{825000:,.2f}'],
         ['NET TOTAL', f'{94569.38:,.2f}']
     ]
@@ -168,7 +168,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
 
     # Building management fee report section
-    mgt_report_title = Paragraph(f"MANAGEMENT FEE [ {mgtfee_summary_dict['period_start'].strftime('%B'-'%Y')} to October {curr_date.year} ]", left_aligned_normal_bold)
+    mgt_report_title = Paragraph(f"MANAGEMENT FEE [ {mgtfee_summary_dict['period_start'].strftime('%B %Y')} to October {curr_date.year} ]", left_aligned_normal_bold)
     mgt_report_title.spaceAfter = 2
     elements.append(mgt_report_title)
 
