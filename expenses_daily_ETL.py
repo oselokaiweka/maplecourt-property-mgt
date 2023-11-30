@@ -140,12 +140,11 @@ def data_insert(records, pool):
             connection.close()
             print(f'ETL complete!\nTotal of {insert_count} records where successfully inserted ;)\n')
 
-            try:
-                dir_path = os.environ.get('DIR_PATH')
+            try:                
                 # Update start_date value with stop_date value so next time the script runs it will begin from where it stopped in the last run.
-                config_data['expenses_daily_etl']['start_date'] = stop_date
-                with open(dir_path+"/mc_app_config.json", "w") as config_file:
-                        json.dump(config_data, config_file, indent=4)
+                app_data['expenses_daily_etl']['start_date'] = stop_date
+                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
+                        json.dump(app_data, app_data_file, indent=4)
                 print("Next ETL operation has been scheduled for tomorrow.")
             except Exception as e:
                 print("Unable to reschedule the start date, however data duplication is resticted in database so only new records will be inserted.\n",e)
@@ -192,9 +191,9 @@ if __name__ == "__main__":
         # Set stop_date arguement = now then read start date from file.
         stop_date = datetime.now().strftime("%Y/%m/%d")
         print(f'Stop date is set for: {stop_date}\n')
-        with open(f'{dir_path}/mc_app_config.json','r') as config_file:
-            config_data = json.load(config_file)
-        start_date = config_data['expenses_daily_etl']['start_date']
+        with open(f'{dir_path}/mc_app_data.json','r') as app_data_file:
+            app_data = json.load(app_data_file)
+        start_date = app_data['expenses_daily_etl']['start_date']
         print(f'Start date is set for: {start_date}\n')
 
         # Execute data extraction and transformation then return value into data insert arguement

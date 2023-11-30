@@ -14,16 +14,19 @@ select Date, UPPER(Reference), Amount, ID from (
         select Date, Reference, Amount, ID from Statement_biz 
         where UPPER(Type) = 'CREDIT'
         and UPPER(Reference) like '%MC1%L1%'
+        
         union all
         
         select Date, Reference, Amount, ID from Statement_biz 
         where UPPER(Type) = 'CREDIT'
         and UPPER(Reference) like '%MC2%L1%'
+        
         union all
         
         select Date, Reference, Amount, ID from Statement_biz 
         where UPPER(Type) = 'CREDIT'
         and UPPER(Reference) like '%MC2%L2%'
+        
         union all
         
         select Date, Reference, Amount, ID from Statement_biz 

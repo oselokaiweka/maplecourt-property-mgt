@@ -1,8 +1,9 @@
 # This script retrieves MC1NSC records from two maplecourt database tables that contain 
 # all business transactions.
-import calendar
+import calendar, os, json
 from datetime import datetime, timedelta
 from mysql_pool import POOL
+dir_path = os.environ.get('DIR_PATH')
 
 # Update rent stopdate according to rent paid by tenant
 update_rentals_stopdate = """
@@ -64,6 +65,13 @@ def mc1_mgt_report(pool, period_start, period_stop):
     cursor.execute("SET GLOBAL event_scheduler = ON;")
     print('Event scheduler is started')
     
+    # Retrieve relevant fixed values from mc_app_data.json file
+    try:
+        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get app data from json file
+            app_data = json.load(app_data_file)
+        mgt_fee_percent = app_data['mgt_fee_%']
+    except Exception as e:
+        print('Unable to retrieve app data')
 
     # create variable to hold table data as list of lits with the first being the header
     mgtfee_table_data = [['UNIT', 'TENANT', 'RENT START', 'RENT STOP', 'RENT(N)', 'FEE/DAY', 'DAYS', 'MGT FEE(N)']]
@@ -95,7 +103,7 @@ def mc1_mgt_report(pool, period_start, period_stop):
                 period = get_mgt_period(rentstart_str, rentstop_str, mgt_period_start, mgt_period_stop)
             
                 if period > 0: # 0 period indicates inactive rent and will be omitted by the continue in else clause.
-                    mgtfee_per_day = (rentprice * .075) / days_in_year # Calculating mgt fee per day
+                    mgtfee_per_day = (rentprice * mgt_fee_percent / 100) / days_in_year # Calculating mgt fee per day
                     mgtfee_for_period = mgtfee_per_day * period # Calculating mgt fee for the period
                     total_mgt_fee += mgtfee_for_period # Calculating total mgt fee
                     rentprice = f"{rentprice:,.0f}" # Formatting digits

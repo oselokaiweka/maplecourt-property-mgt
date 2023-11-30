@@ -19,7 +19,7 @@ import mysql.connector as connector
 logging.basicConfig(
     level=logging.DEBUG, #Level set to DEBUG for more detailed logs but can be set to INFO
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    filename='/home/oseloka/chrometro-expenses-data/csv_file_priv.log',
+    filename='/home/oseloka/chrometro-expenses-data/private_statement_etl_logger.log',
     filemode='w'
 )
 # Create logger
@@ -30,8 +30,8 @@ file_handler.flush = True
 logger.addHandler(file_handler)
 
 # Defining the file path for stdout and stderr redirection
-stdout_file = "/home/oseloka/chrometro-expenses-data/stdout_priv.txt"
-stderr_file = "/home/oseloka/chrometro-expenses-data/stderr_priv.txt"
+stdout_file = "/home/oseloka/chrometro-expenses-data/private_statement_etl_stdout.txt"
+stderr_file = "/home/oseloka/chrometro-expenses-data/private_statement_etl_stderr.txt"
 
 # Open the files in write mode to redirect the output
 with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
@@ -114,7 +114,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
 
 
     # DATA LOADING
-    def data_loading(pool, df):
+    def data_loading(pool, df, file1, file2):
         # Obtain pool connection or adds connection if pool is exhausted 
         try:
             connection = pool.get_connection()
@@ -141,6 +141,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
                     VALUES (%s, %s, %s, %s, %s);"""
         
                 insert_count = 0
+                duplicate_count = 0
                 for row in df.itertuples(index=False, name=None): 
                     try:
                         if pd.isnull(row[1]):
@@ -149,6 +150,12 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
                         elif pd.isnull(row[2]):
                             cursor.execute(insert_query, (row[0], 'Debit', row[1], row[4], row[3]))
                             insert_count +=1
+                    except connector.IntegrityError as e:
+                        if "Duplicate entry" in str(e):
+                            duplicate_count += 1
+                            logging.warning(f"Duplicate entry: {row} - {e}")
+                        else:
+                            logging.error(f"Error inserting record: {row} - {e}")
                     except Exception as e:
                         logging.error(e.args[1]) # args[1] prints only the error message without the error number.
 
@@ -156,7 +163,10 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
                 cursor.close()
                 connection.close()
                 logging.info(f'ETL complete!\nTotal of {insert_count} records where inserted.\nConnection closed\n')
-                
+                logging.info(f"Skipped {duplicate_count} rows due to duplicate entries.")
+                # Remove statement csv files to make room for next etl
+                command = f"rm -fv {file1} {file2}"
+                subprocess.run(command, shell=True)
             else:
                 logging.info('Insert process terminated - No new record for insert.\n')
         except Exception as e:
@@ -168,8 +178,8 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
         logging.info(f'PROCESS START TIME...........................................................................: {start_timer}\n')
 
         # Execute data extraction and transformation then return value into data insert arguement
-        input_file = "/home/oseloka/chrometro-expenses-data/personal.csv"
-        output_file = "/home/oseloka/chrometro-expenses-data/personal_utf-8.csv"
+        input_file = "/home/oseloka/chrometro-expenses-data/private_statement.csv"
+        output_file = "/home/oseloka/chrometro-expenses-data/private_statement_utf-8.csv"
 
         data_encoding(input_file, output_file)
 
@@ -177,7 +187,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
 
         # Execute data insert
         pool = POOL
-        data_loading(pool, df)
+        data_loading(pool, df, input_file, output_file)
 
         logging.info(f'PROCESS DURATION.............................................................................: {(datetime.now()-start_timer).total_seconds()}\n')
     

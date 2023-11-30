@@ -4,70 +4,66 @@ from datetime import datetime, timedelta
 from mysql_pool import POOL
 import json
 import os
+dir_path = os.environ.get('DIR_PATH')
 
 # Query Retrieves records for mc1 service charge expenses from the given start date and loads transformed 
 # data into S.Charge expenses table. Bear in mind constraints prevent duplicate records using multiple cols and StatementID.
 load_new_service_charge_data = """
-insert ignore into maplecourt.MC1sc_expenses 
-(Date, Description, Amount, StatementID)
-select Date, Description, Amount, ID from (
-with 
-cte_biz as (select
-date(sb.Date) as Date, 
-trim(leading ' ' from
-    substring_index(
-        substring_index(
-            substring_index(
-                substring_index(
-                    upper(sb.Reference), 
-                'MC1SC', -1), 
-            ' TO ', 1), 
-        'FROM', 1),
-    'MC1 SC', -1)
-) as Description, 
-sum(sb.Amount) as Amount,
-min(sb.ID) as ID
-from maplecourt.Statement_biz as sb
-where sb.Type =  'Debit'
-and lower(sb.Reference) like '%mc1sc%'
-and lower(sb.Reference) like '%mc1%_sc%'
-and lower(sb.Reference) not like '%mc1%nsc%'
-and lower(sb.Reference) not like '%f6%'
-and date(sb.Date) between %s and current_date()
-group by Description, date(sb.Date)
-),
-cte_priv as (select
-date(sp.Date) as Date, 
-trim(leading ' ' from 
-    substring_index(
-        substring_index(
-            substring_index(
-                substring_index(
-                    upper(sp.Reference), 
-                'MC1SC', -1), 
-            ' TO ', 1), 
-        'FROM', 1),
-    'MC1 SC', -1)
-) as Description, 
-sum(sp.Amount) as Amount, 
-min(ID) as ID
-from maplecourt.Statement_priv as sp
-where sp.Type =  'Debit'
-and lower(sp.Reference) like '%mc1sc%'
-and lower(sp.Reference) like '%mc1%_sc%'
-and lower(sp.Reference) not like '%mc1%nsc%'
-and lower(sp.Reference) not like '%f6%'
-and date(sp.Date) between %s and current_date()
-group by Description, date(sp.Date)
-)
-select * from cte_biz
-union
-select * from cte_priv
-) as combined_statement;
+    insert ignore into maplecourt.MC1sc_expenses (Date, Description, Amount, StatementID)
+    select Date, Description, Amount, ID from ( 
+        with 
+            cte_biz as (
+                select 
+                    date(Date) as Date, 
+                    trim(leading ' ' from substring_index(
+                        substring_index(
+                            substring_index(
+                                substring_index(
+                                    upper(Reference), 
+                                'MC1SC', -1), 
+                            ' TO ', 1), 
+                        'FROM', 1),
+                    'MC1 SC', -1)) as Description, 
+                    sum(Amount) as Amount,
+                    min(ID) as ID
+                from maplecourt.Statement_biz
+                where Type =  'Debit'
+                and ((lower(Reference) like '%mc1sc%')
+                or (lower(Reference) like '%mc1%_sc%'))
+                and lower(Reference) not like '%mc1%nsc%'
+                and date(Date) between %s and current_date()
+                group by Description, date(Date)
+            ),
+            cte_priv as (
+                select 
+                    date(Date) as Date, 
+                    trim(leading ' ' from substring_index(
+                        substring_index(
+                            substring_index(
+                                substring_index(
+                                    upper(Reference), 
+                                'MC1SC', -1), 
+                            ' TO ', 1), 
+                        'FROM', 1),
+                    'MC1 SC', -1)) as Description, 
+                    sum(Amount) as Amount, 
+                    min(ID) as ID
+                from maplecourt.Statement_priv
+                where Type = 'Debit'
+                and ((lower(Reference) like '%mc1sc%')
+                or (lower(Reference) like '%mc1%_sc%'))
+                and lower(Reference) not like '%mc1%nsc%'
+                and date(Date) between %s and current_date()
+                group by Description, date(Date)
+            )
+        select * from cte_biz
+        union
+        select * from cte_priv
+    ) as combined_statement;
 """
 
 
-# Query to retrieve relevant service charge records for reporting (refactor date to month start)
+# Query to retrieve relevant service charge records for reporting.
 get_service_charge_data = """
 select ID, Date, Description, Amount 
 from maplecourt.MC1sc_expenses where date >= %s;
@@ -96,11 +92,11 @@ def mc1_sc_report(pool, sc_start1):
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:
-        dir_path = os.environ.get('DIR_PATH')
-        with open(dir_path+"/mc_app_config.json", "r") as net_file: # Get balance brought forward saved in json file
-            net_summary = json.load(net_file)
-        sc_net_summary = net_summary['sc']
+        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get balance brought forward saved in json file
+            app_data = json.load(app_data_file)
+        sc_net_summary = app_data['sc']
         prev_net = sc_net_summary['prev_net']
+        mgt_fee_percent = app_data['mgt_fee_%']
     except Exception as e:
         print('Unable to retrieve balance brought forward')
         prev_net = 0.0
@@ -111,7 +107,7 @@ def mc1_sc_report(pool, sc_start1):
         records = cursor.fetchall()
 
         if records:
-            serial_num = 1
+            serial_num = 0
             columns = cursor.column_names
             subtotal = sum(record[3] for record in records) 
             sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
@@ -132,7 +128,7 @@ def mc1_sc_report(pool, sc_start1):
             print(f"{'Subtotal':78}  :  {subtotal:-10,.2f}")
             
             subtotal = float(subtotal)
-            management_fee = subtotal * 0.075
+            management_fee = subtotal * mgt_fee_percent / 100
             grand_total = subtotal + management_fee
             curr_net = prev_net + grand_total
 
@@ -146,13 +142,13 @@ def mc1_sc_report(pool, sc_start1):
                 sc_net_summary['curr_date'] = datetime.now().strftime('%Y-%m-%d')
                 # Set previous net to current net if date is >= end of the following month since the last prev net was set.
                 prev_date = datetime.strptime(sc_net_summary['prev_date'], '%Y-%m-%d')
-                next_month_end = datetime(prev_date.year, prev_date.month + 2, 1) - timedelta(days=1)
+                next_month_end = datetime(prev_date.year, (var = prev_date.month + 2 if prev_date <= 10 else 1), 1) - timedelta(days=1)
                 sc_net_summary['prev_net'] = curr_net if datetime.now() >= next_month_end else prev_net
                 sc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
-                with open(dir_path+"/mc_app_config.json", "w") as net_file:
-                    json.dump(net_summary, net_file, indent=4) # Use indent for pretty formatting
+                with open(dir_path+"/mc_app_config.json", "w") as app_data_file:
+                    json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
             except Exception as e:
-                print('Unable to update bal brought forward json file\n', e)
+                print('Unable to update bal brought forward json file\n',e)
             
             sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total, "curr_net": curr_net}
             return sc_table_data, sc_summary_dict
@@ -176,5 +172,5 @@ def mc1_sc_report(pool, sc_start1):
 
 if __name__ == '__main__':
     pool = POOL
-    sc_start = '2023-10-01'
+    sc_start = None
     mc1_sc_report(pool, sc_start)
