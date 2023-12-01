@@ -100,11 +100,13 @@ def get_landlord_inflow(pool, inf_monthstart):
     cursor.execute("SET GLOBAL event_scheduler = ON;")
     print('Event scheduler is started')
 
+    month_start = datetime.now().replace(day=1)
+    period_start = inf_monthstart if inf_monthstart is not None else month_start
    
     try:
-        cursor.execute(insert_mc_inflow, (inf_monthstart,))
+        cursor.execute(insert_mc_inflow, (period_start,))
         cursor.execute(update_mc_inflow)
-        cursor.execute(get_records_from_mc_inflow, (inf_monthstart,))
+        cursor.execute(get_records_from_mc_inflow, (period_start,))
         records = cursor.fetchall()
 
         # Initializing list with default values so I dont get a nonetype error if the record is empty
@@ -112,6 +114,7 @@ def get_landlord_inflow(pool, inf_monthstart):
         MC2L1_SC_NSC_MGT_list = [0,0,0,0]
         MC2L2_SC_NSC_MGT_list = [0,0,0,0]
         MC2L3_SC_NSC_MGT_list = [0,0,0,0]
+        inflow_records = [MC1L1_SC_NSC_MGT_list, MC2L1_SC_NSC_MGT_list, MC2L2_SC_NSC_MGT_list, MC2L3_SC_NSC_MGT_list]
 
         if records:
     
@@ -169,5 +172,5 @@ def get_landlord_inflow(pool, inf_monthstart):
         print("Connection and cursor closed.\n")
 
 pool = POOL
-inf_monthstart = datetime.now().replace(day=1)
+inf_monthstart = None
 get_landlord_inflow(pool, inf_monthstart)

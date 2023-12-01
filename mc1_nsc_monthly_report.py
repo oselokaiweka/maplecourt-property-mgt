@@ -179,24 +179,24 @@ if __name__ == '__main__':
     
     # NON-SERVICE CHARGE FUNCTION
     filters = ['CLEARED']
-    date1 = None
+    date1 = '2023-11-01'
     nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, date1, filters)
     
     # MANAGEMENT FEE FUNCTION
-    date1 = None
-    date2 = None
+    date1 = '2023-11-01'
+    date2 = '2023-11-30'
     mgtfee_table_data, mgtfee_summary_dict = mc1_mgt_report(pool, date1, date2)
 
     # SERVICE CHARGE FUNCTION CALL
-    sc_start = None # Use month start if None is specified. 
+    sc_start = '2023-11-01' # Use month start if None is specified. 
     sc_table_data, sc_summary_dict = mc1_sc_report(pool, sc_start)
 
     # INFLOW FUNCTION
-    inf_monthstart = datetime.now().replace(day=1)
+    inf_monthstart = '2023-11-01'
     inflow_records = get_landlord_inflow(pool, inf_monthstart)
 
     # GENERATE PDF FUNCTION
     generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
                 mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
                 sc_table_data, sc_summary_dict, # <<< SC VARIABLES
-                inflow_records) # <<< INFLOW VARIABLES
+                inflow_records, date1) # <<< INFLOW VARIABLES
