@@ -142,10 +142,10 @@ def mc1_sc_report(pool, sc_start1):
                 sc_net_summary['curr_date'] = datetime.now().strftime('%Y-%m-%d')
                 # Set previous net to current net if date is >= end of the following month since the last prev net was set.
                 prev_date = datetime.strptime(sc_net_summary['prev_date'], '%Y-%m-%d')
-                next_month_end = datetime(prev_date.year, (var = prev_date.month + 2 if prev_date <= 10 else 1), 1) - timedelta(days=1)
+                next_month_end = datetime(prev_date.year + (1 if prev_date.month == 12 else 0), (prev_date.month + 2) % 12 if prev_date.month != 10 else 12, 1) - timedelta(days=1) 
                 sc_net_summary['prev_net'] = curr_net if datetime.now() >= next_month_end else prev_net
                 sc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
-                with open(dir_path+"/mc_app_config.json", "w") as app_data_file:
+                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
                     json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
             except Exception as e:
                 print('Unable to update bal brought forward json file\n',e)

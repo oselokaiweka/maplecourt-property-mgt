@@ -2,7 +2,7 @@
 # main function is called in the mc1_nsc_monthly_report.py
 
 import os, json
-import datetime
+from datetime import datetime
 from reportlab.lib import colors, pagesizes
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Spacer
@@ -15,7 +15,7 @@ dir_path = os.environ.get('DIR_PATH')
 def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
                 mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
                 sc_table_data, sc_summary_dict, # <<< SC VARIABLES 
-                inflow_records): # <<< INFLOW VARIABLES    
+                inflow_records, period_start): # <<< INFLOW VARIABLES, START DATE   
     
     pdf = SimpleDocTemplate('MC1_REPORT.PDF', pagesize=LEGAL) # Creates a PDF document
     elements = [] # Creates a list to store the content
@@ -65,8 +65,8 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     elements.append(logo)
 
     # Initializing date variable
-    curr_date = datetime.date.today()
-    today = curr_date.strftime("%d-%m-%Y")
+    curr_date = datetime.now()
+    report_start = datetime.strptime(period_start,'%Y-%m-%d') if period_start is not None else curr_date.replace(day=1)
 
     # Add document titles
     property_name = Paragraph(f"MAPLE COURT 1 - JABI", left_aligned_title)
@@ -81,7 +81,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     bill_to.spaceAfter = 2
     elements.append(bill_to)
 
-    invoice_id = Paragraph(f"Invoice id: PMG/MC1/F1-7/{curr_date.strftime('%m')}/{curr_date.strftime('%y')}", left_aligned_normal_bold)
+    invoice_id = Paragraph(f"Invoice id: PMG/MC1/F1-7/{report_start.strftime('%m')}/{report_start.strftime('%y')}", left_aligned_normal_bold)
     invoice_id.spaceAfter = 5
     elements.append(invoice_id)
 
@@ -105,11 +105,11 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
     summary_table_data = [
         ['SUMMARY', 'REF CODE','AMOUNT(NGN)'],
-        [f"{curr_date.replace(month=curr_date.month + 1).strftime('%B')} SERVICE CHARGE:", 'MC1L1 SC', f'{service_charge:,.2f}'],
-        [f"{curr_date.replace(month=curr_date.month + 1).strftime('%B')} INCIDENTALS:", 'MC1L1 NSC', f'{incidentals:,.2f}'], 
-        [f"{curr_date.strftime('%B')} REIMBURSABLE:", 'MC1L1 NSC', f"{nsc_summary_dict['grand_total']}"],
-        [f"{curr_date.strftime('%B')} MANAGEMENT FEE:", 'MC1L1 MGT', f"{mgtfee_summary_dict['total_mgt_fee']}"],
-        ['TOTAL:', '' ,f"N{service_charge + incidentals + nsc_summary_dict['grand_total'] + mgtfee_summary_dict['total_mgt_fee']}"]
+        [f"{report_start.replace(month=(report_start.month + 1) % 12 if report_start.month != 11 else 12).strftime('%B').upper()} SERVICE CHARGE:", 'MC1L1 SC', f'{service_charge:,.2f}'],
+        [f"{report_start.replace(month=(report_start.month + 1) % 12 if report_start.month != 11 else 12).strftime('%B').upper()} INCIDENTALS:", 'MC1L1 NSC', f'{incidentals:,.2f}'], 
+        [f"{report_start.strftime('%B').upper()} REIMBURSABLE:", 'MC1L1 NSC', f"{nsc_summary_dict['grand_total']:,.2f}"],
+        [f"{report_start.strftime('%B').upper()} MANAGEMENT FEE:", 'MC1L1 MGT', f"{mgtfee_summary_dict['total_mgt_fee']:,.2f}"],
+        ['TOTAL:', '' ,f"N{service_charge + incidentals + nsc_summary_dict['grand_total'] + mgtfee_summary_dict['total_mgt_fee']:,.2f}"]
     ]
     
     summary_table = Table(summary_table_data, colWidths=[355, 95, 95], hAlign='LEFT')
@@ -145,7 +145,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
 
     # Building non-service charge report section
-    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.datetime.strptime((nsc_table_data[1][2]), '%Y-%m-%d').strftime('%d-%m-%Y')} to 31-10-2023 ]", left_aligned_normal_bold) 
+    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime((nsc_table_data[1][2]), '%Y-%m-%d').strftime('%d-%m-%Y')} to 31-10-2023 ]", left_aligned_normal_bold) 
     nsc_report_title.spaceAfter = 2
     elements.append(nsc_report_title)    
 
