@@ -73,7 +73,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     property_name.spaceAfter = 2
     elements.append(property_name)
 
-    main_title = Paragraph(f"EXPENSES REPORT & MANAGEMENT INVOICE - 31 OCT 2023", left_aligned_title)
+    main_title = Paragraph(f"EXPENSES REPORT & MANAGEMENT INVOICE - {report_start.strftime('%b %Y')}", left_aligned_title)
     main_title.spaceAfter = 10
     elements.append(main_title)
 
@@ -119,7 +119,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
 
     # Building service charge report section
-    nsc_report_title = Paragraph(f"SERVICE CHARGE RECURRING EXPENSES - [ September {curr_date.year} ]", left_aligned_normal_bold) 
+    nsc_report_title = Paragraph(f"SERVICE CHARGE RECURRING EXPENSES - [ {report_start.strftime('%B %Y')} ]", left_aligned_normal_bold) 
     nsc_report_title.spaceAfter = 2
     elements.append(nsc_report_title)    
 
@@ -145,7 +145,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
 
     # Building non-service charge report section
-    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime((nsc_table_data[1][2]), '%Y-%m-%d').strftime('%d-%m-%Y')} to 31-10-2023 ]", left_aligned_normal_bold) 
+    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime((nsc_table_data[1][2]), '%Y-%m-%d').strftime('%d-%m-%Y')} to {datetime.now().strftime('%d-%m-%Y')} ]", left_aligned_normal_bold) 
     nsc_report_title.spaceAfter = 2
     elements.append(nsc_report_title)    
 
@@ -168,7 +168,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
 
     # Building management fee report section
-    mgt_report_title = Paragraph(f"MANAGEMENT FEE [ {mgtfee_summary_dict['period_start'].strftime('%B %Y')} to October {curr_date.year} ]", left_aligned_normal_bold)
+    mgt_report_title = Paragraph(f"MANAGEMENT FEE [ {mgtfee_summary_dict['period_start'].strftime('%B %Y')} ]", left_aligned_normal_bold)
     mgt_report_title.spaceAfter = 2
     elements.append(mgt_report_title)
 
