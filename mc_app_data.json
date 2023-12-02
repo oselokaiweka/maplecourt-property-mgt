@@ -1,20 +1,31 @@
 {
-    "sc": {
-        "prev_net": 1221587.5805,
-        "prev_date": "2023-12-01",
-        "curr_net": 1832391.79825,
-        "curr_date": "2023-12-01",
-        "service_charge": 320833,
-        "incidentals": 25000
-    },
     "nsc": {
-        "prev_net": 527986.2715,
-        "prev_date": "2023-12-01",
-        "curr_net": 879135.0430000001,
-        "curr_date": "2023-12-01"
+        "bill_total": 351148.77,
+        "bill_date": "2023-11-30",
+        "bill_outstanding": 0.0
+    },
+    "sc": {
+        "bill_total": 645444.08,
+        "bill_date": "2023-11-30",
+        "bill_outstanding": 0.0
+    },
+    "mgt": {
+        "bill_total": 123287.67,
+        "bill_start_date": "2023-11-01",
+        "bill_stop_date": "2023-11-30",
+        "bill_outstanding": 0.0
     },
     "expenses_daily_etl": {
-        "start_date": "2023/11/28"
+        "start_date": "2023/12/01"
     },
-    "mgt_fee_%": 7.5
+    "bal_sheet": {
+        "prev_total": 1086068.87,
+        "total_received": 0.0,
+        "net_balance": 0.0
+    },
+    "rates": {
+        "mgt_fee_%": 7.5,
+        "service_charge": 320833,
+        "incidentals": 25000
+    }
 }
