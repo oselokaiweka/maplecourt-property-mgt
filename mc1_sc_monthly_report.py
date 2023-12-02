@@ -31,7 +31,7 @@ load_new_service_charge_data = """
                 and ((lower(Reference) like '%mc1sc%')
                 or (lower(Reference) like '%mc1%_sc%'))
                 and lower(Reference) not like '%mc1%nsc%'
-                and date(Date) between %s and current_date()
+                and date(Date) between %s and %s
                 group by Description, date(Date)
             ),
             cte_priv as (
@@ -53,7 +53,7 @@ load_new_service_charge_data = """
                 and ((lower(Reference) like '%mc1sc%')
                 or (lower(Reference) like '%mc1%_sc%'))
                 and lower(Reference) not like '%mc1%nsc%'
-                and date(Date) between %s and current_date()
+                and date(Date) between %s and %s
                 group by Description, date(Date)
             )
         select * from cte_biz
@@ -66,11 +66,11 @@ load_new_service_charge_data = """
 # Query to retrieve relevant service charge records for reporting.
 get_service_charge_data = """
 select ID, Date, Description, Amount 
-from maplecourt.MC1sc_expenses where date >= %s;
+from maplecourt.MC1sc_expenses where date between %s and %s;
 """
    
 
-def mc1_sc_report(pool, sc_start1):
+def mc1_sc_report(pool, sc_start):
     # Obtain pool connection if available or add connection then obtain pool connection.
     try:
         connection = pool.get_connection()
@@ -87,7 +87,8 @@ def mc1_sc_report(pool, sc_start1):
     cursor.execute("SET GLOBAL event_scheduler = ON;")
     print('Event scheduler is started')
 
-    sc_start =  sc_start1 if sc_start1 is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
+    sc_start =  datetime.strptime(sc_start, '%Y-%m-%d') if sc_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
+    sc_stop = datetime(sc_start.year + (1 if sc_start.month == 12 else 0), (sc_start.month + 1) % 12 if sc_start.month != 11 else 12, 1) - timedelta(days=1) # Calculates month end
     # In order to maintain track of total service charge since app start date a json file to write prev_net (used for bal brought forward) at the end of every month is created.
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
@@ -95,15 +96,13 @@ def mc1_sc_report(pool, sc_start1):
         with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get balance brought forward saved in json file
             app_data = json.load(app_data_file)
         sc_net_summary = app_data['sc']
-        prev_net = sc_net_summary['prev_net']
-        mgt_fee_percent = app_data['mgt_fee_%']
+        mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
-        print('Unable to retrieve balance brought forward')
-        prev_net = 0.0
+        print('Unable to load app data\n',e)
 
     try:
-        cursor.execute(load_new_service_charge_data, (sc_start, sc_start))
-        cursor.execute(get_service_charge_data, (sc_start,))
+        cursor.execute(load_new_service_charge_data, (sc_start, sc_stop, sc_start, sc_stop))
+        cursor.execute(get_service_charge_data, (sc_start, sc_stop))
         records = cursor.fetchall()
 
         if records:
@@ -130,27 +129,21 @@ def mc1_sc_report(pool, sc_start1):
             subtotal = float(subtotal)
             management_fee = subtotal * mgt_fee_percent / 100
             grand_total = subtotal + management_fee
-            curr_net = prev_net + grand_total
 
             print(f"{'Management fee':78}  :  {management_fee:-10,.2f}")
             print(f"{'Grand total':78}  :  {grand_total:-10,.2f}")
-            print(f"{'Net balance':78}  :  {curr_net:-10,.2f}")
             
             try:
                 # Update json file
-                sc_net_summary['curr_net'] = curr_net
-                sc_net_summary['curr_date'] = datetime.now().strftime('%Y-%m-%d')
-                # Set previous net to current net if date is >= end of the following month since the last prev net was set.
-                prev_date = datetime.strptime(sc_net_summary['prev_date'], '%Y-%m-%d')
-                next_month_end = datetime(prev_date.year + (1 if prev_date.month == 12 else 0), (prev_date.month + 2) % 12 if prev_date.month != 10 else 12, 1) - timedelta(days=1) 
-                sc_net_summary['prev_net'] = curr_net if datetime.now() >= next_month_end else prev_net
-                sc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
+                sc_net_summary['bill_total'] = round(grand_total,2)
+                sc_net_summary['bill_date'] = sc_stop.strftime('%Y-%m-%d')
+
                 with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
                     json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
             except Exception as e:
-                print('Unable to update bal brought forward json file\n',e)
+                print('Unable to update app data file\n',e)
             
-            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total, "curr_net": curr_net}
+            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
             return sc_table_data, sc_summary_dict
         else:
             print('No records retrieved.\n')
@@ -158,8 +151,7 @@ def mc1_sc_report(pool, sc_start1):
             subtotal = 0.0
             management_fee = 0.0
             grand_total = 0.0
-            curr_net = prev_net
-            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total, "curr_net": curr_net}
+            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
             return sc_table_data, sc_summary_dict
         
     except Exception as e:
@@ -172,5 +164,5 @@ def mc1_sc_report(pool, sc_start1):
 
 if __name__ == '__main__':
     pool = POOL
-    sc_start = None
-    mc1_sc_report(pool, sc_start)
+    start_date = '2023-11-01'
+    mc1_sc_report(pool, start_date)

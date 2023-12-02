@@ -10,7 +10,7 @@ from mc1_generate_report_pdf import generate_pdf
 from mc1_sc_monthly_report import mc1_sc_report
 dir_path = os.environ.get('DIR_PATH')
 
-def mc1_nsc_report(pool, date1, filters):
+def mc1_nsc_report(pool, nsc_start, filters):
     # Obtain pool connection if available or add connection then obtain pool connection.
     try:
         connection = pool.get_connection()
@@ -51,7 +51,7 @@ def mc1_nsc_report(pool, date1, filters):
                     where Type = 'Debit'
                     and ((lower(Reference) like '%mc1%nsc%')
                     or (lower(Reference) like '%mc1%_sc%'))
-                    and Date between %s and current_date()
+                    and Date between %s and %s
                     group by Description, Date
                 ),
                 cte_priv as (
@@ -72,7 +72,7 @@ def mc1_nsc_report(pool, date1, filters):
                     where Type = 'Debit'
                     and ((lower(Reference) like '%mc1%nsc%')
                     or (lower(Reference) like '%mc1%_sc%'))
-                    and Date between %s and current_date()
+                    and Date between %s and %s
                     group by Description, Date
                 )
             select * from cte_biz
@@ -83,9 +83,11 @@ def mc1_nsc_report(pool, date1, filters):
    
     # Query to retrieve relevant non-service charge records for reporting (refactor date to month start)
     get_non_service_charge_data = """select ID, Date, Description, Amount 
-    from maplecourt.MC1nsc_expenses where date >= %s;"""
+    from maplecourt.MC1nsc_expenses where date between %s and %s;"""
 
-    nsc_start =  date1 if date1 is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
+    nsc_start =  datetime.strptime(nsc_start, '%Y-%m-%d') if nsc_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
+    nsc_stop = datetime(nsc_start.year + (1 if nsc_start.month == 12 else 0), (nsc_start.month + 1) % 12 if nsc_start.month != 11 else 12, 1) - timedelta(days=1)
+
     # In order to maintain track of total service charge since app start date a json file to write prev_net (used for bal brought forward) at the end of every month is created.
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
@@ -93,15 +95,13 @@ def mc1_nsc_report(pool, date1, filters):
         with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get balance brought forward saved in json file
             app_data = json.load(app_data_file)
         nsc_net_summary = app_data['nsc']
-        prev_net = nsc_net_summary['prev_net']
-        mgt_fee_percent = app_data['mgt_fee_%']
+        mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
-        print('Unable to retrieve balance brought forward')
-        prev_net = 0.0
+        print('Unable to load app data\n',e)
 
     try:
-        cursor.execute(data_insert_query, (nsc_start, nsc_start))
-        cursor.execute(get_non_service_charge_data, (nsc_start,))
+        cursor.execute(data_insert_query, (nsc_start, nsc_stop, nsc_start, nsc_stop))
+        cursor.execute(get_non_service_charge_data, (nsc_start, nsc_stop))
         records = cursor.fetchall()
 
         if records:
@@ -135,21 +135,15 @@ def mc1_nsc_report(pool, date1, filters):
             nsc_subtotal = subtotal_2
             nsc_management_fee = nsc_subtotal * mgt_fee_percent / 100
             nsc_grand_total = subtotal_2 + nsc_management_fee
-            nsc_curr_net = prev_net + nsc_grand_total
 
             print(f"{'Management fee':78}  :  {nsc_management_fee:-10,.2f}")
-            print(f"{'Grand total':78}  :  {nsc_grand_total:-10,.2f}")
-            print(f"{'Net balance':78}  :  {nsc_curr_net:-10,.2f}")   
+            print(f"{'Grand total':78}  :  {nsc_grand_total:-10,.2f}")   
 
             try:
                 # Update json file
-                nsc_net_summary['curr_net'] = nsc_curr_net
-                nsc_net_summary['curr_date'] = datetime.now().strftime('%Y-%m-%d')
-                # Set previous net to current net if date is >= end of the following month since the last prev net was set.
-                prev_date = datetime.strptime(nsc_net_summary['prev_date'], '%Y-%m-%d')
-                next_month_end = datetime(prev_date.year + (1 if prev_date.month == 12 else 0), (prev_date.month + 2) % 12 if prev_date.month != 10 else 12, 1) - timedelta(days=1) 
-                nsc_net_summary['prev_net'] = nsc_curr_net if datetime.now() >= next_month_end else prev_net
-                nsc_net_summary['prev_date'] = datetime.now().strftime('%Y-%m-%d') if datetime.now() >= next_month_end else prev_date.strftime('%Y-%m-%d')
+                nsc_net_summary['bill_total'] = round(nsc_grand_total,2)
+                nsc_net_summary['bill_date'] = nsc_stop.strftime('%Y-%m-%d')
+                
                 with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
                     json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
             except Exception as e:
@@ -162,7 +156,6 @@ def mc1_nsc_report(pool, date1, filters):
             nsc_subtotal = 0.0
             nsc_management_fee = 0.0
             nsc_grand_total = 0.0
-            nsc_curr_net = prev_net
             nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
             return nsc_table_data, nsc_summary_dict
         
@@ -179,9 +172,9 @@ if __name__ == '__main__':
     
     # NON-SERVICE CHARGE FUNCTION
     filters = ['CLEARED']
-    date1 = '2023-11-01'
-    nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, date1, filters)
-    
+    start_date = '2023-11-01'
+    nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, start_date, filters)
+    """
     # MANAGEMENT FEE FUNCTION
     date1 = '2023-11-01'
     date2 = '2023-11-30'
@@ -200,3 +193,4 @@ if __name__ == '__main__':
                 mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
                 sc_table_data, sc_summary_dict, # <<< SC VARIABLES
                 inflow_records, date1) # <<< INFLOW VARIABLES
+    """
