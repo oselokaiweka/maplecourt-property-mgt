@@ -89,9 +89,9 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     try:
         with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get app data from json file
             app_data = json.load(app_data_file)
-        sc_config_summary = app_data['sc']
-        service_charge = float(sc_config_summary['service_charge'])
-        incidentals =  float(sc_config_summary['incidentals'])
+        bills_data = app_data['bills']
+        service_charge = float(app_data['rates']['service_charge'])
+        incidentals =  float(app_data['rates']['incidentals'])
     except Exception as e:
         print('Unable to retrieve app data')
 
@@ -118,55 +118,6 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     elements.append(summary_table)
 
 
-    # Building service charge report section
-    nsc_report_title = Paragraph(f"SERVICE CHARGE RECURRING EXPENSES - [ {report_start.strftime('%B %Y')} ]", left_aligned_normal_bold) 
-    nsc_report_title.spaceAfter = 2
-    elements.append(nsc_report_title)    
-
-    sc_table = Table(sc_table_data, colWidths=[30, 35, 80, 305, 95], hAlign='LEFT')
-    sc_table.setStyle(TableStyle(common_table_style))
-    sc_table.spaceAfter = 0
-    elements.append(sc_table)
-
-    # Create a sum_table for sub-total, management_fee and grand_total for nsc table
-    sc_sum_table_data = [
-        ['SUB-TOTAL', f"{sc_summary_dict['subtotal']:,.2f}"],
-        ['7.5% MANAGEMENT FEE', f"{sc_summary_dict['mgt_fee']:,.2f}"],
-        ['GRAND TOTAL', f"{sc_summary_dict['grand_total']:,.2f}"],
-        ['BALANCE BROUGHT FORWARD', f"{inflow_records[0][1] - sc_summary_dict['curr_net']:,.2f}"], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
-        ['TOTAL RECEIVED (Aug-Sept SC & N300k Diesel)', f'{825000:,.2f}'],
-        ['NET TOTAL', f'{94569.38:,.2f}']
-    ]
-
-    sc_sum_table = Table(sc_sum_table_data, colWidths=[450, 95], hAlign='LEFT')
-    sc_sum_table.setStyle(TableStyle(summary_table_style))
-    sc_sum_table.spaceAfter = 15
-    elements.append(sc_sum_table)
-
-
-    # Building non-service charge report section
-    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime((nsc_table_data[1][2]), '%Y-%m-%d').strftime('%d-%m-%Y')} to {datetime.now().strftime('%d-%m-%Y')} ]", left_aligned_normal_bold) 
-    nsc_report_title.spaceAfter = 2
-    elements.append(nsc_report_title)    
-
-    nsc_table = Table(nsc_table_data, colWidths=[30, 35, 80, 305, 95], hAlign='LEFT')
-    nsc_table.setStyle(TableStyle(common_table_style))
-    nsc_table.spaceAfter = 0
-    elements.append(nsc_table)
-
-    # Create a sum_table for sub-total, management_fee and grand_total for nsc table
-    sum_table_data = [
-        ['SUB-TOTAL',f"{nsc_summary_dict['subtotal']:,.2f}"],
-        ['7.5% MANAGEMENT FEE', f"{nsc_summary_dict['mgt_fee']:,.2f}"],
-        ['GRAND TOTAL', f"{nsc_summary_dict['grand_total']:,.2f}"]
-    ]
-
-    sum_table = Table(sum_table_data, colWidths=[450, 95], hAlign='LEFT')
-    sum_table.setStyle(TableStyle(summary_table_style))
-    sum_table.spaceAfter = 15
-    elements.append(sum_table)
-
-
     # Building management fee report section
     mgt_report_title = Paragraph(f"MANAGEMENT FEE [ {mgtfee_summary_dict['period_start'].strftime('%B %Y')} ]", left_aligned_normal_bold)
     mgt_report_title.spaceAfter = 2
@@ -187,11 +138,65 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     elements.append(mgtfee_table)
 
     # Create table to display total mgt fee
-    total_mgt_fee_data = [['TOTAL MANAGEMENT FEE FOR PERIOD', f"{mgtfee_summary_dict['total_mgt_fee']:,.2f}"]]
+    total_mgt_fee_data = [
+        ['TOTAL MANAGEMENT FEE FOR PERIOD', f"{mgtfee_summary_dict['total_mgt_fee']:,.2f}"],
+        ['OUTSTANDING MANAGEMENT FEE', f"{bills_data['mgt']['bill_outstanding']:,.2f}"],
+        ['NET PAYABLE MANAGEMENT FEE', f"{mgtfee_summary_dict['total_mgt_fee'] + bills_data['mgt']['bill_outstanding']:,.2f}" ]
+    ]
     total_mgt_fee_table = Table(total_mgt_fee_data, colWidths=[465, 80], hAlign='LEFT')
     total_mgt_fee_table.setStyle(TableStyle(summary_table_style))
-    total_mgt_fee_table.spaceAfter = 20
+    total_mgt_fee_table.spaceAfter = 15
     elements.append(total_mgt_fee_table)
+
+
+    # Building non-service charge report section
+    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime((nsc_table_data[1][2]), '%Y-%m-%d').strftime('%d-%m-%Y')} to {datetime.now().strftime('%d-%m-%Y')} ]", left_aligned_normal_bold) 
+    nsc_report_title.spaceAfter = 2
+    elements.append(nsc_report_title)    
+
+    nsc_table = Table(nsc_table_data, colWidths=[30, 35, 80, 305, 95], hAlign='LEFT')
+    nsc_table.setStyle(TableStyle(common_table_style))
+    nsc_table.spaceAfter = 0
+    elements.append(nsc_table)
+
+    # Create a sum_table for sub-total, management_fee and grand_total for nsc table
+    sum_table_data = [
+        ['SUB-TOTAL',f"{nsc_summary_dict['subtotal']:,.2f}"],
+        ['7.5% MANAGEMENT FEE', f"{nsc_summary_dict['mgt_fee']:,.2f}"],
+        ['TOTAL REIMBURSABLE EXPENSES FOR PERIOD', f"{nsc_summary_dict['grand_total']:,.2f}"],
+        ['PREVIOUS BALANCE BROUGHT FORWARD', f"{bills_data['nsc']['bill_outstanding']:,.2f}"],
+        ['NET PAYABLE REIMBURSABLE EXPENSES', F"{nsc_summary_dict['grand_total'] + bills_data['nsc']['bill_outstanding']:,.2f}"]
+    ]
+
+    sum_table = Table(sum_table_data, colWidths=[450, 95], hAlign='LEFT')
+    sum_table.setStyle(TableStyle(summary_table_style))
+    sum_table.spaceAfter = 15
+    elements.append(sum_table)
+
+    # Building service charge report section
+    nsc_report_title = Paragraph(f"SERVICE CHARGE RECURRING EXPENSES - [ {report_start.strftime('%B %Y')} ]", left_aligned_normal_bold) 
+    nsc_report_title.spaceAfter = 2
+    elements.append(nsc_report_title)    
+
+    sc_table = Table(sc_table_data, colWidths=[30, 35, 80, 305, 95], hAlign='LEFT')
+    sc_table.setStyle(TableStyle(common_table_style))
+    sc_table.spaceAfter = 0
+    elements.append(sc_table)
+
+    # Create a sum_table for sub-total, management_fee and grand_total for nsc table
+    sc_sum_table_data = [
+        ['SUB-TOTAL', f"{sc_summary_dict['subtotal']:,.2f}"],
+        ['7.5% MANAGEMENT FEE', f"{sc_summary_dict['mgt_fee']:,.2f}"],
+        ['TOTAL SERVICE CHARGE EXPENSES FOR PERIOD', f"{sc_summary_dict['grand_total']:,.2f}"],
+        ['BALANCE BROUGHT FORWARD', f"{bills_data['sc']['bill_outstanding']:,.2f}"], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
+        ['TOTAL RECEIVED (Aug-Sept SC & N300k Diesel)', f"{bills_data['sc']['received'] + app_data['payments']['diesel_contribution']:,.2f}"],
+        ['NET TOTAL', f'{94569.38:,.2f}']
+    ]
+
+    sc_sum_table = Table(sc_sum_table_data, colWidths=[450, 95], hAlign='LEFT')
+    sc_sum_table.setStyle(TableStyle(summary_table_style))
+    sc_sum_table.spaceAfter = 20
+    elements.append(sc_sum_table)
 
 
     # Add closing remarks / name / designation

@@ -95,7 +95,7 @@ def mc1_sc_report(pool, sc_start):
     try:
         with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get balance brought forward saved in json file
             app_data = json.load(app_data_file)
-        sc_net_summary = app_data['sc']
+        sc_net_summary = app_data['bills']['sc']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
         print('Unable to load app data\n',e)
@@ -136,7 +136,8 @@ def mc1_sc_report(pool, sc_start):
             try:
                 # Update json file
                 sc_net_summary['bill_total'] = round(grand_total,2)
-                sc_net_summary['bill_date'] = sc_stop.strftime('%Y-%m-%d')
+                sc_net_summary['bill_start_date'] = sc_start.strftime('%Y-%m-%d')
+                sc_net_summary['bill_stop_date'] = sc_stop.strftime('%Y-%m-%d')
 
                 with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
                     json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
