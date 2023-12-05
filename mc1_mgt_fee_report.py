@@ -69,7 +69,7 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
     try:
         with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get app data from json file
             app_data = json.load(app_data_file)
-        mgt_net_summary = app_data['mgt']
+        mgt_net_summary = app_data['bills']['mgt']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
         print('Unable to retrieve app data')

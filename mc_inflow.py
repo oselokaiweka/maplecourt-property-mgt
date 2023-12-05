@@ -1,7 +1,8 @@
 from mysql_pool import POOL
-import datetime
-from datetime import datetime
+import os, json
+from datetime import datetime, timedelta
 
+dir_path = os.environ.get("DIR_PATH")
 
 # Using insert into select to retrieve relevant records from Statement_biz to load into MC_inflow.
 # MC_inflow contains records of landlord payments for SC, NSC and MGT fees. 
@@ -76,14 +77,14 @@ where LandlordID is null;
 
 
 # Get records from mc_inflow for the current month
-get_records_from_mc_inflow = """select 
-ID, Date, Description, Amount, Type, LandlordID, PropertyID, StatementID 
-from MC_inflow 
-where Date >= %s;
+get_records_from_mc_inflow = """
+select i.ID, l.FullName, i.LandlordID, i.PropertyID, i.Amount as Paid
+from Landlords l inner join MC_inflow i 
+on l.LandlordID = i.LandlordID
+where i.Date between %s and %s;
 """
 
-
-def get_landlord_inflow(pool, inf_monthstart):
+def get_landlord_inflow(pool, inf_start):
     # Obtain pool connection if available or add connection then obtain pool connection.
     try:
         connection = pool.get_connection()
@@ -100,68 +101,41 @@ def get_landlord_inflow(pool, inf_monthstart):
     cursor.execute("SET GLOBAL event_scheduler = ON;")
     print('Event scheduler is started')
 
-    month_start = datetime.now().replace(day=1)
-    period_start = inf_monthstart if inf_monthstart is not None else month_start
+    inf_start =  datetime.strptime(inf_start, '%Y-%m-%d') if inf_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
+    inf_stop = datetime(inf_start.year + (1 if inf_start.month == 12 else 0), (inf_start.month + 1) % 12 if inf_start.month != 11 else 12, 1) - timedelta(days=1)
    
+
+    with open(dir_path+"/mc_app_data.json", "r") as app_data_file:
+        app_data = json.load(app_data_file)
+    payments_data = app_data['payments']
+    available_balance = payments_data['available_balance']
+    last_payment_id = payments_data['last_payment_id']
+    print(f'Last payment id: {last_payment_id}')
+    
     try:
-        cursor.execute(insert_mc_inflow, (period_start,))
+        cursor.execute(insert_mc_inflow, (inf_start,))
         cursor.execute(update_mc_inflow)
-        cursor.execute(get_records_from_mc_inflow, (period_start,))
+        cursor.execute(get_records_from_mc_inflow, (inf_start, inf_stop))
         records = cursor.fetchall()
 
-        # Initializing list with default values so I dont get a nonetype error if the record is empty
-        MC1L1_SC_NSC_MGT_list = [0,0,0,0]
-        MC2L1_SC_NSC_MGT_list = [0,0,0,0]
-        MC2L2_SC_NSC_MGT_list = [0,0,0,0]
-        MC2L3_SC_NSC_MGT_list = [0,0,0,0]
-        inflow_records = [MC1L1_SC_NSC_MGT_list, MC2L1_SC_NSC_MGT_list, MC2L2_SC_NSC_MGT_list, MC2L3_SC_NSC_MGT_list]
-
         if records:
+            MC1L1_payments = [record for record in records if record[2] == 1 and record[3] == 1 and int(record[0]) > last_payment_id]
+            MC2L1_payments = [record for record in records if record[2] == 1 and record[3] == 2 and int(record[0]) > last_payment_id]
+            MC2L2_payments = [record for record in records if record[2] == 2 and record[3] == 2 and int(record[0]) > last_payment_id]
+            MC2L3_payments = [record for record in records if record[2] == 3 and record[3] == 2 and int(record[0]) > last_payment_id]
+            
+            if MC1L1_payments:
+                last_payment_id = max(int(record[0]) for record in MC1L1_payments) #Update last_payment_id to Max id from payment records processed.
+                payments_data['last_payment_id'] = last_payment_id
+                payments_data['available_balance'] = round(sum(float(record[4]) for record in MC1L1_payments) + available_balance, 2)
+                payments_data['date_processed'] = datetime.now().strftime('%Y-%m-%d [%H:%M:%S]')
     
-            MC1L1_SC    = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'SC']
-            MC1L1_NSC   = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'NSC']
-            MC1L1_MGT   = [record for record in records if record[6] == 1 and record[5] == 1 and record[4] == 'MGT']
-           
-            mnth_MC1L1_SC = round(float(sum(record[3] for record in MC1L1_SC if record[1] >= datetime.now().date().replace(day=1))),2)
-            all_MC1L1_SC = round(float(sum(record[3] for record in MC1L1_SC)),2)
-            sum_MC1L1_NSC = round(float(sum(record[3] for record in MC1L1_NSC)),2)
-            curr_MC1L1_MGT = round(float(sum(record[3] for record in MC1L1_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
-
-            MC2L1_SC    = [record for record in records if record[6] == 2 and record[5] == 1 and record[4] == 'SC']
-            MC2L1_NSC   = [record for record in records if record[6] == 2 and record[5] == 1 and record[4] == 'NSC']
-            MC2L1_MGT   = [record for record in records if record[6] == 2 and record[5] == 1 and record[4] == 'MGT']
-           
-            mnth_MC2L1_SC = round(float(sum(record[3] for record in MC2L1_SC if record[1] >= datetime.now().date().replace(day=1))),2)
-            all_MC2L1_SC = round(float(sum(record[3] for record in MC2L1_SC)),2)
-            sum_MC2L1_NSC = round(float(sum(record[3] for record in MC2L1_NSC)),2)
-            curr_MC2L1_MGT = round(float(sum(record[3] for record in MC2L1_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
-
-            MC2L2_SC    = [record for record in records if record[6] == 2 and record[5] == 2 and record[4] == 'SC']
-            MC2L2_NSC   = [record for record in records if record[6] == 2 and record[5] == 2 and record[4] == 'NSC']
-            MC2L2_MGT   = [record for record in records if record[6] == 2 and record[5] == 2 and record[4] == 'MGT']
-            
-            mnth_MC2L2_SC = round(float(sum(record[3] for record in MC2L2_SC if record[1] >= datetime.now().date().replace(day=1))),2)
-            all_MC2L2_SC = round(float(sum(record[3] for record in MC2L2_SC)),2)
-            sum_MC2L2_NSC = round(float(sum(record[3] for record in MC2L2_NSC)),2)
-            curr_MC2L2_MGT = round(float(sum(record[3] for record in MC2L2_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
-
-            MC2L3_SC    = [record for record in records if record[6] == 2 and record[5] == 3 and record[4] == 'SC']
-            MC2L3_NSC   = [record for record in records if record[6] == 2 and record[5] == 3 and record[4] == 'NSC']
-            MC2L3_MGT   = [record for record in records if record[6] == 2 and record[5] == 3 and record[4] == 'MGT']
-           
-            mnth_MC2L3_SC = round(float(sum(record[3] for record in MC2L3_SC if record[1] >= datetime.now().date().replace(day=1))),2)
-            all_MC2L3_SC = round(float(sum(record[3] for record in MC2L3_SC)),2)
-            sum_MC2L3_NSC = round(float(sum(record[3] for record in MC2L3_NSC)),2)
-            curr_MC2L3_MGT = round(float(sum(record[3] for record in MC2L3_MGT if record[1] >= datetime.now().date().replace(day=1))),2) # Checks for payment within current month
-
-            MC1L1_SC_NSC_MGT_list = [mnth_MC1L1_SC, all_MC1L1_SC, sum_MC1L1_NSC, curr_MC1L1_MGT]
-            MC2L1_SC_NSC_MGT_list = [mnth_MC2L1_SC, all_MC2L1_SC, sum_MC2L1_NSC, curr_MC2L1_MGT]
-            MC2L2_SC_NSC_MGT_list = [mnth_MC2L2_SC, all_MC2L2_SC, sum_MC2L2_NSC, curr_MC2L2_MGT]
-            MC2L3_SC_NSC_MGT_list = [mnth_MC2L3_SC, all_MC2L3_SC, sum_MC2L3_NSC, curr_MC2L3_MGT]
-
-            inflow_records = [MC1L1_SC_NSC_MGT_list, MC2L1_SC_NSC_MGT_list, MC2L2_SC_NSC_MGT_list, MC2L3_SC_NSC_MGT_list]
-            
-        return inflow_records
+                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
+                    json.dump(app_data, app_data_file, indent=4)
+            else:
+                pass
+        else:
+            pass
         
     except Exception as e:
         print(e)
@@ -172,5 +146,5 @@ def get_landlord_inflow(pool, inf_monthstart):
         print("Connection and cursor closed.\n")
 
 pool = POOL
-inf_monthstart = None
-get_landlord_inflow(pool, inf_monthstart)
+inf_start = '2023-11-01'
+get_landlord_inflow(pool, inf_start)
