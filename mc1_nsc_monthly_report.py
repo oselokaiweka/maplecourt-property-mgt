@@ -4,11 +4,7 @@ from math import ceil, floor
 import os, json
 from mysql_pool import POOL
 from datetime import datetime, timedelta
-from mc_inflow import get_landlord_inflow
-from mc1_mgt_fee_report import mc1_mgt_report
-from mc1_generate_report_pdf import generate_pdf
-from mc1_sc_monthly_report import mc1_sc_report
-from mc1_bill_settlement import mc1_bill_settlement
+
 dir_path = os.environ.get('DIR_PATH')
 
 def mc1_nsc_report(pool, nsc_start, filters):
