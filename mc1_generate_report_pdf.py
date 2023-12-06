@@ -109,7 +109,9 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
         [f"{report_start.replace(month=(report_start.month + 1) % 12 if report_start.month != 11 else 12).strftime('%B').upper()} INCIDENTALS:", 'MC1L1 NSC', f'{incidentals:,.2f}'], 
         [f"{report_start.strftime('%B').upper()} REIMBURSABLE:", 'MC1L1 NSC', f"{nsc_summary_dict['grand_total']:,.2f}"],
         [f"{report_start.strftime('%B').upper()} MANAGEMENT FEE:", 'MC1L1 MGT', f"{mgtfee_summary_dict['total_mgt_fee']:,.2f}"],
-        ['TOTAL:', '' ,f"N{service_charge + incidentals + nsc_summary_dict['grand_total'] + mgtfee_summary_dict['total_mgt_fee']:,.2f}"]
+        ['PREVIOUS SERVICE CHARGE DEFICIT', 'MC1L1 SC', f"{app_data['rates']['prev_service_charge']-bills_data['sc']['received']:,.2f}"],
+        ['LESS F4 SERVICE CHARGE', 'N/A', f"{app_data['payments']['tenant_sc']:,.2f}"],
+        ['NET TOTAL PAYABLE:', 'MC1L1' ,f"N{service_charge + incidentals + nsc_summary_dict['grand_total'] + mgtfee_summary_dict['total_mgt_fee'] + app_data['rates']['prev_service_charge']-bills_data['sc']['received'] - app_data['payments']['tenant_sc']:,.2f}"]
     ]
     
     summary_table = Table(summary_table_data, colWidths=[355, 95, 95], hAlign='LEFT')
@@ -150,7 +152,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
 
     # Building non-service charge report section
-    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime((nsc_table_data[1][2]), '%Y-%m-%d').strftime('%d-%m-%Y')} to {datetime.now().strftime('%d-%m-%Y')} ]", left_aligned_normal_bold) 
+    nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime(bills_data['nsc']['bill_start_date'], '%Y-%m-%d').strftime('%d %b %Y')} to {datetime.strptime(bills_data['nsc']['bill_stop_date'], '%Y-%m-%d').strftime('%d %b %Y')} ]", left_aligned_normal_bold) 
     nsc_report_title.spaceAfter = 2
     elements.append(nsc_report_title)    
 
@@ -187,10 +189,10 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     sc_sum_table_data = [
         ['SUB-TOTAL', f"{sc_summary_dict['subtotal']:,.2f}"],
         ['7.5% MANAGEMENT FEE', f"{sc_summary_dict['mgt_fee']:,.2f}"],
-        ['TOTAL SERVICE CHARGE EXPENSES FOR PERIOD', f"{sc_summary_dict['grand_total']:,.2f}"],
-        ['BALANCE BROUGHT FORWARD', f"{bills_data['sc']['bill_outstanding']:,.2f}"], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
-        ['TOTAL RECEIVED (Aug-Sept SC & N300k Diesel)', f"{bills_data['sc']['received'] + app_data['payments']['diesel_contribution']:,.2f}"],
-        ['NET TOTAL', f'{94569.38:,.2f}']
+        ['TOTAL SERVICE CHARGE EXPENSES FOR PERIOD', f"{bills_data['sc']['bill_total']:,.2f}"],
+        ['BALANCE BROUGHT FORWARD', f"{bills_data['sc']['balance_brought_f']:,.2f}"], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
+        ['TOTAL SERVICE CHARGE AND DIESEL CONTRIBUTION RECEIVED', f"{bills_data['sc']['received'] + app_data['payments']['diesel_contribution']:,.2f}"],
+        ['NET TOTAL', f"{bills_data['sc']['bill_outstanding']:,.2f}"]
     ]
 
     sc_sum_table = Table(sc_sum_table_data, colWidths=[450, 95], hAlign='LEFT')

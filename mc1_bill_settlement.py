@@ -24,19 +24,20 @@ class Received:
 
 def pay_bill(bill, received):
     if bill.bill_name == 'service_charge':
-        if received.available_balance >= rates['service_charge']:
+        if received.available_balance >= rates['prev_service_charge']:
             # If payment is sufficient, settle the entire bill
-            received.available_balance -= rates['service_charge']
-            print(f"Settled {bill.bill_name} bill of N{bill.outstanding:,.2f}. Recieved id-{received.last_payment_id} balance: N{received.available_balance:,.2f}")
-            bill.outstanding -= rates['service_charge']
-            bills['sc']['received'] = round(rates['service_charge'], 2)
+            received.available_balance -= rates['prev_service_charge']
+            bills['sc']['balance_brought_f'] = bill.outstanding
+            bill.outstanding = round(bill.bill_total + bills['sc']['balance_brought_f'] - rates['prev_service_charge'] - payments['diesel_contribution'], 2)
+            bills['sc']['received'] = round(rates['prev_service_charge'], 2)
+            print(f"Settled {bill.bill_name} bill. Recieved id-{received.last_payment_id} balance: N{received.available_balance:,.2f}")
         else:
             # If payment is not sufficient, make a partial payment
-            prev_outstanding = bill.outstanding
-            bill.outstanding -= received.available_balance
-            print(f"Part payment of N{received.available_balance:,.2f} out of N{prev_outstanding:,.2f} for {bill.bill_name}, outstanding: N{bill.outstanding:,.2f}. Recieved id-{received.last_payment_id} balance: N0.0") 
-            received.available_balance = 0.0  
-            bills['sc']['received'] = round(received.available_balance, 2)     
+            bills['sc']['balance_brought_f'] = bill.outstanding
+            bill.outstanding = round(bill.bill_total + bills['sc']['balance_brought_f'] - received.available_balance - payments['diesel_contribution'], 2)
+            bills['sc']['received'] = round(received.available_balance, 2)
+            received.available_balance = 0.0
+            print(f"Part settled {bill.bill_name} bill. Recieved id-{received.last_payment_id} balance: N{received.available_balance:,.2f}")     
     else:   
         if received.available_balance >= bill.outstanding:
             # If payment is sufficient, settle the entire bill
@@ -55,7 +56,7 @@ def mc1_bill_settlement():
     for bill_key, category in bills.items():
         bill = Bill(category['bill_name'], category['bill_total'], category['bill_outstanding'])
         received = Received(payments['last_payment_id'], payments['available_balance'])
-        if bill.outstanding > 0 and received.last_payment_id > category['last_payment_id']:
+        if (bill.bill_name != 'service_charge' and bill.outstanding > 0 and received.last_payment_id > category['last_payment_id']) or (bill.bill_name == 'service_charge' and received.last_payment_id > category['last_payment_id']):
             try:
                 pay_bill(bill, received)
                 category['bill_outstanding'] = round(bill.outstanding, 2)

@@ -1,8 +1,9 @@
 # This script retrieves MC1NSC records from two maplecourt database tables that contain 
 # all business transactions.
-import calendar, os, json
+import os, json
 from datetime import datetime, timedelta
 from mysql_pool import POOL
+
 dir_path = os.environ.get('DIR_PATH')
 
 # Update rent stopdate according to rent paid by tenant
