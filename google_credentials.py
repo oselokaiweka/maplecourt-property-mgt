@@ -33,7 +33,7 @@ def get_credentials():
         else:
             print("Attempting to authorise application...")
             try:
-                flow = InstalledAppFlow.from_client_secrets_file(dir_path+"/client_secret.json", SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file(dir_path+"/client_secret.json", scopes)
                 creds = flow.run_local_server(port=0)
                 # Save the credentials for the next run
                 with open(dir_path+"/token.json", "w") as token:
