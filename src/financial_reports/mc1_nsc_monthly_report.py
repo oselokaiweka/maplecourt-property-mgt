@@ -1,11 +1,10 @@
 # This script retrieves MC1NSC records from two maplecourt database tables that contain 
 # all business transactions.
-from math import ceil, floor
-import os, json
-from mysql_pool import POOL
 from datetime import datetime, timedelta
 
-dir_path = os.environ.get('DIR_PATH')
+from math import floor
+
+from src.utils.file_paths import access_app_data
 
 def mc1_nsc_report(pool, nsc_start, filters):
     # Obtain pool connection if available or add connection then obtain pool connection.
@@ -89,8 +88,7 @@ def mc1_nsc_report(pool, nsc_start, filters):
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:        
-        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get balance brought forward saved in json file
-            app_data = json.load(app_data_file)
+        app_data = access_app_data('r')
         nsc_net_summary = app_data['bills']['nsc']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
@@ -142,8 +140,7 @@ def mc1_nsc_report(pool, nsc_start, filters):
                 nsc_net_summary['bill_start_date'] = nsc_start.strftime('%Y-%m-%d')
                 nsc_net_summary['bill_stop_date'] = nsc_stop.strftime('%Y-%m-%d')
                 
-                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
-                    json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
+                access_app_data('w', app_data)
             except Exception as e:
                 print('Unable to update bal brought forward json file\n', e)  
             nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 

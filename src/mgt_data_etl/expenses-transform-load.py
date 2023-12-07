@@ -4,13 +4,15 @@
 
 
 # Importing necessary libraries: 
-import re
 import sys
 import subprocess
-import pandas as pd 
-from mysql_pool import POOL # Starts MySQL service and obtains connection pool object
 from datetime import datetime
+
+import re
+import pandas as pd 
 import mysql.connector as connector
+
+from src.utils.credentials import pool_connection
 
 # Defining the file path for stdout and stderr redirection
 stdout_file = "/home/oseloka/chrometro-expenses-data/company_statement_etl_stdout.txt"
@@ -126,7 +128,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
         df = data_transformation(csv_file)
 
         # Execute data insert
-        pool = POOL
+        pool = pool_connection()
         data_loading(pool, df, csv_file)
 
         print(f'PROCESS DURATION.............................................................................: {(datetime.now()-start_timer).total_seconds()}\n')

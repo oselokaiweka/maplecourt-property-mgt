@@ -1,22 +1,24 @@
 #Importing necessary libraries and modules:
-import os
 import time
 import base64
-from mysql_pool import POOL
+from datetime import datetime, timedelta
+
 from crontab import CronTab
 import mysql.connector as connector
-from google_credentials import CREDS
-from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from email.mime.text import MIMEText #for creating email messages with text content
 from email.mime.multipart import MIMEMultipart #for creating email messages with text content
+
+from src.utils.file_paths import sys_user
+from src.utils.credentials import pool_connection
+from src.utils.credentials import get_google_credentials
 
 
 def send_upcoming_rent_email(pool):
 
     # Variables to schedule cron job
     plus_hour = (datetime.now())+(timedelta(hours=1)) # Current time plus one hour.
-    USER =  os.environ.get('SYS_USER')
+    USER =  sys_user
     my_cron = CronTab(user=USER)
 
     # Query statement to fetch records of upcominng rentals that are 1 or 2 or 3 months away.
@@ -64,6 +66,7 @@ def send_upcoming_rent_email(pool):
 
                 #Send email message. Reset cron job to 10am everyday in case it has been modifiied by the exception.
                 try:
+                    CREDS = get_google_credentials
                     service = build('gmail', 'v1', credentials=CREDS)
 
                     create_message = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
@@ -107,5 +110,5 @@ def send_upcoming_rent_email(pool):
 
 if __name__ == "__main__":
     print(f'PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n')
-    
-    send_upcoming_rent_email(pool=POOL) 
+    pool = pool_connection()
+    send_upcoming_rent_email(pool) 

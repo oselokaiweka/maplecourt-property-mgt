@@ -1,20 +1,21 @@
 #Importing necessary libraries and modules:
-import os, json
 import sys
 import base64
 import decimal
-from mysql_pool import POOL
+from datetime import datetime, timedelta
+
 from crontab import CronTab
 from bs4 import BeautifulSoup
-from google_credentials import CREDS
-from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from src.utils.file_paths import sys_user, access_app_data
+from src.utils.credentials import pool_connection, get_google_credentials
 
 def read_mc_transaction(sender, start_date, stop_date, subject):
     try:
         print('Obtaining credential to read transaction data...\n')
+        CREDS = get_google_credentials()
         service = build('gmail', 'v1', credentials=CREDS)
         print('Checking for property management expenses data...\n')
 
@@ -143,8 +144,7 @@ def data_insert(records, pool):
             try:                
                 # Update start_date value with stop_date value so next time the script runs it will begin from where it stopped in the last run.
                 app_data['expenses_daily_etl']['start_date'] = stop_date
-                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
-                        json.dump(app_data, app_data_file, indent=4)
+                access_app_data('w', app_data)
                 print("Next ETL operation has been scheduled for tomorrow.")
             except Exception as e:
                 print("Unable to reschedule the start date, however data duplication is resticted in database so only new records will be inserted.\n",e)
@@ -183,16 +183,14 @@ if __name__ == "__main__":
     
     # Variables to schedule cron job
     plus_hour = (datetime.now())+(timedelta(hours=1)) # Current time plus one hour.
-    USER =  os.environ.get('SYS_USER')
-    dir_path = os.environ.get('DIR_PATH')
+    USER = sys_user
     my_cron = CronTab(user=USER)
 
     try:
         # Set stop_date arguement = now then read start date from file.
         stop_date = datetime.now().strftime("%Y/%m/%d")
         print(f'Stop date is set for: {stop_date}\n')
-        with open(f'{dir_path}/mc_app_data.json','r') as app_data_file:
-            app_data = json.load(app_data_file)
+        app_data = access_app_data('r')
         start_date = app_data['expenses_daily_etl']['start_date']
         print(f'Start date is set for: {start_date}\n')
 
@@ -200,7 +198,7 @@ if __name__ == "__main__":
         records = read_mc_transaction('GeNS@gtbank.com', start_date, stop_date, 'GeNS Transaction *')
 
         #  Execute data insert
-        pool = POOL
+        pool = pool_connection()
         data_insert(records, pool)
 
     except Exception as e:
