@@ -4,16 +4,17 @@
 
 
 # Importing necessary libraries: 
-import re
 import sys
-import codecs
-import logging
-import locale
 import subprocess
-import pandas as pd 
-from mysql_pool import POOL # Starts MySQL service and obtains connection pool object
 from datetime import datetime
+
+import logging
+import re
+import locale
+import pandas as pd 
 import mysql.connector as connector
+
+from src.utils.credentials import pool_connection
 
 # Setup logging
 logging.basicConfig(
@@ -186,7 +187,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
         df = data_transformation(output_file)
 
         # Execute data insert
-        pool = POOL
+        pool = pool_connection()
         data_loading(pool, df, input_file, output_file)
 
         logging.info(f'PROCESS DURATION.............................................................................: {(datetime.now()-start_timer).total_seconds()}\n')

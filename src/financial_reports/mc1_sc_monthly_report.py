@@ -1,10 +1,9 @@
 # This script retrieves MC1SC records from two maplecourt database tables that contain 
 # all business transactions.
 from datetime import datetime, timedelta
-from mysql_pool import POOL
-import json
-import os
-dir_path = os.environ.get('DIR_PATH')
+
+from src.utils.file_paths import access_app_data
+from src.utils.credentials import pool_connection
 
 # Query Retrieves records for mc1 service charge expenses from the given start date and loads transformed 
 # data into S.Charge expenses table. Bear in mind constraints prevent duplicate records using multiple cols and StatementID.
@@ -93,8 +92,7 @@ def mc1_sc_report(pool, sc_start):
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:
-        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get balance brought forward saved in json file
-            app_data = json.load(app_data_file)
+        app_data = access_app_data('r')
         sc_net_summary = app_data['bills']['sc']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
@@ -139,8 +137,7 @@ def mc1_sc_report(pool, sc_start):
                 sc_net_summary['bill_start_date'] = sc_start.strftime('%Y-%m-%d')
                 sc_net_summary['bill_stop_date'] = sc_stop.strftime('%Y-%m-%d')
 
-                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
-                    json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
+                access_app_data('w', app_data)
             except Exception as e:
                 print('Unable to update app data file\n',e)
             
@@ -164,6 +161,6 @@ def mc1_sc_report(pool, sc_start):
         print("Connection and cursor closed.\n")
 
 if __name__ == '__main__':
-    pool = POOL
+    pool = pool_connection()
     start_date = '2023-11-01'
     mc1_sc_report(pool, start_date)

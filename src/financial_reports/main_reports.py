@@ -1,14 +1,10 @@
-from mysql_pool import POOL
-from mc_inflow import get_landlord_inflow
-from mc1_mgt_fee_report import mc1_mgt_report
-from mc1_generate_report_pdf import generate_pdf
-from mc1_sc_monthly_report import mc1_sc_report
-from mc1_bill_settlement import mc1_bill_settlement
-from mc1_nsc_monthly_report import mc1_nsc_report
+from src.utils import pool_connection
+
+from src.financial_reports import *
 
 
 if __name__ == '__main__':
-    pool = POOL
+    pool = pool_connection()
     
     # NON-SERVICE CHARGE FUNCTION
     filters = ['CLEARED']
@@ -29,10 +25,10 @@ if __name__ == '__main__':
     inflow_records = get_landlord_inflow(pool, inf_start)
 
     # BILL SETTLEMENT FUNCTION
-    mc1_bill_settlement()
+    mc1_settle_bill()
 
     # GENERATE PDF FUNCTION
     generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
                 mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
                 sc_table_data, sc_summary_dict, # <<< SC VARIABLES
-                inflow_records, date1) # <<< INFLOW VARIABLES
+                date1) # <<< START DATE

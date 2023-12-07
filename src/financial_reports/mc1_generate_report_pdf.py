@@ -1,8 +1,8 @@
 # This script generates pdf of mc1 reports and the 
 # main function is called in the mc1_nsc_monthly_report.py
 
-import os, json
 from datetime import datetime
+
 from reportlab.lib import colors, pagesizes
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Spacer
@@ -10,12 +10,14 @@ from reportlab.lib.pagesizes import LEGAL
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Frame
-dir_path = os.environ.get('DIR_PATH')
+
+from src.utils.file_paths import dir_path, access_app_data
+
 
 def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
                 mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
                 sc_table_data, sc_summary_dict, # <<< SC VARIABLES 
-                inflow_records, period_start): # <<< INFLOW VARIABLES, START DATE   
+                period_start): # START DATE   
     
     pdf = SimpleDocTemplate('MC1_REPORT.PDF', pagesize=LEGAL) # Creates a PDF document
     elements = [] # Creates a list to store the content
@@ -59,7 +61,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     ]
 
     # Add business logo
-    logo = Image(dir_path+'/images/business_logo.png', width=2.1*inch, height=0.8*inch)
+    logo = Image(dir_path+'/app_data/static/images/business_logo.png', width=2.1*inch, height=0.8*inch)
     logo.spaceAfter = 5
     logo.hAlign = 'LEFT'
     elements.append(logo)
@@ -87,8 +89,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
     # Retrieve relevant fixed values from mc_app_data.json file
     try:
-        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get app data from json file
-            app_data = json.load(app_data_file)
+        app_data = access_app_data('r')
         bills_data = app_data['bills']
         service_charge = float(app_data['rates']['service_charge'])
         incidentals =  float(app_data['rates']['incidentals'])
@@ -213,7 +214,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     elements.append(closing_remark3) 
 
     # Add signature
-    signature = Image(dir_path+'/images/signature.png', width=2.46*inch, height=0.984*inch)
+    signature = Image(dir_path+'/app_data/static/images/signature.png', width=2.46*inch, height=0.984*inch)
     signature.spaceAfter = 2
     signature.hAlign = 'LEFT'
     elements.append(signature)

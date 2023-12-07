@@ -1,8 +1,8 @@
-from mysql_pool import POOL
-import os, json
 from datetime import datetime, timedelta
 
-dir_path = os.environ.get("DIR_PATH")
+from src.utils.file_paths import access_app_data
+from src.utils.credentials import pool_connection
+    
 
 # Using insert into select to retrieve relevant records from Statement_biz to load into MC_inflow.
 # MC_inflow contains records of landlord payments for SC, NSC and MGT fees. 
@@ -104,9 +104,7 @@ def get_landlord_inflow(pool, inf_start):
     inf_start =  datetime.strptime(inf_start, '%Y-%m-%d') if inf_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
     inf_stop = datetime(inf_start.year + (1 if inf_start.month == 12 else 0), (inf_start.month + 1) % 12 if inf_start.month != 11 else 12, 1) - timedelta(days=1)
    
-
-    with open(dir_path+"/mc_app_data.json", "r") as app_data_file:
-        app_data = json.load(app_data_file)
+    app_data = access_app_data('r')
     payments_data = app_data['payments']
     available_balance = payments_data['available_balance']
     last_payment_id = payments_data['last_payment_id']
@@ -130,8 +128,7 @@ def get_landlord_inflow(pool, inf_start):
                 payments_data['available_balance'] = round(sum(float(record[4]) for record in MC1L1_payments) + available_balance, 2)
                 payments_data['date_processed'] = datetime.now().strftime('%Y-%m-%d [%H:%M:%S]')
     
-                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
-                    json.dump(app_data, app_data_file, indent=4)
+                access_app_data('w', app_data)
             else:
                 pass
         else:
@@ -145,6 +142,8 @@ def get_landlord_inflow(pool, inf_start):
         connection.close()
         print("Connection and cursor closed.\n")
 
-pool = POOL
-inf_start = '2023-11-01'
-get_landlord_inflow(pool, inf_start)
+
+if __name__ == '__main__':
+    pool = pool_connection()
+    inf_start = '2023-11-01'
+    get_landlord_inflow(pool, inf_start)

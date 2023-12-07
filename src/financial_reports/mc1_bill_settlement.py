@@ -1,11 +1,8 @@
-import os, json
 from datetime import datetime
-from mysql_pool import POOL
 
-dir_path = os.environ.get('DIR_PATH')
+from src.utils.file_paths import access_app_data
 
-with open(dir_path+"/mc_app_data.json", "r") as app_data_file:
-    app_data = json.load(app_data_file)
+app_data = access_app_data('r')
 payments = app_data['payments']
 bills = app_data['bills']
 rates = app_data['rates']
@@ -52,7 +49,7 @@ def pay_bill(bill, received):
             received.available_balance = 0.0
 
 
-def mc1_bill_settlement():
+def mc1_settle_bill():
     for bill_key, category in bills.items():
         bill = Bill(category['bill_name'], category['bill_total'], category['bill_outstanding'])
         received = Received(payments['last_payment_id'], payments['available_balance'])
@@ -69,5 +66,4 @@ def mc1_bill_settlement():
             print('No new payment or pending bill')
             continue
 
-    with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
-        json.dump(app_data, app_data_file, indent=4)
+    access_app_data('w', app_data)

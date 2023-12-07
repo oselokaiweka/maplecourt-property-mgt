@@ -1,10 +1,9 @@
 # This script retrieves MC1NSC records from two maplecourt database tables that contain 
 # all business transactions.
-import os, json
 from datetime import datetime, timedelta
-from mysql_pool import POOL
 
-dir_path = os.environ.get('DIR_PATH')
+from src.utils.credentials import pool_connection
+from src.utils.file_paths import access_app_data
 
 # Update rent stopdate according to rent paid by tenant
 update_rentals_stopdate = """
@@ -68,8 +67,7 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
     
     # Retrieve relevant fixed values from mc_app_data.json file
     try:
-        with open(dir_path+"/mc_app_data.json", "r") as app_data_file: # Get app data from json file
-            app_data = json.load(app_data_file)
+        app_data = access_app_data('r')
         mgt_net_summary = app_data['bills']['mgt']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
@@ -121,8 +119,7 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
                 mgt_net_summary['bill_start_date'] = mgt_start.strftime('%Y-%m-%d')
                 mgt_net_summary['bill_stop_date'] = mgt_stop.strftime('%Y-%m-%d')
 
-                with open(dir_path+"/mc_app_data.json", "w") as app_data_file:
-                    json.dump(app_data, app_data_file, indent=4) # Use indent for pretty formatting
+                access_app_data('w', app_data)
             except Exception as e:
                 print('Unable to update app data file\n',e)
 
@@ -141,7 +138,7 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
         print("Connection and cursor closed.\n")
     
 if __name__ == '__main__':
-    pool = POOL
+    pool = pool_connection()
     period_start = '2023-11-01'
     period_stop = None
     mc1_mgt_report(pool, period_start, period_stop)

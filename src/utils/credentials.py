@@ -1,16 +1,20 @@
 import os
+import psutil
+import subprocess
 import json
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from mysql.connector.pooling import MySQLConnectionPool as mysqlconpool
+
+from src.utils import db_pass, sudopass, dir_path
 
 
-
-def get_credentials():
+def get_google_credentials():
     creds  = None
-    dir_path = os.environ.get('DIR_PATH')
     scopes = ["https://www.googleapis.com/auth/gmail.send","https://www.googleapis.com/auth/gmail.readonly"] 
 
     if os.path.exists(dir_path+'/token.json'):
@@ -46,4 +50,37 @@ def get_credentials():
         print("Valid credentials obtained.\n")    
     return creds
 
-CREDS = get_credentials()
+
+
+def start_mysql_service(sudopass):
+    # Checking if mysql process is running already. 
+    # The process_iter() method yields a psutil.process object for each process enabling iteration.
+    for process in psutil.process_iter():
+        if process.name() == "mysqld":
+            print("MySQL process is already running.")
+            return
+        
+    # If the MySQL process is not running then start the service.
+    print("Starting MySQL service...")
+    command = f"echo '{sudopass}' | sudo -S service mysql start"
+    subprocess.run(command, shell=True)
+
+
+def pool_connection():
+
+    start_mysql_service(sudopass)
+    
+    db_config = {
+        "host":"localhost", 
+        "user":"admin", 
+        "password":db_pass, 
+        "database":"maplecourt", 
+        "autocommit":True, 
+        "pool_reset_session": True
+    }
+    pool = mysqlconpool(
+        pool_name="mc_pool", 
+        pool_size=30, 
+        **db_config
+    )
+    return pool
