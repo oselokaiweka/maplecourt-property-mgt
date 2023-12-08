@@ -1,114 +1,117 @@
-#Importing necessary libraries and modules:
+# Importing necessary libraries and modules:
 import time
-import base64
 from datetime import datetime, timedelta
 
-from crontab import CronTab
 import mysql.connector as connector
-from googleapiclient.discovery import build
-from email.mime.text import MIMEText #for creating email messages with text content
-from email.mime.multipart import MIMEMultipart #for creating email messages with text content
 
+from src.utils.comms import send_email
 from src.utils.file_paths import sys_user
-from src.utils.credentials import pool_connection
-from src.utils.credentials import get_google_credentials
+from src.utils.workflow import reschedule_cron_job
+from src.utils.credentials import pool_connection, get_google_credentials
+
+
+def create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total):
+    """
+        Function creates email body for upcoming rent to tenants based on
+        provided parameters. 
+
+    Args:
+        tenant_name (str or varchar): Supplied as variable obtained from database.
+        due_date (date): Supplied as variable obtained from database.
+        rent_amount (decimal): Supplied as variable obtained from database.
+        service_charge (decimal): Supplied as variable obtained from database.
+        payment_total (decimal): rent_amount + service_charge.
+
+    Returns:
+        Variable: Variable initialized with email body multi-line string. 
+    """    
+    body = (
+        f"Dear {tenant_name},\n\n"
+        f"This is a friendly reminder that your tenancy expires on {due_date}.\n"
+        "We are happy with your tenancy and hereby extend you an offer to renew your tenancy as detailed below:\n\n"
+        f"OUTSTANDING RENT:  NGN{rent_amount}\n"
+        f"SERVICE CHARGE:  NGN{service_charge}\n"
+        f"TOTAL:  NGN{payment_total}\n\n"
+        "Kindly respond to this email stating if you will be renewing or not renewing.\n"
+        f"Please note that accepting to renew is accepting to make full payment on or before {due_date}.\n\n"
+        "Failure to respond will be treated as a decline to this offer.\n\n"
+        "Thank you for your prompt response.\n\n"
+        "Thank You and Best Regards,\n"
+        "ADMIN - CHROMETRO NIG\n"
+        "MAPLE COURT APARTMENTS"
+    )
+    return body
 
 
 def send_upcoming_rent_email(pool):
+    """
+        Checks for rent stopdates in rental database table that are today or 3,2 or 1 month from today and
+        sends email notification to the respective tenants from the tenant database table.
 
+    Args:
+        pool (object): mysql connection pool object obtained from imported pool_connection function.
+    """
     # Variables to schedule cron job
-    plus_hour = (datetime.now())+(timedelta(hours=1)) # Current time plus one hour.
-    USER =  sys_user
-    my_cron = CronTab(user=USER)
+    plus_hour = (datetime.now()) + (timedelta(hours=1))  # Current time plus one hour.
+    USER = sys_user
 
     # Query statement to fetch records of upcominng rentals that are 1 or 2 or 3 months away.
-    upcoming_rent_records = """SELECT concat(T.FirstName,' ',T.LastName) as TenantName, 
-    T.Email, U.RentPrice, U.ServiceCharge, R.StopDate, (U.RentPrice + U.ServiceCharge) as Total
-    FROM Units U inner join Tenants T using (UnitID)
-    inner join Rentals R using (TenantID) 
-    where R.StopDate = date_add(curdate(), interval 1 month) 
-    or R.StopDate = date_add(curdate(), interval 2 month)
-    or R.StopDate = date_add(curdate(), interval 3 month)
-    or R.StopDate = curdate();"""
+    upcoming_rent_records = """
+        SELECT concat(T.FirstName,' ',T.LastName) as TenantName, 
+        T.Email, U.RentPrice, U.ServiceCharge, R.StopDate, (U.RentPrice + U.ServiceCharge) as Total
+        FROM Units U inner join Tenants T using (UnitID)
+        inner join Rentals R using (TenantID) 
+        where R.StopDate in (date_add(curdate(), interval 1 month),
+                             date_add(curdate(), interval 2 month),
+                             date_add(curdate(), interval 3 month),
+                             curdate());
+    """
 
     try:
         connection = pool.get_connection()
-        print(f"connected to {pool.pool_name} pool successfully.\n" )
+        print(f"connected to {pool.pool_name} pool successfully.\n")
     except:
         pool.add_connection()
         print(f"Added a new connection to the {pool.pool_name} pool.")
         connection = pool.get_connection()
         print(f"connected to {pool.pool_name} pool successfully.\n")
+
     cursor = connection.cursor()
 
     try:
-        print('Checking for upcoming rent...')
+        print("Checking for upcoming rent...")
         cursor.execute(upcoming_rent_records)
         records = cursor.fetchall()
-        if records:
-            print('Upcoming rent data found.\n')
-            for record in records:
-                tenant_name = record[0]
-                email = record[1]
-                rent_amount = record[2]
-                service_charge = record[3]
-                due_date = record[4]
-                payment_total = record[5]
 
-                #creating email message
-                message = MIMEMultipart()
-                message["Subject"] = "Upcoming Rent Renewal"
-                message["From"] = "admin@chrometronig.com"
-                message["To"] = email
-                body = f"Dear {tenant_name},\n\nThis is a friendly reminder that your tenancy expires on {due_date}.\nWe are happy with your tenancy and hereby extend you an offer to renew your tenancy as detailed below:\n\nOUTSTANDING RENT:  NGN{rent_amount}\nSERVICE CHARGE:  NGN{service_charge}\nTOTAL:  NGN{payment_total}\n\nKindly respond to this email stating if you will be renwing or not renewing.\nPlease note that accepting to renew is accepting to make full payment on or before {due_date}.\n\nFailure to respond will be treated as decline to this offer.\n\nThank you for your prompt response.\n\nThank You and Best Regards, \nADMIN - CHROMETRO NIG\nMAPLE COURT APARTMENTS"
-                message.attach(MIMEText(body, "Plain"))
+        if records:
+            print("Upcoming rent data found.\n")
+            for record in records:
+                tenant_name, email, rent_amount, service_charge, due_date, payment_total = record[:5]
+
+                body = create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total)
                 print(f"Creating email for {tenant_name}...\n")
 
-                #Send email message. Reset cron job to 10am everyday in case it has been modifiied by the exception.
-                try:
-                    CREDS = get_google_credentials
-                    service = build('gmail', 'v1', credentials=CREDS)
+                success = send_email("Upcoming Rent Renewal", "admin@chrometronig.com", email, body, get_google_credentials())
 
-                    create_message = {'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()}
-                    send_message = (service.users().messages().send(userId="me", body=create_message).execute())
+                if success:
                     print(f"Email sent to {tenant_name} successfully!\n")
-
-                    # Reset cron job to 10am everyday.
-                    try:
-                        for job in my_cron:
-                            if job.comment == 'upcoming_rent_email':
-                                job.setall('0 10 * * *')
-                                my_cron.write()
-                                print(f"The '{job.comment}' cron job has been successfully reset as follows:")
-                                print(f"{job}\n")
-                    except Exception as e:
-                        print("Unable to reset cron job to 10am everyday.")
-                    
-                except Exception as e:
-                    print(f"Exception: {str(e)}. cron job is being modified to send email in 1 hour...")
-                    try:
-                        # Modify cron job to cron job to retry script after 1 hour:
-                        for job in my_cron:
-                            if job.comment == 'upcoming_rent_email':
-                                job.setall('{minute} {hour} * * *'.format(minute=plus_hour.minute, hour=plus_hour.hour))
-                                my_cron.write()
-                                print(f"The '{job.comment}' cron job has been successfully modified as follows:")
-                                print(job)
-                    except Exception as e:
-                        print(f"\nUnable to reschedule cron job which means email of today {datetime.date}, if any, was not sent!")
-            time.sleep(1) #A 1 second delay between each iteration of loop to avoid excessive resource usage
+                    reschedule_cron_job(USER, "upcoming_rent_email", "0 10 * * *")
+                else:
+                    print(f"Email not sent to {tenant_name}. Modifying cron job to send email in 1 hour...\n")
+                    reschedule_cron_job(USER, "upcoming_rent_email", f"{plus_hour.minute} {plus_hour.hour} * * *")
+                
+                time.sleep(1)
         else:
-            print('No upcoming rent data found.')
+            print("No upcoming rent found.")
     except connector.Error as error:
         print(error)
     finally:
-        #Close cursor
         cursor.close()
         connection.close()
         print("Connection and cursor closed.\n")
-        
+
 
 if __name__ == "__main__":
-    print(f'PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n')
+    print(f"PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n")
     pool = pool_connection()
-    send_upcoming_rent_email(pool) 
+    send_upcoming_rent_email(pool)

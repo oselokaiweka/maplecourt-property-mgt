@@ -61,7 +61,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     ]
 
     # Add business logo
-    logo = Image(dir_path+'/app_data/static/images/business_logo.png', width=2.1*inch, height=0.8*inch)
+    logo = Image(dir_path+'/resources/static/images/business_logo.png', width=2.1*inch, height=0.8*inch)
     logo.spaceAfter = 5
     logo.hAlign = 'LEFT'
     elements.append(logo)
@@ -214,7 +214,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     elements.append(closing_remark3) 
 
     # Add signature
-    signature = Image(dir_path+'/app_data/static/images/signature.png', width=2.46*inch, height=0.984*inch)
+    signature = Image(dir_path+'/resources/static/images/signature.png', width=2.46*inch, height=0.984*inch)
     signature.spaceAfter = 2
     signature.hAlign = 'LEFT'
     elements.append(signature)
