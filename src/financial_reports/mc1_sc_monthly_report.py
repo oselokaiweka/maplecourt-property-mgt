@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 
 from src.utils.file_paths import access_app_data
-from src.utils.credentials import pool_connection
+from src.utils.credentials import get_cursor
 
 # Query Retrieves records for mc1 service charge expenses from the given start date and loads transformed 
 # data into S.Charge expenses table. Bear in mind constraints prevent duplicate records using multiple cols and StatementID.
@@ -71,15 +71,7 @@ from maplecourt.MC1sc_expenses where date between %s and %s;
 
 def mc1_sc_report(pool, sc_start):
     # Obtain pool connection if available or add connection then obtain pool connection.
-    try:
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully\n')
-    except:
-        pool.add_connection()
-        print(f'Added a new connection to {pool.pool_name} pool\n')
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully')
-    cursor = connection.cursor()
+    connection, cursor = get_cursor(pool)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
     print('Starting MySQL event scheduler\n')
@@ -159,8 +151,3 @@ def mc1_sc_report(pool, sc_start):
         cursor.close()
         connection.close()
         print("Connection and cursor closed.\n")
-
-if __name__ == '__main__':
-    pool = pool_connection()
-    start_date = '2023-11-01'
-    mc1_sc_report(pool, start_date)

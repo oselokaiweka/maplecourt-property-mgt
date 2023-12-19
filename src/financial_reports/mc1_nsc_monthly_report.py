@@ -5,18 +5,11 @@ from datetime import datetime, timedelta
 from math import floor
 
 from src.utils.file_paths import access_app_data
+from src.utils.credentials import get_cursor
 
 def mc1_nsc_report(pool, nsc_start, filters):
     # Obtain pool connection if available or add connection then obtain pool connection.
-    try:
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully\n')
-    except:
-        pool.add_connection()
-        print(f'Added a new connection to {pool.pool_name} pool\n')
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully')
-    cursor = connection.cursor()
+    connection, cursor = get_cursor(pool)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
     print('Starting MySQL event scheduler\n')

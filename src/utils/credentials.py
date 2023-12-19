@@ -104,3 +104,26 @@ def pool_connection():
     }
     pool = mysqlconpool(pool_name="mc_pool", pool_size=30, **db_config)
     return pool
+
+
+def get_cursor(pool):
+    """
+        returns mysql connection and cursor objects
+
+    Args:
+        pool (object/variable): mysql connection pool object
+
+    Returns:
+        connection, cursor(objects): mysql pool connection and cursor objects
+    """    
+    try:
+        connection = pool.get_connection()
+        print(f'Connected to {pool.pool_name} pool successfully\n')
+    except:
+        pool.add_connection()
+        print(f'Added a new connection to {pool.pool_name} pool\n')
+        connection = pool.get_connection()
+        print(f'Connected to {pool.pool_name} pool successfully')
+    cursor = connection.cursor()
+    return connection, cursor
+
