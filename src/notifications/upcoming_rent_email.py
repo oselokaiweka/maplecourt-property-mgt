@@ -12,8 +12,8 @@ from src.utils.credentials import pool_connection, get_google_credentials
 
 def create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total):
     """
-        Function creates email body for upcoming rent to tenants based on
-        provided parameters. 
+    Function creates email body for upcoming rent to tenants based on
+    provided parameters. 
 
     Args:
         tenant_name (str or varchar): Supplied as variable obtained from database.
@@ -45,8 +45,8 @@ def create_email_body(tenant_name, due_date, rent_amount, service_charge, paymen
 
 def send_upcoming_rent_email(pool):
     """
-        Checks for rent stopdates in rental database table that are today or 3,2 or 1 month from today and
-        sends email notification to the respective tenants from the tenant database table.
+    Checks for rent stopdates in rental database table that are today or 3,2 or 1 month from today and
+    sends email notification to the respective tenants from the tenant database table.
 
     Args:
         pool (object): mysql connection pool object obtained from imported pool_connection function.

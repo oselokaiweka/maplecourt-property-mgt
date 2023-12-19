@@ -6,8 +6,8 @@ from email.mime.multipart import MIMEMultipart
 
 def send_email(subject, sender, recipient, body, credentials):
     """
-        Function sends email based on the provided parameters through
-        organizations email account. 
+    Function sends email based on the provided parameters through
+    organizations email account. 
 
     Args:
         subject (str): Email subject,

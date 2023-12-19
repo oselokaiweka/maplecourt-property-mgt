@@ -9,7 +9,7 @@ db_pass = os.environ.get("DB_PASS")
 
 def access_app_data(mode, *args):
     """
-        Function to either load or dump data from or to json file (mc_app_data.json).
+    Function to either load or dump data from or to json file (mc_app_data.json).
 
     Args:
         'r'/'w' (str): Accepts only either 'r' for json.load or 'w' for json.dump.
@@ -17,14 +17,11 @@ def access_app_data(mode, *args):
     Returns:
         dictionary: app_data dictionary.
     """    
-    with open(
-        dir_path + "/resources/dynamic/mc_app_data.json", mode
-    ) as app_data_file:  # Get app data from json file
+    if mode not in ('r','w'):
+        raise ValueError("Error, Mode accepts 'r' and 'w' only")
+    
+    with open(dir_path + "/resources/dynamic/mc_app_data.json", mode) as app_data_file: 
         if mode == "r":
-            app_data = json.load(app_data_file)
-            return app_data
+            return json.load(app_data_file)
         elif mode == "w":
-            app_data = args[0]
-            json.dump(app_data, app_data_file, indent=4)  # Use indent for pretty format
-        else:
-            print("Error, Mode accepts 'r' and 'w' only")
+            json.dump(args[0], app_data_file, indent=4) # args[0] means the first in *args. 
