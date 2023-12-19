@@ -3,7 +3,7 @@ from crontab import CronTab
 
 def reschedule_cron_job(sys_user, job_comment, schedule):
     """
-        Function sets schedule for an exisitng cronjob.
+    Function sets schedule for an exisitng cronjob.
 
     Args:
         sys_user (variable): os session user name,

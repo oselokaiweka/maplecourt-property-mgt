@@ -15,8 +15,8 @@ from src.utils import db_pass, sudopass, dir_path
 
 def get_google_credentials():
     """
-        Obtains credentials for connection to google api in
-        order to read and send emails.
+    Obtains credentials for connection to google api in
+    order to read and send emails.
 
     Returns:
         creds: valid credentials object
