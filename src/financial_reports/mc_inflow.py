@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from src.utils.file_paths import access_app_data
-from src.utils.credentials import pool_connection
+from src.utils.credentials import get_cursor
     
 
 # Using insert into select to retrieve relevant records from Statement_biz to load into MC_inflow.
@@ -85,16 +85,18 @@ where i.Date between %s and %s;
 """
 
 def get_landlord_inflow(pool, inf_start):
+    """
+        Function inserts into MC_inflow table with relevant records from Statement_biz table, 
+        updates columns of same table according to the reference codes, retrieves relevant records
+        and posts to mc_app_data.json for management report processing.
+
+    Args:
+        pool (object/variable): mysql connection pool object
+        inf_start (date str): start date for the records to retrieved and processed.
+    """    
     # Obtain pool connection if available or add connection then obtain pool connection.
-    try:
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully\n')
-    except:
-        pool.add_connection()
-        print(f'Added a new connection to {pool.pool_name} pool\n')
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully')
-    cursor = connection.cursor()
+    # Includes the connection object so that the connection can be closed after operation.
+    connection, cursor = get_cursor(pool)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
     print('Starting MySQL event scheduler\n')
@@ -128,7 +130,7 @@ def get_landlord_inflow(pool, inf_start):
                 payments_data['available_balance'] = round(sum(float(record[4]) for record in MC1L1_payments) + available_balance, 2)
                 payments_data['date_processed'] = datetime.now().strftime('%Y-%m-%d [%H:%M:%S]')
     
-                access_app_data('w', app_data)
+                access_app_data('w', app_data) # See file_paths.py
             else:
                 pass
         else:
@@ -141,9 +143,3 @@ def get_landlord_inflow(pool, inf_start):
         cursor.close()
         connection.close()
         print("Connection and cursor closed.\n")
-
-
-if __name__ == '__main__':
-    pool = pool_connection()
-    inf_start = '2023-11-01'
-    get_landlord_inflow(pool, inf_start)

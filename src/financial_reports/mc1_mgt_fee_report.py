@@ -2,7 +2,7 @@
 # all business transactions.
 from datetime import datetime, timedelta
 
-from src.utils.credentials import pool_connection
+from src.utils.credentials import get_cursor
 from src.utils.file_paths import access_app_data
 
 # Update rent stopdate according to rent paid by tenant
@@ -51,15 +51,7 @@ def days_in_year_function(mgt_start):
 
 def mc1_mgt_report(pool, mgt_start, mgt_stop):
     # Obtain pool connection if available or add connection then obtain pool connection.
-    try:
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully\n')
-    except:
-        pool.add_connection()
-        print(f'Added a new connection to {pool.pool_name} pool\n')
-        connection = pool.get_connection()
-        print(f'Connected to {pool.pool_name} pool successfully')
-    cursor = connection.cursor()
+    connection, cursor = get_cursor(pool)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
     cursor.execute("SET GLOBAL event_scheduler = ON;")
@@ -136,9 +128,3 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
         cursor.close()
         connection.close()
         print("Connection and cursor closed.\n")
-    
-if __name__ == '__main__':
-    pool = pool_connection()
-    period_start = '2023-11-01'
-    period_stop = None
-    mc1_mgt_report(pool, period_start, period_stop)
