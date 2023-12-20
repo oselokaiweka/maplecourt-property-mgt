@@ -1,112 +1,75 @@
 #Importing necessary libraries and modules:
 import sys
-import base64
-import decimal
+from decimal import Decimal
 from datetime import datetime, timedelta
 
-from crontab import CronTab
-from bs4 import BeautifulSoup
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-
 from src.utils.file_paths import sys_user, access_app_data
-from src.utils.credentials import pool_connection, get_google_credentials
+from src.utils.workflow import reschedule_cron_job
+from src.utils.credentials import pool_connection, get_cursor
+from src.utils.comms import read_email
 
-def read_mc_transaction(sender, start_date, stop_date, subject):
+def extract_mc_transaction(sender, start_date, stop_date, subject):
+    """
+        Retrieves records of transactions pertaining to maple court property management
+        from email transaction notifications. 
+
+    Args:
+        sender (str): sender title
+        start_date (date str): date from which retrieval begins
+        stop_date (date str): date from which retrieval ends
+        subject (str): email subject
+
+    Returns:
+        records (tuple): Comprises of date-time, alert type, amount, reference and current balance. 
+    """    
     try:
-        print('Obtaining credential to read transaction data...\n')
-        CREDS = get_google_credentials()
-        service = build('gmail', 'v1', credentials=CREDS)
-        print('Checking for property management expenses data...\n')
+        email_data = read_email(sender, start_date, stop_date, subject)
 
-        query = f"from:{sender} after:{start_date} before:{stop_date} subject:{subject}"
-        result = service.users().messages().list(userId='me',q=query).execute()
-        messages = result.get('messages')
+        records = []
 
-        records = [] #List to coontain entire insert values as a list of tuples for insert. 
+        for email_entry in email_data:
+            subject = email_entry['subject']
+            body = email_entry['email_body']
 
-        # Iterate through mail between the specified date range to obtain email subject and body. 
-        if messages:
-            print('Extracting detected records')
-            for message in messages:
-                msg = service.users().messages().get(userId='me', id=message['id'], format='full').execute()
-                payload = msg['payload']
-                headers = payload['headers']
-                for header in headers:
-                    name = header['name']
-                    value = header['value']        
-                    if name == 'Subject':
-                        subject = value
+            try:
+                amount = Decimal(subject[5][:-1].replace(',',''))
+                alert_type = subject[3][1:-1]              
+                date_time = datetime.strptime(body[0]+' '+body[1], '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+                reference = ' '.join(body[body.index('Remarks')+ 1: body.index('Time')])
+                current_bal = Decimal(body[body.index('Current')+4].replace(',',''))
+            except Exception as e:
+                print(f"Error extracting email data with subject: {subject}, error: {e}")
+
+            records.append((date_time , alert_type , amount , reference , current_bal))
+
+        records = sorted(records, reverse = False) #Sorting the record so it inserts from the oldest to the newest.
+        print('Records Extracted, Transformed and ready for Loading...\n')
+        
+        return records
                 
-                # Subject_list is email subject converted to list in order to retrieve amount and alert type.
-                subject_list = subject.split()  
-
-                if 'parts' in payload:
-                    for part in payload['parts']:
-                        if 'data' in part['body']:
-                            data = part['body']['data']
-                            break
-                else:
-                    if 'data' in payload['body']:
-                        data = payload['body']['data']
-                    else:
-                        continue # skip this message if it doesn't have base64-encoded data
-            
-                body = base64.urlsafe_b64decode(data).decode('utf-8')
-                soup = BeautifulSoup(body,'html.parser')
-                email_body = soup.get_text(separator=' ').strip()
-                email_body = email_body.split()
-
-                amount = (subject_list[5][:-1]).replace(',','')
-                amount = decimal.Decimal(amount)
-
-                alert_type = (subject_list[3][1:-1])
-                
-                date_time = (email_body[0]+' '+email_body[1])
-                date_time = datetime.strptime(date_time, '%d-%m-%Y %H:%M')
-                date_time = date_time.strftime('%Y-%m-%d %H:%M:%S')
-
-                reference = ' '.join(email_body[email_body.index('Remarks')+ 1: email_body.index('Time')])
-
-                current_bal = (email_body[email_body.index('Current')+4]).replace(',','')
-                current_bal = decimal.Decimal(current_bal)
-
-                record = (date_time , alert_type , amount , reference , current_bal)
-                records.append(record)
-
-            records = sorted(records, reverse = False) #Sorting the record so it inserts from the oldest to the newest.
-            print('Records Extracted, Transformed and ready for Loading...\n')
-            return records        
-        else:
-            print('No new transaction data present.')
-            sys.exit()       
-    except HttpError as e:
-        print(f'Encountered an error, {e}\n')
-        try:
-            # Modify cron job to cron job to retry script after 1 hour:
-            for job in my_cron:
-                if job.comment == 'upcoming_rent_email':
-                    job.setall('{minute} {hour} * * *'.format(minute=plus_hour.minute, hour=plus_hour.hour))
-                    my_cron.write()
-                    print(f"The '{job.comment}' cron job has been successfully modified as follows:")
-                    print(job)
-        except Exception as e:
-            print(f"\nUnable to reschedule cron job which means email of today {datetime.date}, if any, was not sent!")
+    except Exception as e:
+        print(e)
+        # Reschedule cron job to retry script after 1 hour:
+        SYS_USER = sys_user
+        job_comment = 'upcoming_rent_email'
+        schedule = '{minute} {hour} * * *'.format(minute=plus_hour.minute, hour=plus_hour.hour)
+        reschedule_cron_job(SYS_USER, job_comment, schedule)
         sys.exit()
 
 
-def data_insert(records, pool):
+def data_insert(records):
+    """
+        Inserts records of transactions pertaining to maple court property management
+        as retrieved from email transaction notifications by extract_mc_transaction() and 
+        loads data into Cashflow table in the mysql aplecourt database.
+
+    Args:
+        records (tuple): Extracted email records
+    """    
     if records:
         try:
-            try:
-                connection = pool.get_connection()
-                print(f"connected to {pool.pool_name} pool successfully.\n" )
-            except:
-                pool.add_connection()
-                print(f"Added a new connection to the {pool.pool_name} pool.")
-                connection = pool.get_connection()
-                print(f"connected to {pool.pool_name} pool successfully.\n")
-            cursor = connection.cursor()
+            pool = pool_connection()
+            connection, cursor = get_cursor(pool)
 
             print('Starting DB event scheduler...')
             cursor.execute("SET GLOBAL event_scheduler =  ON;")
@@ -129,6 +92,7 @@ def data_insert(records, pool):
                 , 'VIA GTWORLD', ' ')
             , 'VIA GAPSLITE', ' '),
             %s)"""
+            
             insert_count = 0
             for record in records:
                 try:
@@ -136,6 +100,7 @@ def data_insert(records, pool):
                     insert_count += 1
                 except Exception as e:
                     print(e.args[1])
+
             connection.commit()
             cursor.close()
             connection.close()
@@ -151,31 +116,20 @@ def data_insert(records, pool):
 
         except Exception as e:
             print(e)
-            try:
-                # Modify cron job to cron job to retry script after 1 hour:
-                for job in my_cron:
-                    if job.comment == 'expenses_daily_ETL':
-                        job.setall('{minute} {hour} * * *'.format(minute=plus_hour.minute, hour=plus_hour.hour))
-                        my_cron.write()
-                        print(f"The '{job.comment}' cron job has been successfully modified as follows:")
-                        print(job)
-            except Exception as e:
-                print(f"\nUnable to reschedule cron job which means email of today {datetime.date}, if any, was not sent!")
-            print()
+            # Reschedule cron job to retry script after 1 hour:
+            SYS_USER = sys_user
+            job_comment = 'expenses_daily_ETL'
+            schedule = '{minute} {hour} * * *'.format(minute=plus_hour.minute, hour=plus_hour.hour)
+            reschedule_cron_job(SYS_USER, job_comment, schedule)
             sys.exit()
     else:
         print('Insert process terminated - No new record for insert.\n')
     
-    # Reset cron job to 11am everyday.
-    try:
-        for job in my_cron:
-            if job.comment == 'expenses_daily_ETL':
-                job.setall('0 11 * * *')
-                my_cron.write()
-                print(f"The '{job.comment}' cron job has been successfully reset as follows:")
-                print(f"{job}\n")
-    except Exception as e:
-        print("Unable to reset cron job to 10am everyday.")
+    # Reschedule cron job to 11am everyday.
+    SYS_USER = sys_user
+    job_comment = 'expenses_daily_ETL'
+    schedule = '0 11 * * *'
+    reschedule_cron_job(SYS_USER, job_comment, schedule)
     
 
 if __name__ == "__main__":
@@ -183,23 +137,22 @@ if __name__ == "__main__":
     
     # Variables to schedule cron job
     plus_hour = (datetime.now())+(timedelta(hours=1)) # Current time plus one hour.
-    USER = sys_user
-    my_cron = CronTab(user=USER)
 
     try:
-        # Set stop_date arguement = now then read start date from file.
+        # Set stop_date arguement to now.
         stop_date = datetime.now().strftime("%Y/%m/%d")
         print(f'Stop date is set for: {stop_date}\n')
+
+        # Read start date from mc_app_data.json
         app_data = access_app_data('r')
         start_date = app_data['expenses_daily_etl']['start_date']
         print(f'Start date is set for: {start_date}\n')
 
-        # Execute data extraction and transformation then return value into data insert arguement
-        records = read_mc_transaction('GeNS@gtbank.com', start_date, stop_date, 'GeNS Transaction *')
+        # Execute data extraction and transformation.
+        records = extract_mc_transaction('GeNS@gtbank.com', start_date, stop_date, 'GeNS Transaction *')
 
         #  Execute data insert
-        pool = pool_connection()
-        data_insert(records, pool)
+        data_insert(records)
 
     except Exception as e:
         print(e)

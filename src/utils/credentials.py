@@ -7,7 +7,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from mysql.connector.pooling import MySQLConnectionPool as mysqlconpool
 
 from src.utils import db_pass, sudopass, dir_path
@@ -15,11 +14,11 @@ from src.utils import db_pass, sudopass, dir_path
 
 def get_google_credentials():
     """
-    Obtains credentials for connection to google api in
-    order to read and send emails.
+    Obtains credentials then initializes the service object used
+    for connecting to google api in order to read and send emails.
 
     Returns:
-        creds: valid credentials object
+        service (type: object): usage service = build('gmail', 'v1',cre)
     """
     creds = None
     scopes = [
@@ -60,7 +59,8 @@ def get_google_credentials():
 
     else:
         print("Valid credentials obtained.\n")
-    return creds
+    service = build('gmail', 'v1', credentials=creds)
+    return service
 
 
 def start_mysql_service(sudopass):
