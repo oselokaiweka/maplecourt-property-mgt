@@ -12,7 +12,7 @@ import re
 import pandas as pd 
 import mysql.connector as connector
 
-from src.utils.credentials import pool_connection
+from src.utils.credentials import pool_connection, get_cursor
 
 # Defining the file path for stdout and stderr redirection
 stdout_file = "/home/oseloka/chrometro-expenses-data/company_statement_etl_stdout.txt"
@@ -67,17 +67,10 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
 
 
     # DATA LOADING
-    def data_loading(pool, df, file):
+    def data_loading(df, file):
         # Obtain pool connection or adds connection if pool is exhausted 
-        try:
-            connection = pool.get_connection()
-            print(f"connected to {pool.pool_name} pool successfully.\n" )
-        except:
-            pool.add_connection()
-            print(f"Added a new connection to the {pool.pool_name} pool.")
-            connection = pool.get_connection()
-            print(f"connected to {pool.pool_name} pool successfully.\n")
-        cursor = connection.cursor()
+        pool = pool_connection()
+        connection, cursor = get_cursor(pool)
 
         try:
             # Starts MySQL event scheduler so that any triggers affected by operation will be executed.
@@ -94,6 +87,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
                     VALUES (%s, %s, %s, %s, %s);"""
         
                 insert_count = 0
+                duplicate_count = 0
                 for row in df.itertuples(index=False, name=None): 
                     try:
                         if pd.isnull(row[1]):
@@ -102,6 +96,12 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
                         elif pd.isnull(row[2]):
                             cursor.execute(insert_query, (row[0], 'Debit', row[1], row[4], row[3]))
                             insert_count +=1
+                    except connector.IntegrityError as e:
+                        if "Duplicate entry" in str(e):
+                            duplicate_count += 1
+                            print(f"Duplicate entry: {row} - {e}")
+                        else:
+                            print(f"Error inserting record: {row} - {e}")
                     except Exception as e:
                         print(e.args[1]) # args[1] prints only the error message without the error number.
 
@@ -128,8 +128,7 @@ with open(stdout_file, 'w') as sys.stdout, open(stderr_file, 'w') as sys.stderr:
         df = data_transformation(csv_file)
 
         # Execute data insert
-        pool = pool_connection()
-        data_loading(pool, df, csv_file)
+        data_loading(df, csv_file)
 
         print(f'PROCESS DURATION.............................................................................: {(datetime.now()-start_timer).total_seconds()}\n')
     
