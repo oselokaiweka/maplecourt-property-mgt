@@ -1,0 +1,25 @@
+PROCESS START TIME...........................................................................: 2023-12-24 18:06:54.622563
+
+Read mc_config.ini successful
+Successfully encoded and written 320 lines output file.
+Applying transformation to data
+Required columns successfully captured
+Date formatting successful
+decimal conversion successful
+Reference formatting successful
+Data transformation completed successfully
+Initiating data loading
+MySQL process is already running.
+MySQL connection pool created.
+Connected to mc_pool pool successfully
+
+Event scheduler is started.
+
+Inserting records into table...
+ETL complete!
+Inserted 319 records.
+Skipped 0 duplicate entries.
+File /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/data/priv_statement_utf-8.csv deleted.
+Database connection and cursor are closed
+PROCESS DURATION.............................................................................: 3.834082
+

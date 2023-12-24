@@ -1,10 +1,10 @@
 from crontab import CronTab
 
 
-def reschedule_cron_job(sys_user, job_comment, schedule):
+def reschedule_cron_job(sys_user, job_comment, schedule, logger):
     """
-    Function sets schedule for an exisitng cronjob.
-
+    Summary:
+        Function sets schedule for an exisitng cronjob.
     Args:
         sys_user (variable): os session user name,
         job_comment (str): comment attached to cronjob details as tag name.
@@ -16,7 +16,6 @@ def reschedule_cron_job(sys_user, job_comment, schedule):
             if job.comment == job_comment:
                 job.setall(schedule)
                 cron.write()
-                print(f"The '{job.comment}' cron job has been successfully reset as follows:")
-                print(f"{job}\n")
+                logger.info(f"The '{job.comment}' cron job has been successfully reset as follows:\n{job}")
     except Exception as e:
-        print(f"Unable to reset cron job to {schedule}. {str(e)}")
+        logger.error(f"Unable to reset cron job to {schedule}. {str(e)}")
