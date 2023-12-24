@@ -1,13 +1,15 @@
 # Importing necessary libraries and modules:
-import time
 from datetime import datetime, timedelta
 
 import mysql.connector as connector
 
 from src.utils.comms import send_email
-from src.utils.file_paths import sys_user
+from src.utils.my_logging import mc_logger
+from src.utils.file_paths import sys_user, read_config
 from src.utils.workflow import reschedule_cron_job
-from src.utils.credentials import pool_connection, get_google_credentials
+from src.utils.credentials import pool_connection, get_cursor, get_google_credentials
+
+logger = mc_logger(log_name='rent_notice_log', log_level='INFO', log_file='rent_notice.log')
 
 
 def create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total):
@@ -24,7 +26,7 @@ def create_email_body(tenant_name, due_date, rent_amount, service_charge, paymen
 
     Returns:
         Variable: Variable initialized with email body multi-line string. 
-    """    
+    """  
     body = (
         f"Dear {tenant_name},\n\n"
         f"This is a friendly reminder that your tenancy expires on {due_date}.\n"
@@ -40,10 +42,12 @@ def create_email_body(tenant_name, due_date, rent_amount, service_charge, paymen
         "ADMIN - CHROMETRO NIG\n"
         "MAPLE COURT APARTMENTS"
     )
+
+    logger.info("Email body created")  
     return body
 
 
-def send_upcoming_rent_email(pool):
+def send_upcoming_rent_email():
     """
     Checks for rent stopdates in rental database table that are today or 3,2 or 1 month from today and
     sends email notification to the respective tenants from the tenant database table.
@@ -61,57 +65,59 @@ def send_upcoming_rent_email(pool):
         T.Email, U.RentPrice, U.ServiceCharge, R.StopDate, (U.RentPrice + U.ServiceCharge) as Total
         FROM Units U inner join Tenants T using (UnitID)
         inner join Rentals R using (TenantID) 
-        where R.StopDate in (date_add(curdate(), interval 1 month),
-                             date_add(curdate(), interval 2 month),
-                             date_add(curdate(), interval 3 month),
-                             curdate());
+        where R.StopDate in (
+            date_add(curdate(), interval 1 month),
+            date_add(curdate(), interval 2 month),
+            date_add(curdate(), interval 3 month),
+            curdate()
+        );
     """
 
     try:
-        connection = pool.get_connection()
-        print(f"connected to {pool.pool_name} pool successfully.\n")
-    except:
-        pool.add_connection()
-        print(f"Added a new connection to the {pool.pool_name} pool.")
-        connection = pool.get_connection()
-        print(f"connected to {pool.pool_name} pool successfully.\n")
+        pool = pool_connection(logger)
+        connection, cursor = get_cursor(pool, logger)
 
-    cursor = connection.cursor()
+        config = read_config(logger)
+        app_email = config.get('Email', 'app_email_address')
 
-    try:
-        print("Checking for upcoming rent...")
+        logger.info("Checking for upcoming rent...")
         cursor.execute(upcoming_rent_records)
         records = cursor.fetchall()
 
         if records:
-            print("Upcoming rent data found.\n")
+            logger.info("Upcoming rent data found.\n")
             for record in records:
                 tenant_name, email, rent_amount, service_charge, due_date, payment_total = record[:5]
 
                 body = create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total)
-                print(f"Creating email for {tenant_name}...\n")
-
-                success = send_email("Upcoming Rent Renewal", "admin@chrometronig.com", email, body, get_google_credentials())
+                
+                logger.info(f"Creating email for {tenant_name}...\n")
+                success = send_email("Upcoming Rent Renewal", app_email, email, body, get_google_credentials(logger))
 
                 if success:
-                    print(f"Email sent to {tenant_name} successfully!\n")
-                    reschedule_cron_job(USER, "upcoming_rent_email", "0 10 * * *")
+                    logger.info(f"Email sent to {tenant_name} successfully!\n")
+                    reschedule_cron_job(USER, "rent_notice_email", "0 10 * * *", logger)
                 else:
-                    print(f"Email not sent to {tenant_name}. Modifying cron job to send email in 1 hour...\n")
-                    reschedule_cron_job(USER, "upcoming_rent_email", f"{plus_hour.minute} {plus_hour.hour} * * *")
-                
-                time.sleep(1)
+                    logger.warning(f"Email not sent to {tenant_name}. Modifying cron job to send email in 1 hour...\n")
+                    reschedule_cron_job(USER, "rent_notice_email", f"{plus_hour.minute} {plus_hour.hour} * * *", logger)
+
         else:
-            print("No upcoming rent found.")
+            logger.info("No upcoming rent found.")
+
     except connector.Error as error:
-        print(error)
+        logger.error(f"Unable to retrieve rental details from database:\n{error}")
+
+    except Exception as e:
+        logger.exception(f"An error occured", exc_info=True)
+
     finally:
         cursor.close()
         connection.close()
-        print("Connection and cursor closed.\n")
+        logger.info("Connection and cursor closed.\n")
 
 
 if __name__ == "__main__":
-    print(f"PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n")
-    pool = pool_connection()
-    send_upcoming_rent_email(pool)
+    
+    logger.info(f"PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n")
+
+    send_upcoming_rent_email()

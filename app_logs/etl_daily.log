@@ -1,0 +1,35 @@
+PROCESS RUN TIMESTAMP...........................................................................: 2023-12-24 19:12:51.794556
+
+Stop date is set for: 2023/12/24
+
+Read mc_config.ini successful
+Loading app data from JSON file.
+Start date is set for: 2023/12/20
+
+Read mc_config.ini successful
+Valid credentials obtained.
+
+Retrieving email(s)
+Retrieved 3 email(s)
+Records Extracted, Transformed and ready for Loading...
+
+Inserting records into maplecourt.Cashflow db table...
+MySQL process is already running.
+MySQL connection pool created.
+Connected to mc_pool pool successfully
+
+Event scheduler is started
+
+Error inserting record: 1062 (23000): Duplicate entry '2023-12-21 01:21:00-:   PRIV   FROM CHROMETRO NIGERIA LTD TO IWE' for key 'Cashflow.unique_record'
+Error inserting record: 1062 (23000): Duplicate entry '2023-12-21 08:22:00-:     PRIV TO MERRYBELLYS LTD/1 /26.875/ -58' for key 'Cashflow.unique_record'
+Error inserting record: 1062 (23000): Duplicate entry '2023-12-21 09:41:00-:   PRIV   FROM CHROMETRO NIGERIA LTD TO IWE' for key 'Cashflow.unique_record'
+ETL complete!
+Total of 0 records where successfully inserted
+
+Read mc_config.ini successful
+Writing app data to JSON file.
+App data written to JSON file.
+Next ETL operation has been scheduled for tomorrow.
+Database cursor and connection are closed
+The 'etl_daily' cron job has been successfully reset as follows:
+0 11 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily

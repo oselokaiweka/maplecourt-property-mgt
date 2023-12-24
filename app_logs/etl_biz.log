@@ -1,0 +1,23 @@
+PROCESS START TIME...........................................................................: 2023-12-24 18:17:00.204730
+
+Read mc_config.ini successful
+Applying transformation to data
+Required columns successfully captured
+Date formatting successful
+decimal conversion successful
+Reference formatting successful
+Data transformation completed successfully
+Initiating data loading
+MySQL process is already running.
+MySQL connection pool created.
+Connected to mc_pool pool successfully
+
+Event scheduler is started.
+
+Inserting records into table...
+ETL complete!
+Inserted 94 records.
+Skipped 0 duplicate entries.
+Database connection and cursor are closed
+PROCESS DURATION.............................................................................: 1.287502
+
