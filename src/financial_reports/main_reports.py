@@ -2,7 +2,7 @@ from src.utils.credentials import pool_connection
 from src.utils.my_logging import mc_logger
 from src.financial_reports import *
 
-logger = mc_logger(log_name=main_report_log, log_level='INFO', log_file=main_report.log)
+logger = mc_logger(log_name='main_report_log', log_level='INFO', log_file='main_report.log')
 
 if __name__ == '__main__':
     logger.info("Processing mc_1 financial report.")
