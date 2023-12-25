@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 
 from src.utils.file_paths import access_app_data
 from src.utils.credentials import get_cursor
+from src.utils.my_logging import mc_logger
+
+logger = mc_logger(log_name='sc_report_log', log_level='INFO', log_file='sc_report.log')
 
 # Query Retrieves records for mc1 service charge expenses from the given start date and loads transformed 
 # data into S.Charge expenses table. Bear in mind constraints prevent duplicate records using multiple cols and StatementID.
@@ -71,12 +74,11 @@ from maplecourt.MC1sc_expenses where date between %s and %s;
 
 def mc1_sc_report(pool, sc_start):
     # Obtain pool connection if available or add connection then obtain pool connection.
-    connection, cursor = get_cursor(pool)
+    connection, cursor = get_cursor(pool, logger)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
-    print('Starting MySQL event scheduler\n')
     cursor.execute("SET GLOBAL event_scheduler = ON;")
-    print('Event scheduler is started')
+    logger.info("Event scheduler is started")
 
     sc_start =  datetime.strptime(sc_start, '%Y-%m-%d') if sc_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
     sc_stop = datetime(sc_start.year + (1 if sc_start.month == 12 else 0), (sc_start.month + 1) % 12 if sc_start.month != 11 else 12, 1) - timedelta(days=1) # Calculates month end
@@ -84,11 +86,11 @@ def mc1_sc_report(pool, sc_start):
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:
-        app_data = access_app_data('r')
+        app_data = access_app_data('r', logger)
         sc_net_summary = app_data['bills']['sc']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
-        print('Unable to load app data\n',e)
+        logger.exception("Unable to load app data.")
 
     try:
         cursor.execute(load_new_service_charge_data, (sc_start, sc_stop, sc_start, sc_stop))
@@ -96,13 +98,14 @@ def mc1_sc_report(pool, sc_start):
         records = cursor.fetchall()
 
         if records:
+            logger.info("Records retrieved and ready for processing.")
             serial_num = 0
             columns = cursor.column_names
             subtotal = sum(record[3] for record in records) 
             sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
 
-            print(f'S/N  :  {columns[0]:5}  :  {columns[1]:10}  :  {columns[2]:45}  :  {columns[3]}')
-            print('-----------------------------------------------------------------------------------------------')
+            logger.info(f'S/N  :  {columns[0]:5}  :  {columns[1]:10}  :  {columns[2]:45}  :  {columns[3]}')
+            logger.info('-----------------------------------------------------------------------------------------------')
             for record in records:
                 # Format date to display date only
                 id = 'S0' + str(record[0])
@@ -112,16 +115,16 @@ def mc1_sc_report(pool, sc_start):
                 sc_table_data.append([serial_num, id, date, description, amount])
                 serial_num += 1
                 # Print statement for quick analysis.
-                print(f"{serial_num:3}  :  {id:5}  :  {date:10}  :  {description:45}  :  {record[3]:-10,.2f}")
-            print('-----------------------------------------------------------------------------------------------')
-            print(f"{'Subtotal':78}  :  {subtotal:-10,.2f}")
+                logger.info(f"{serial_num:3}  :  {id:5}  :  {date:10}  :  {description:45}  :  {record[3]:-10,.2f}")
+            logger.info('-----------------------------------------------------------------------------------------------')
+            logger.info(f"{'Subtotal':78}  :  {subtotal:-10,.2f}")
             
             subtotal = float(subtotal)
             management_fee = subtotal * mgt_fee_percent / 100
             grand_total = subtotal + management_fee
 
-            print(f"{'Management fee':78}  :  {management_fee:-10,.2f}")
-            print(f"{'Grand total':78}  :  {grand_total:-10,.2f}")
+            logger.info(f"{'Management fee':78}  :  {management_fee:-10,.2f}")
+            logger.info(f"{'Grand total':78}  :  {grand_total:-10,.2f}")
             
             try:
                 # Update json file
@@ -129,25 +132,26 @@ def mc1_sc_report(pool, sc_start):
                 sc_net_summary['bill_start_date'] = sc_start.strftime('%Y-%m-%d')
                 sc_net_summary['bill_stop_date'] = sc_stop.strftime('%Y-%m-%d')
 
-                access_app_data('w', app_data)
+                access_app_data('w', logger, app_data)
             except Exception as e:
-                print('Unable to update app data file\n',e)
+                logger.exception("Unable to dump app data to file.")
             
             sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
             return sc_table_data, sc_summary_dict
         else:
-            print('No records retrieved.\n')
+            logger.info('No records retrieved.\n')
             sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
             subtotal = 0.0
             management_fee = 0.0
             grand_total = 0.0
             sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
+            
             return sc_table_data, sc_summary_dict
         
     except Exception as e:
-        print(e)
+        logger.exception("An error occured while processing sc report: {e}")
     finally:
         #Close cursor
         cursor.close()
         connection.close()
-        print("Connection and cursor closed.\n")
+        logger.info("Connection and cursor closed.\n")

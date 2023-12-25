@@ -6,15 +6,17 @@ from math import floor
 
 from src.utils.file_paths import access_app_data
 from src.utils.credentials import get_cursor
+from src.utils.my_logging import mc_logger
+
+logger = mc_logger(log_name='nsc_report_log', log_level='INFO', log_file='nsc_report.log')
 
 def mc1_nsc_report(pool, nsc_start, filters):
     # Obtain pool connection if available or add connection then obtain pool connection.
-    connection, cursor = get_cursor(pool)
+    connection, cursor = get_cursor(pool, logger)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
-    print('Starting MySQL event scheduler\n')
     cursor.execute("SET GLOBAL event_scheduler = ON;")
-    print('Event scheduler is started')
+    logger.info("Event scheduler is started")
 
     # Query statement that retrieves records for mc1 expenses for the given start 
     # and end date from two db tables.
@@ -81,11 +83,11 @@ def mc1_nsc_report(pool, nsc_start, filters):
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.
     try:        
-        app_data = access_app_data('r')
+        app_data = access_app_data('r', logger)
         nsc_net_summary = app_data['bills']['nsc']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
-        print('Unable to load app data\n',e)
+        logger.exception("Unable to load app data.")
 
     try:
         cursor.execute(data_insert_query, (nsc_start, nsc_stop, nsc_start, nsc_stop))
@@ -93,6 +95,7 @@ def mc1_nsc_report(pool, nsc_start, filters):
         records = cursor.fetchall()
 
         if records:
+            logger.info("Records retrieved for processing.")
             # Filter records based on specific description
             filtered_records = [record for record in records if all(filter not in record[2] for filter in filters)]
             nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
@@ -101,8 +104,8 @@ def mc1_nsc_report(pool, nsc_start, filters):
             columns = cursor.column_names
             serial_num = 0
 
-            print(f'S/N  :  {columns[0]:5}  :  {columns[1]:10} : {columns[2]:45} : {columns[3]} : AMOUNT2')
-            print('------------------------------------------------------------------------------------------------------')
+            logger.info(f'S/N  :  {columns[0]:5}  :  {columns[1]:10} : {columns[2]:45} : {columns[3]} : AMOUNT2')
+            logger.info('------------------------------------------------------------------------------------------------------')
             for record in filtered_records:
                 # Format date to display date only
                 id = record[0]
@@ -115,17 +118,17 @@ def mc1_nsc_report(pool, nsc_start, filters):
                 nsc_table_data.append([serial_num, id, formatted_date, description, amount2])
                 serial_num += 1
                 # Print statement for easy analysis of original amounts against marked up amounts.
-                print(f'{serial_num:3}  :  {id:10}  :  {formatted_date:10}  :  {description:45}  :  {amount:10}  :  {amount2:8}')
-            print('------------------------------------------------------------------------------------------------------')
-            print(f"{'Subtotal 1':78}  :  {subtotal_1:-10,.2f}")
-            print(f"{'Subtotal 2':78}  :  {subtotal_2:-10,.2f}")
+                logger.info(f'{serial_num:3}  :  {id:10}  :  {formatted_date:10}  :  {description:45}  :  {amount:10}  :  {amount2:8}')
+            logger.info('------------------------------------------------------------------------------------------------------')
+            logger.info(f"{'Subtotal 1':78}  :  {subtotal_1:-10,.2f}")
+            logger.info(f"{'Subtotal 2':78}  :  {subtotal_2:-10,.2f}")
 
             nsc_subtotal = subtotal_2
             nsc_management_fee = nsc_subtotal * mgt_fee_percent / 100
             nsc_grand_total = subtotal_2 + nsc_management_fee
 
-            print(f"{'Management fee':78}  :  {nsc_management_fee:-10,.2f}")
-            print(f"{'Grand total':78}  :  {nsc_grand_total:-10,.2f}")   
+            logger.info(f"{'Management fee':78}  :  {nsc_management_fee:-10,.2f}")
+            logger.info(f"{'Grand total':78}  :  {nsc_grand_total:-10,.2f}")   
 
             try:
                 # Update json file
@@ -133,25 +136,27 @@ def mc1_nsc_report(pool, nsc_start, filters):
                 nsc_net_summary['bill_start_date'] = nsc_start.strftime('%Y-%m-%d')
                 nsc_net_summary['bill_stop_date'] = nsc_stop.strftime('%Y-%m-%d')
                 
-                access_app_data('w', app_data)
+                access_app_data('w', logger, app_data)
             except Exception as e:
-                print('Unable to update bal brought forward json file\n', e)  
+                logger.exception("Unable to update bal brought forward json file.")
+                
             nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
             return nsc_table_data, nsc_summary_dict
         else:
-            print('No records retrieved.\n')
+            logger.info("No records retrieved.\n")
             nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
             nsc_subtotal = 0.0
             nsc_management_fee = 0.0
             nsc_grand_total = 0.0
             nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
+            
             return nsc_table_data, nsc_summary_dict
         
     except Exception as e:
-        print(e)
+        logger.exception("An error occured while processing nsc report: {e}")
     finally:
         #Close cursor
         cursor.close()
         connection.close()
-        print("Connection and cursor closed.\n")
+        logger.info("Connection and cursor closed.\n")
     
