@@ -8,6 +8,8 @@ from src.utils.file_paths import access_app_data
 from src.utils.credentials import get_cursor
 from src.utils.my_logging import mc_logger
 
+logger = mc_logger(log_name='nsc_report_log', log_level='INFO', log_file='nsc_report.log')
+
 def mc1_nsc_report(pool, nsc_start, filters):
     # Obtain pool connection if available or add connection then obtain pool connection.
     connection, cursor = get_cursor(pool, logger)
