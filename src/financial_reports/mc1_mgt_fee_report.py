@@ -6,7 +6,7 @@ from src.utils.credentials import get_cursor
 from src.utils.file_paths import access_app_data
 from src.utils.my_logging import mc_logger
 
-logger = mc_logger(log_name='nsc_report_log', log_level='INFO', log_file='nsc_report.log')
+logger = mc_logger(log_name='mgt_report_log', log_level='INFO', log_file='mgt_report.log')
 
 # Update rent stopdate according to rent paid by tenant
 update_rentals_stopdate = """
