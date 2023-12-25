@@ -12,7 +12,9 @@ from reportlab.platypus import PageTemplate, BaseDocTemplate, PageBreak, NextPag
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Frame
 
 from src.utils.file_paths import dir_path, access_app_data
+from src.utils.my_logging import mc_logger
 
+logger = mc_logger(log_name='generate_report_pdf_log', log_level='INFO', log_file='generate_report_pdf.log')
 
 def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
                 mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
@@ -89,12 +91,12 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
     # Retrieve relevant fixed values from mc_app_data.json file
     try:
-        app_data = access_app_data('r')
+        app_data = access_app_data('r', logger)
         bills_data = app_data['bills']
         service_charge = float(app_data['rates']['service_charge'])
         incidentals =  float(app_data['rates']['incidentals'])
     except Exception as e:
-        print('Unable to retrieve app data')
+        logger.exception(f"Unable to retrieve app data")
 
     # Create a summary table for all sections
     summary_table_style = common_table_style + [
@@ -225,3 +227,4 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     elements.append(designation) 
 
     pdf.build(elements)
+    logger.info("Report pdf has been generated")
