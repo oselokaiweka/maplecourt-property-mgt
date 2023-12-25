@@ -145,4 +145,4 @@ def get_landlord_inflow(pool, inf_start):
         #Close cursor
         cursor.close()
         connection.close()
-        print("Connection and cursor closed.\n")
+        logger.info("Connection and cursor closed.\n")
