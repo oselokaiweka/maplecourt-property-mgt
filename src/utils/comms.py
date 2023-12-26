@@ -7,7 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from src.utils.credentials import get_google_credentials
 
 
-def send_email(subject, sender, recipient, body, logger):
+def send_email(subject, sender, recipient, body, logger_instance):
     """
     Summary:
         Function sends email based on the provided parameters through organizations email account. 
@@ -16,7 +16,7 @@ def send_email(subject, sender, recipient, body, logger):
         sender (str): Sender email address,
         recipient (str): Recipient email address,
         body (str): Single or multi-line text.
-        logger (object): Inherits logger instance in script where function is imported into for logging consistency.
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency.
     Returns:
       Either True or False (Boolean): If email is sent successfully it returns True, else it returns Fales. 
     """    
@@ -26,22 +26,22 @@ def send_email(subject, sender, recipient, body, logger):
     message["To"] = recipient
     message.attach(MIMEText(body, "Plain"))
 
-    service = get_google_credentials(logger)
+    service = get_google_credentials(logger_instance)
 
     try:
         create_message = {"raw": base64.urlsafe_b64encode(message.as_bytes()).decode()}
         send_message = service.users().messages().send(userId="me", body=create_message).execute()
-        logger.info(f"Email '{subject}' sent!")
+        logger_instance.info(f"Email '{subject}' sent!")
         return True
     
     except Exception as e:
-        logger.error(f"Error sending email '{subject}': {e}")
+        logger_instance.error(f"Error sending email '{subject}': {e}")
 
         return False
     
 
 
-def read_email(sender, start_date, stop_date, subject, logger):
+def read_email(sender, start_date, stop_date, subject, logger_instance):
     """
     Summary:
         Function accesses registered email using valid app credentials registered 
@@ -51,16 +51,16 @@ def read_email(sender, start_date, stop_date, subject, logger):
         start_date (date str): date from which retrieval begins
         stop_date (date str): date from which retrieval ends
         subject (str): email subject
-        logger (object): Inherits logger instance in script where function is imported into for logging consistency.
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency.
     Returns:
         email_data (list of dictionaries): Contains email subject and body in form of: 
         [{'subject':subject, 'body':email_body},] 
     """    
 
-    service = get_google_credentials(logger)
+    service = get_google_credentials(logger_instance)
 
     try:
-        logger.info("Retrieving email(s)")
+        logger_instance.info("Retrieving email(s)")
         query = f"from:{sender} after:{start_date} before:{stop_date} subject:{subject}"
         result = service.users().messages().list(userId='me',q=query).execute()
         messages = result.get('messages')
@@ -88,16 +88,16 @@ def read_email(sender, start_date, stop_date, subject, logger):
 
                     email_data.append({'subject':subject, 'email_body':email_body})
                 except Exception as e:
-                    logger.error(f"Error processing email with subject: {subject}, error: {e}")
+                    logger_instance.error(f"Error processing email with subject: {subject}, error: {e}")
 
-            logger.info("Retrieved %d email(s)", len(email_data))
+            logger_instance.info("Retrieved %d email(s)", len(email_data))
             return email_data
     
     except HttpError as e:
-        logger.error(f"Error while connecting to gmail: {e}")
+        logger_instance.error(f"Error while connecting to gmail: {e}")
     
     except Exception as e:
-        logger.error(f"Error while reading email: {e}")
+        logger_instance.error(f"Error while reading email: {e}")
 
 
 

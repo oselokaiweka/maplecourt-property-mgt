@@ -1,6 +1,7 @@
 # This script generates pdf of mc1 reports and the 
 # main function is called in the mc1_nsc_monthly_report.py
 
+import os
 from datetime import datetime
 
 from reportlab.lib import colors, pagesizes
@@ -11,17 +12,19 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Frame
 
-from src.utils.file_paths import dir_path, access_app_data
-from src.utils.my_logging import mc_logger
+from src.utils.file_paths import dir_path, access_app_data, read_config
 
-logger = mc_logger(log_name='generate_report_pdf_log', log_level='INFO', log_file='generate_report_pdf.log')
 
 def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
                 mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
                 sc_table_data, sc_summary_dict, # <<< SC VARIABLES 
-                period_start): # START DATE   
+                period_start, # <<< START DATE 
+                logger_instance): # LOGGER  
     
-    pdf = SimpleDocTemplate('MC1_REPORT.PDF', pagesize=LEGAL) # Creates a PDF document
+    config = read_config(logger_instance)
+    file_location = config.get('FilePaths', 'mc1_report_directory')
+
+    pdf = SimpleDocTemplate(os.path.join(file_location, f"MC1 MGT REPORT & INVOICE - {datetime.strptime(period_start, '%Y-%m-%d').strftime('%B_%Y')}.PDF"), pagesize=LEGAL) # Creates a PDF document
     elements = [] # Creates a list to store the content
 
     # Define PageTemplate for the first page 
@@ -91,12 +94,12 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
     # Retrieve relevant fixed values from mc_app_data.json file
     try:
-        app_data = access_app_data('r', logger)
+        app_data = access_app_data('r', logger_instance)
         bills_data = app_data['bills']
         service_charge = float(app_data['rates']['service_charge'])
         incidentals =  float(app_data['rates']['incidentals'])
     except Exception as e:
-        logger.exception(f"Unable to retrieve app data")
+        logger_instance.exception(f"Unable to retrieve app data")
 
     # Create a summary table for all sections
     summary_table_style = common_table_style + [
@@ -113,7 +116,7 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
         [f"{report_start.strftime('%B').upper()} REIMBURSABLE:", 'MC1L1 NSC', f"{nsc_summary_dict['grand_total']:,.2f}"],
         [f"{report_start.strftime('%B').upper()} MANAGEMENT FEE:", 'MC1L1 MGT', f"{mgtfee_summary_dict['total_mgt_fee']:,.2f}"],
         ['PREVIOUS SERVICE CHARGE DEFICIT', 'MC1L1 SC', f"{app_data['rates']['prev_service_charge']-bills_data['sc']['received']:,.2f}"],
-        ['LESS F4 SERVICE CHARGE', 'N/A', f"{app_data['payments']['tenant_sc']:,.2f}"],
+        #['LESS F4 SERVICE CHARGE', 'N/A', f"{app_data['payments']['tenant_sc']:,.2f}"],
         ['NET TOTAL PAYABLE:', 'MC1L1' ,f"N{service_charge + incidentals + nsc_summary_dict['grand_total'] + mgtfee_summary_dict['total_mgt_fee'] + app_data['rates']['prev_service_charge']-bills_data['sc']['received'] - app_data['payments']['tenant_sc']:,.2f}"]
     ]
     
@@ -227,4 +230,4 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     elements.append(designation) 
 
     pdf.build(elements)
-    logger.info("Report pdf has been generated")
+    logger_instance.info("Report pdf has been generated")

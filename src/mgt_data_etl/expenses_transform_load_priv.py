@@ -16,13 +16,13 @@ from src.utils.credentials import pool_connection, get_cursor
 from src.utils.file_paths import read_config, data_encoding, delete_file
 from src.utils.my_logging import mc_logger
 
-# Setup logger
+# Setup logger_instance
 logger = mc_logger(log_name='etl_priv_log', log_level='INFO', log_file='etl_priv.log')
 
 
 # DATA EXTRAXTION AND TRANSFORMATION
-def data_transformation(file):
-    logger.info('Applying transformation to data')
+def data_transformation(file, logger_instance):
+    logger_instance.info('Applying transformation to data')
     try:
         needed_columns = [0, 3, 4, 5, 6]
         not_number = ["", "-","- "," -"] # To handle negative values
@@ -30,21 +30,21 @@ def data_transformation(file):
         try:
             # Import desired records into pandas data frame:
             df = pd.read_csv(file, usecols=needed_columns, header=None, skiprows=1, na_values=not_number, encoding='utf-8')
-            logger.info('Required columns successfully captured')
+            logger_instance.info('Required columns successfully captured')
         except pd.errors.EmptyDataError:
-            logger.warning("The input file is empty. No data to transform.")
+            logger_instance.warning("The input file is empty. No data to transform.")
             return pd.DataFrame()
         
         # Changing the date format for column 0:
         df[0] = pd.to_datetime(df[0], format='%d-%b-%y').dt.strftime('%Y-%m-%d')
-        logger.info("Date formatting successful")
+        logger_instance.info("Date formatting successful")
 
         # Converting columns 3, 4, 5 to sql decimal type:
         decimal_columns = [3,4,5]
         for column in decimal_columns:
             df[column] = df[column].apply(lambda x: locale.atof(x.replace(',', '')) if isinstance(x, str) else x) # Removing comma from digits
             df[column] = pd.to_numeric(df[column], errors='coerce')
-        logger.info("decimal conversion successful")
+        logger_instance.info("decimal conversion successful")
 
         # Defining a method to transform column 6:
         def transform_str(value):
@@ -61,31 +61,31 @@ def data_transformation(file):
 
         # Applying transformation method to columns 6 from the df:
         df[6] = df[6].apply(transform_str)
-        logger.info('Reference formatting successful')
+        logger_instance.info('Reference formatting successful')
 
-        logger.info('Data transformation completed successfully')
+        logger_instance.info('Data transformation completed successfully')
         return df
     
     except Exception as e:
-        logger.error(f"Data transformation failed,\n{e}", exc_info=True)
+        logger_instance.error(f"Data transformation failed,\n{e}", exc_info=True)
         sys.exit() # Exit the entire process if any part of data extraction or transformation fails. 
 
 
 # DATA LOADING
-def data_loading(df, file):
-    logger.info('Initiating data loading')
+def data_loading(df, file, logger_instance):
+    logger_instance.info('Initiating data loading')
 
     try:
         # Obtain pool connection or adds connection if pool is exhausted 
-        pool = pool_connection(logger)
-        connection, cursor = get_cursor(pool, logger)
+        pool = pool_connection(logger_instance)
+        connection, cursor = get_cursor(pool, logger_instance)
 
         # Starts MySQL event scheduler so that any triggers affected by operation will be executed.
         cursor.execute("SET GLOBAL event_scheduler =  ON;")
-        logger.info('Event scheduler is started.\n')
+        logger_instance.info('Event scheduler is started.\n')
 
         # Loading data into the database table
-        logger.info('Inserting records into table...')
+        logger_instance.info('Inserting records into table...')
 
         if not df.empty:
             insert_query = """INSERT IGNORE INTO Statement_priv 
@@ -107,34 +107,34 @@ def data_loading(df, file):
                 except connector.IntegrityError as e:
                     if "Duplicate entry" in str(e):
                         duplicate_count += 1
-                        logger.warning(f"Duplicate entry: {row} - {e}")
+                        logger_instance.warning(f"Duplicate entry: {row} - {e}")
                     else:
-                        logger.error(f"Error inserting record: {row} - {e}")
+                        logger_instance.error(f"Error inserting record: {row} - {e}")
 
                 except connector.Error as e:
-                    logger.error(f"MySQL connector error: {e}")
+                    logger_instance.error(f"MySQL connector error: {e}")
 
                 except Exception as e:
-                    logger.error(e.args[1]) # args[1] prints only the error message without the error number.
+                    logger_instance.error(e.args[1]) # args[1] prints only the error message without the error number.
 
             connection.commit()
-            logger.info(f"ETL complete!\nInserted {insert_count} records.\nSkipped {duplicate_count} duplicate entries.")
+            logger_instance.info(f"ETL complete!\nInserted {insert_count} records.\nSkipped {duplicate_count} duplicate entries.")
             
 
             # Remove statement us-ascii csv file to make room for next etl
-            delete_file(file, logger)
+            delete_file(file, logger_instance)
 
         else:
-            logger.info('Insert process terminated - No new record for insert.\n')
+            logger_instance.info('Insert process terminated - No new record for insert.\n')
     
     except Exception as e:
-        logger.error(f"Error inserting records: {e}", exc_info=True)
+        logger_instance.error(f"Error inserting records: {e}", exc_info=True)
 
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
-            logger.info("Database connection and cursor are closed")
+            logger_instance.info("Database connection and cursor are closed")
 
 
 if __name__ == "__main__":
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"File encoding failed: {e}")
 
-    df = data_transformation(output_file)
-    data_loading(df, output_file)
+    df = data_transformation(output_file, logger)
+    data_loading(df, output_file, logger)
 
     logger.info(f'PROCESS DURATION.............................................................................: {(datetime.now()-start_timer).total_seconds()}\n')

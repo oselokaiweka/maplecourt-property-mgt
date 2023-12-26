@@ -1,0 +1,11 @@
+PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 11:45:02.470143
+
+MySQL process is already running.
+MySQL connection pool created.
+Connected to mc_pool pool successfully
+
+Read mc_config.ini successful
+Checking for upcoming rent...
+No upcoming rent found.
+Connection and cursor closed.
+

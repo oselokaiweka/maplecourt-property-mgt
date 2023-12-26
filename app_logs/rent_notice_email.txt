@@ -1,0 +1,136 @@
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 12, in <module>
+    logger = mc_logger(log_name='rent_notice_log', log_level='INFO', log_file='rent_notice.log')
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/my_logging.py", line 39, in mc_logger
+    config = read_config()
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 67, in read_config
+    logger_instance.info("Read mc_config.ini successful")
+Message: 'Read mc_config.ini successful'
+Arguments: ()
+2023-12-26 11:45:02,469 - read_config_log - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 121, in <module>
+    logger.info(f"PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n")
+Message: 'PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 11:45:02.470143\n'
+Arguments: ()
+2023-12-26 11:45:02,470 - rent_notice_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 11:45:02.470143
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 123, in <module>
+    send_upcoming_rent_email(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 77, in send_upcoming_rent_email
+    pool = pool_connection(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 100, in pool_connection
+    start_mysql_service(sudopass, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 82, in start_mysql_service
+    logger_instance.info(f"MySQL process is already running.")
+Message: 'MySQL process is already running.'
+Arguments: ()
+2023-12-26 11:45:02,472 - rent_notice_log - INFO - MySQL process is already running.
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 123, in <module>
+    send_upcoming_rent_email(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 77, in send_upcoming_rent_email
+    pool = pool_connection(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 111, in pool_connection
+    logger_instance.info(f"MySQL connection pool created.")
+Message: 'MySQL connection pool created.'
+Arguments: ()
+2023-12-26 11:45:02,614 - rent_notice_log - INFO - MySQL connection pool created.
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 123, in <module>
+    send_upcoming_rent_email(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 78, in send_upcoming_rent_email
+    connection, cursor = get_cursor(pool, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 127, in get_cursor
+    logger_instance.info(f"Connected to {pool.pool_name} pool successfully\n")
+Message: 'Connected to mc_pool pool successfully\n'
+Arguments: ()
+2023-12-26 11:45:02,615 - rent_notice_log - INFO - Connected to mc_pool pool successfully
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 123, in <module>
+    send_upcoming_rent_email(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 80, in send_upcoming_rent_email
+    config = read_config(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 67, in read_config
+    logger_instance.info("Read mc_config.ini successful")
+Message: 'Read mc_config.ini successful'
+Arguments: ()
+2023-12-26 11:45:02,616 - rent_notice_log - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 123, in <module>
+    send_upcoming_rent_email(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 83, in send_upcoming_rent_email
+    logger_instance.info("Checking for upcoming rent...")
+Message: 'Checking for upcoming rent...'
+Arguments: ()
+2023-12-26 11:45:02,616 - rent_notice_log - INFO - Checking for upcoming rent...
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 123, in <module>
+    send_upcoming_rent_email(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 105, in send_upcoming_rent_email
+    logger_instance.info("No upcoming rent found.")
+Message: 'No upcoming rent found.'
+Arguments: ()
+2023-12-26 11:45:02,617 - rent_notice_log - INFO - No upcoming rent found.
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 123, in <module>
+    send_upcoming_rent_email(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 116, in send_upcoming_rent_email
+    logger_instance.info("Connection and cursor closed.\n")
+Message: 'Connection and cursor closed.\n'
+Arguments: ()
+2023-12-26 11:45:02,619 - rent_notice_log - INFO - Connection and cursor closed.
+
+Exception ignored in atexit callback: <function shutdown at 0x7f9784ad8b80>
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 2182, in shutdown
+    h.flush()
+TypeError: 'bool' object is not callable

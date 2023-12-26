@@ -2,9 +2,7 @@ from datetime import datetime, timedelta
 
 from src.utils.file_paths import access_app_data
 from src.utils.credentials import get_cursor
-from src.utils.my_logging import mc_logger
 
-logger = mc_logger(log_name='mc_inflow_log', log_leve='INFO', log_file='mc_imflow.log')
 
 # Using insert into select to retrieve relevant records from Statement_biz to load into MC_inflow.
 # MC_inflow contains records of landlord payments for SC, NSC and MGT fees. 
@@ -86,7 +84,7 @@ on l.LandlordID = i.LandlordID
 where i.Date between %s and %s;
 """
 
-def get_landlord_inflow(pool, inf_start):
+def get_landlord_inflow(pool, inf_start, logger_instance):
     """
         Function inserts into MC_inflow table with relevant records from Statement_biz table, 
         updates columns of same table according to the reference codes, retrieves relevant records
@@ -98,20 +96,20 @@ def get_landlord_inflow(pool, inf_start):
     """    
     # Obtain pool connection if available or add connection then obtain pool connection.
     # Includes the connection object so that the connection can be closed after operation.
-    connection, cursor = get_cursor(pool, logger)
+    connection, cursor = get_cursor(pool, logger_instance)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
     cursor.execute("SET GLOBAL event_scheduler = ON;")
-    logger.info("Event scheduler is started")
+    logger_instance.info("Event scheduler is started")
 
     inf_start =  datetime.strptime(inf_start, '%Y-%m-%d') if inf_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
     inf_stop = datetime(inf_start.year + (1 if inf_start.month == 12 else 0), (inf_start.month + 1) % 12 if inf_start.month != 11 else 12, 1) - timedelta(days=1)
    
-    app_data = access_app_data('r', logger)
+    app_data = access_app_data('r', logger_instance)
     payments_data = app_data['payments']
     available_balance = payments_data['available_balance']
     last_payment_id = payments_data['last_payment_id']
-    logger.info(f"Last payment id: {last_payment_id}")
+    logger_instance.info(f"Last payment id: {last_payment_id}")
     
     try:
         cursor.execute(insert_mc_inflow, (inf_start,))
@@ -131,18 +129,18 @@ def get_landlord_inflow(pool, inf_start):
                 payments_data['available_balance'] = round(sum(float(record[4]) for record in MC1L1_payments) + available_balance, 2)
                 payments_data['date_processed'] = datetime.now().strftime('%Y-%m-%d [%H:%M:%S]')
                 try:
-                    access_app_data('w', logger, app_data) # See file_paths.py
+                    access_app_data('w', logger_instance, app_data) # See file_paths.py
                 except Exception as e:
-                    logger.exception("Unable to access app data in write mode")
+                    logger_instance.exception("Unable to access app data in write mode")
             else:
                 pass
         else:
             pass
         
     except Exception as e:
-        logger.error(f"An error occured while processing imflow: {e}")
+        logger_instance.error(f"An error occured while processing imflow: {e}")
     finally:
         #Close cursor
         cursor.close()
         connection.close()
-        logger.info("Connection and cursor closed.\n")
+        logger_instance.info("Connection and cursor closed.\n")
