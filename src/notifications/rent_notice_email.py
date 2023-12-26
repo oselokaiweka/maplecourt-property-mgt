@@ -12,7 +12,7 @@ from src.utils.credentials import pool_connection, get_cursor, get_google_creden
 logger = mc_logger(log_name='rent_notice_log', log_level='INFO', log_file='rent_notice.log')
 
 
-def create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total):
+def create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total, logger_instance):
     """
     Function creates email body for upcoming rent to tenants based on
     provided parameters. 
@@ -43,11 +43,11 @@ def create_email_body(tenant_name, due_date, rent_amount, service_charge, paymen
         "MAPLE COURT APARTMENTS"
     )
 
-    logger.info("Email body created")  
+    logger_instance.info("Email body created")  
     return body
 
 
-def send_upcoming_rent_email():
+def send_upcoming_rent_email(logger_instance):
     """
     Checks for rent stopdates in rental database table that are today or 3,2 or 1 month from today and
     sends email notification to the respective tenants from the tenant database table.
@@ -74,50 +74,50 @@ def send_upcoming_rent_email():
     """
 
     try:
-        pool = pool_connection(logger)
-        connection, cursor = get_cursor(pool, logger)
+        pool = pool_connection(logger_instance)
+        connection, cursor = get_cursor(pool, logger_instance)
 
-        config = read_config(logger)
+        config = read_config(logger_instance)
         app_email = config.get('Email', 'app_email_address')
 
-        logger.info("Checking for upcoming rent...")
+        logger_instance.info("Checking for upcoming rent...")
         cursor.execute(upcoming_rent_records)
         records = cursor.fetchall()
 
         if records:
-            logger.info("Upcoming rent data found.\n")
+            logger_instance.info("Upcoming rent data found.\n")
             for record in records:
                 tenant_name, email, rent_amount, service_charge, due_date, payment_total = record[:5]
 
-                body = create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total)
+                body = create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total, logger_instance)
                 
-                logger.info(f"Creating email for {tenant_name}...\n")
-                success = send_email("Upcoming Rent Renewal", app_email, email, body, get_google_credentials(logger))
+                logger_instance.info(f"Creating email for {tenant_name}...\n")
+                success = send_email("Upcoming Rent Renewal", app_email, email, body, get_google_credentials(logger_instance))
 
                 if success:
-                    logger.info(f"Email sent to {tenant_name} successfully!\n")
-                    reschedule_cron_job(USER, "rent_notice_email", "0 10 * * *", logger)
+                    logger_instance.info(f"Email sent to {tenant_name} successfully!\n")
+                    reschedule_cron_job(USER, "rent_notice_email", "0 10 * * *", logger_instance)
                 else:
-                    logger.warning(f"Email not sent to {tenant_name}. Modifying cron job to send email in 1 hour...\n")
-                    reschedule_cron_job(USER, "rent_notice_email", f"{plus_hour.minute} {plus_hour.hour} * * *", logger)
+                    logger_instance.warning(f"Email not sent to {tenant_name}. Modifying cron job to send email in 1 hour...\n")
+                    reschedule_cron_job(USER, "rent_notice_email", f"{plus_hour.minute} {plus_hour.hour} * * *", logger_instance)
 
         else:
-            logger.info("No upcoming rent found.")
+            logger_instance.info("No upcoming rent found.")
 
     except connector.Error as error:
-        logger.error(f"Unable to retrieve rental details from database:\n{error}")
+        logger_instance.error(f"Unable to retrieve rental details from database:\n{error}")
 
     except Exception as e:
-        logger.exception(f"An error occured", exc_info=True)
+        logger_instance.exception(f"An error occured", exc_info=True)
 
     finally:
         cursor.close()
         connection.close()
-        logger.info("Connection and cursor closed.\n")
+        logger_instance.info("Connection and cursor closed.\n")
 
 
 if __name__ == "__main__":
     
     logger.info(f"PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n")
 
-    send_upcoming_rent_email()
+    send_upcoming_rent_email(logger)

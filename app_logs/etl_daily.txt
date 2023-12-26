@@ -1,0 +1,742 @@
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+2023-12-26 11:00:02,466 - src.utils.file_paths - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 145, in <module>
+    logger.info(f'PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n')
+Message: 'PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 11:00:02.466709\n'
+Arguments: ()
+2023-12-26 11:00:02,466 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 11:00:02.466709
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 150, in <module>
+    logger.info(f'Stop date is set for: {stop_date}\n')
+Message: 'Stop date is set for: 2023/12/26\n'
+Arguments: ()
+2023-12-26 11:00:02,467 - etl_daily_log - INFO - Stop date is set for: 2023/12/26
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 153, in <module>
+    app_data = access_app_data('r', logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 27, in access_app_data
+    config = read_config(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 58, in read_config
+    logger_instance.info("Read mc_config.ini successful")
+Message: 'Read mc_config.ini successful'
+Arguments: ()
+2023-12-26 11:00:02,468 - etl_daily_log - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 153, in <module>
+    app_data = access_app_data('r', logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 32, in access_app_data
+    logger_instance.info("Loading app data from JSON file.")
+Message: 'Loading app data from JSON file.'
+Arguments: ()
+2023-12-26 11:00:02,468 - etl_daily_log - INFO - Loading app data from JSON file.
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 155, in <module>
+    logger.info(f'Start date is set for: {start_date}\n')
+Message: 'Start date is set for: 2023/12/24\n'
+Arguments: ()
+2023-12-26 11:00:02,468 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 157, in <module>
+    config = read_config(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 58, in read_config
+    logger_instance.info("Read mc_config.ini successful")
+Message: 'Read mc_config.ini successful'
+Arguments: ()
+2023-12-26 11:00:02,469 - etl_daily_log - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 36, in get_google_credentials
+    logger_instance.warning("Failed to obtain valid creddentials")
+Message: 'Failed to obtain valid creddentials'
+Arguments: ()
+2023-12-26 11:00:02,471 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 39, in get_google_credentials
+    logger_instance.info("Trying to refresh credentials...")
+Message: 'Trying to refresh credentials...'
+Arguments: ()
+2023-12-26 11:00:02,471 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-26 11:00:02,472 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-26 11:00:02,473 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 174, in _new_conn
+    conn = connection.create_connection(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/connection.py", line 72, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/usr/lib/python3.10/socket.py", line 955, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 1042, in _validate_conn
+    conn.connect()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 358, in connect
+    self.sock = conn = self._new_conn()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 186, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    retries = retries.increment(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 193, in __call__
+    response = self.session.request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 565, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 41, in get_google_credentials
+    creds.refresh(Request())
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/credentials.py", line 335, in refresh
+    ) = reauth.refresh_grant(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/reauth.py", line 324, in refresh_grant
+    response_status_ok, response_data, retryable_error = _client._token_endpoint_request_no_throw(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 213, in _token_endpoint_request_no_throw
+    request_succeeded, response_data, retryable_error = _perform_request()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 189, in _perform_request
+    response = request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 199, in __call__
+    six.raise_from(new_exc, caught_exc)
+  File "<string>", line 3, in raise_from
+google.auth.exceptions.TransportError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 46, in get_google_credentials
+    logger_instance.error("Failed to refresh credentials:", e)
+Message: 'Failed to refresh credentials:'
+Arguments: (TransportError(ConnectionError(MaxRetryError("HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))"))),)
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 174, in _new_conn
+    conn = connection.create_connection(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/connection.py", line 72, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/usr/lib/python3.10/socket.py", line 955, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 1042, in _validate_conn
+    conn.connect()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 358, in connect
+    self.sock = conn = self._new_conn()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 186, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    retries = retries.increment(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 193, in __call__
+    response = self.session.request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 565, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 41, in get_google_credentials
+    creds.refresh(Request())
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/credentials.py", line 335, in refresh
+    ) = reauth.refresh_grant(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/reauth.py", line 324, in refresh_grant
+    response_status_ok, response_data, retryable_error = _client._token_endpoint_request_no_throw(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 213, in _token_endpoint_request_no_throw
+    request_succeeded, response_data, retryable_error = _perform_request()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 189, in _perform_request
+    response = request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 199, in __call__
+    six.raise_from(new_exc, caught_exc)
+  File "<string>", line 3, in raise_from
+google.auth.exceptions.TransportError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 46, in get_google_credentials
+    logger_instance.error("Failed to refresh credentials:", e)
+Message: 'Failed to refresh credentials:'
+Arguments: (TransportError(ConnectionError(MaxRetryError("HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fa027593b50>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))"))),)
+2023-12-26 11:00:12,495 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 63, in read_email
+    logger_instance.info("Retrieving email(s)")
+Message: 'Retrieving email(s)'
+Arguments: ()
+2023-12-26 11:00:12,498 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-26 11:00:12,501 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F26+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+2023-12-26 11:00:12,501 - google_auth_httplib2 - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/httplib2/__init__.py", line 1366, in _conn_request
+    conn.connect()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/httplib2/__init__.py", line 1142, in connect
+    address_info = socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM)
+  File "/usr/lib/python3.10/socket.py", line 955, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google_auth_httplib2.py", line 119, in __call__
+    response, data = self.http.request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/httplib2/__init__.py", line 1724, in request
+    (response, content) = self._request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/httplib2/__init__.py", line 1444, in _request
+    (response, content) = self._conn_request(conn, request_uri, method, body, headers)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/httplib2/__init__.py", line 1373, in _conn_request
+    raise ServerNotFoundError("Unable to find the server at %s" % conn.host)
+httplib2.error.ServerNotFoundError: Unable to find the server at oauth2.googleapis.com
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 65, in read_email
+    result = service.users().messages().list(userId='me',q=query).execute()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/googleapiclient/_helpers.py", line 130, in positional_wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/googleapiclient/http.py", line 923, in execute
+    resp, content = _retry_request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/googleapiclient/http.py", line 191, in _retry_request
+    resp, content = http.request(uri, method, *args, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google_auth_httplib2.py", line 209, in request
+    self.credentials.before_request(self._request, method, uri, request_headers)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/credentials.py", line 135, in before_request
+    self.refresh(request)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/credentials.py", line 335, in refresh
+    ) = reauth.refresh_grant(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/reauth.py", line 324, in refresh_grant
+    response_status_ok, response_data, retryable_error = _client._token_endpoint_request_no_throw(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 213, in _token_endpoint_request_no_throw
+    request_succeeded, response_data, retryable_error = _perform_request()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 189, in _perform_request
+    response = request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google_auth_httplib2.py", line 126, in __call__
+    raise exceptions.TransportError(exc)
+google.auth.exceptions.TransportError: Unable to find the server at oauth2.googleapis.com
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 100, in read_email
+    logger_instance.error(f"Error while reading email: {e}")
+Message: 'Error while reading email: Unable to find the server at oauth2.googleapis.com'
+Arguments: ()
+2023-12-26 11:00:22,593 - etl_daily_log - ERROR - Error while reading email: Unable to find the server at oauth2.googleapis.com
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 34, in extract_mc_transaction
+    for email_entry in email_data:
+TypeError: 'NoneType' object is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 55, in extract_mc_transaction
+    logger_instance.error(f"Rescheduling process due to error retrieving email data:\n{e}")
+Message: "Rescheduling process due to error retrieving email data:\n'NoneType' object is not iterable"
+Arguments: ()
+2023-12-26 11:00:22,600 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 34, in extract_mc_transaction
+    for email_entry in email_data:
+TypeError: 'NoneType' object is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 60, in extract_mc_transaction
+    reschedule_cron_job(SYS_USER, job_comment, schedule, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/workflow.py", line 19, in reschedule_cron_job
+    logger_instance.info(f"The '{job.comment}' cron job has been successfully reset as follows:\n{job}")
+Message: "The 'etl_daily' cron job has been successfully reset as follows:\n0 12 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily"
+Arguments: ()
+2023-12-26 11:00:22,623 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+0 12 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+Exception ignored in atexit callback: <function shutdown at 0x7fa02ae7fa30>
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 2182, in shutdown
+    h.flush()
+TypeError: 'bool' object is not callable
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 13, in <module>
+    logger = mc_logger(log_name='etl_daily_log', log_level='DEBUG', log_file='etl_daily.log')
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/my_logging.py", line 39, in mc_logger
+    config = read_config()
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 67, in read_config
+    logger_instance.info("Read mc_config.ini successful")
+Message: 'Read mc_config.ini successful'
+Arguments: ()
+2023-12-26 12:00:02,664 - read_config_log - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 145, in <module>
+    logger.info(f'PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n')
+Message: 'PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 12:00:02.665697\n'
+Arguments: ()
+2023-12-26 12:00:02,665 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 12:00:02.665697
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 150, in <module>
+    logger.info(f'Stop date is set for: {stop_date}\n')
+Message: 'Stop date is set for: 2023/12/26\n'
+Arguments: ()
+2023-12-26 12:00:02,666 - etl_daily_log - INFO - Stop date is set for: 2023/12/26
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 153, in <module>
+    app_data = access_app_data('r', logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 27, in access_app_data
+    config = read_config(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 67, in read_config
+    logger_instance.info("Read mc_config.ini successful")
+Message: 'Read mc_config.ini successful'
+Arguments: ()
+2023-12-26 12:00:02,667 - etl_daily_log - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 153, in <module>
+    app_data = access_app_data('r', logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 32, in access_app_data
+    logger_instance.info("Loading app data from JSON file.")
+Message: 'Loading app data from JSON file.'
+Arguments: ()
+2023-12-26 12:00:02,667 - etl_daily_log - INFO - Loading app data from JSON file.
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 155, in <module>
+    logger.info(f'Start date is set for: {start_date}\n')
+Message: 'Start date is set for: 2023/12/24\n'
+Arguments: ()
+2023-12-26 12:00:02,668 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 157, in <module>
+    config = read_config(logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/file_paths.py", line 67, in read_config
+    logger_instance.info("Read mc_config.ini successful")
+Message: 'Read mc_config.ini successful'
+Arguments: ()
+2023-12-26 12:00:02,669 - etl_daily_log - INFO - Read mc_config.ini successful
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 36, in get_google_credentials
+    logger_instance.warning("Failed to obtain valid creddentials")
+Message: 'Failed to obtain valid creddentials'
+Arguments: ()
+2023-12-26 12:00:02,672 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 39, in get_google_credentials
+    logger_instance.info("Trying to refresh credentials...")
+Message: 'Trying to refresh credentials...'
+Arguments: ()
+2023-12-26 12:00:02,672 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-26 12:00:02,673 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-26 12:00:02,675 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-12-26 12:00:04,390 - urllib3.connectionpool - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 42, in get_google_credentials
+    logger_instance.info("Credentials refreshed successfully.\n")
+Message: 'Credentials refreshed successfully.\n'
+Arguments: ()
+2023-12-26 12:00:04,394 - etl_daily_log - INFO - Credentials refreshed successfully.
+
+2023-12-26 12:00:04,400 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 63, in read_email
+    logger_instance.info("Retrieving email(s)")
+Message: 'Retrieving email(s)'
+Arguments: ()
+2023-12-26 12:00:04,405 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-26 12:00:04,412 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F26+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 34, in extract_mc_transaction
+    for email_entry in email_data:
+TypeError: 'NoneType' object is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 55, in extract_mc_transaction
+    logger_instance.error(f"Rescheduling process due to error retrieving email data:\n{e}")
+Message: "Rescheduling process due to error retrieving email data:\n'NoneType' object is not iterable"
+Arguments: ()
+2023-12-26 12:00:06,494 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 34, in extract_mc_transaction
+    for email_entry in email_data:
+TypeError: 'NoneType' object is not iterable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1104, in emit
+    self.flush()
+TypeError: 'bool' object is not callable
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 60, in extract_mc_transaction
+    reschedule_cron_job(SYS_USER, job_comment, schedule, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/workflow.py", line 19, in reschedule_cron_job
+    logger_instance.info(f"The '{job.comment}' cron job has been successfully reset as follows:\n{job}")
+Message: "The 'etl_daily' cron job has been successfully reset as follows:\n0 13 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily"
+Arguments: ()
+2023-12-26 12:00:06,524 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+0 13 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+Exception ignored in atexit callback: <function shutdown at 0x7f9c7417fa30>
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 2182, in shutdown
+    h.flush()
+TypeError: 'bool' object is not callable
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+2023-12-26 13:00:02,517 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-26 13:00:02,517 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 13:00:02.517235
+
+2023-12-26 13:00:02,517 - etl_daily_log - INFO - Stop date is set for: 2023/12/26
+
+2023-12-26 13:00:02,517 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 13:00:02,518 - etl_daily_log - INFO - Loading app data from JSON file.
+2023-12-26 13:00:02,518 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+2023-12-26 13:00:02,518 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 13:00:02,519 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+2023-12-26 13:00:02,520 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-26 13:00:02,520 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-26 13:00:02,521 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-12-26 13:00:04,413 - urllib3.connectionpool - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-12-26 13:00:04,417 - etl_daily_log - INFO - Credentials refreshed successfully.
+
+2023-12-26 13:00:04,422 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2023-12-26 13:00:04,426 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-26 13:00:04,434 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F26+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+2023-12-26 13:00:06,304 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+2023-12-26 13:00:06,338 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+0 14 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+2023-12-26 14:00:02,284 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-26 14:00:02,284 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 14:00:02.284528
+
+2023-12-26 14:00:02,284 - etl_daily_log - INFO - Stop date is set for: 2023/12/26
+
+2023-12-26 14:00:02,285 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 14:00:02,285 - etl_daily_log - INFO - Loading app data from JSON file.
+2023-12-26 14:00:02,285 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+2023-12-26 14:00:02,285 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 14:00:02,287 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+2023-12-26 14:00:02,287 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-26 14:00:02,287 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-26 14:00:02,288 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-12-26 14:00:04,241 - urllib3.connectionpool - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-12-26 14:00:04,244 - etl_daily_log - INFO - Credentials refreshed successfully.
+
+2023-12-26 14:00:04,248 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2023-12-26 14:00:04,251 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-26 14:00:04,256 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F26+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+2023-12-26 14:00:06,080 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+2023-12-26 14:00:06,113 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+0 15 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+2023-12-26 15:00:01,928 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-26 15:00:01,928 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 15:00:01.928873
+
+2023-12-26 15:00:01,929 - etl_daily_log - INFO - Stop date is set for: 2023/12/26
+
+2023-12-26 15:00:01,929 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 15:00:01,929 - etl_daily_log - INFO - Loading app data from JSON file.
+2023-12-26 15:00:01,929 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+2023-12-26 15:00:01,930 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 15:00:01,931 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+2023-12-26 15:00:01,931 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-26 15:00:01,931 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-26 15:00:01,932 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-12-26 15:00:03,525 - urllib3.connectionpool - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-12-26 15:00:03,529 - etl_daily_log - INFO - Credentials refreshed successfully.
+
+2023-12-26 15:00:03,535 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2023-12-26 15:00:03,540 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-26 15:00:03,549 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F26+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+2023-12-26 15:00:05,178 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+2023-12-26 15:00:05,212 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+0 16 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+2023-12-26 16:00:02,034 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-26 16:00:02,034 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 16:00:02.034702
+
+2023-12-26 16:00:02,034 - etl_daily_log - INFO - Stop date is set for: 2023/12/26
+
+2023-12-26 16:00:02,035 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 16:00:02,035 - etl_daily_log - INFO - Loading app data from JSON file.
+2023-12-26 16:00:02,035 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+2023-12-26 16:00:02,035 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-26 16:00:02,037 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+2023-12-26 16:00:02,037 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-26 16:00:02,037 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-26 16:00:02,038 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2023-12-26 16:00:03,691 - urllib3.connectionpool - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2023-12-26 16:00:03,695 - etl_daily_log - INFO - Credentials refreshed successfully.
+
+2023-12-26 16:00:03,700 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2023-12-26 16:00:03,706 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-26 16:00:03,713 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F26+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+2023-12-26 16:00:05,542 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+2023-12-26 16:00:05,577 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+0 17 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily

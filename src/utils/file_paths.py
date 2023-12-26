@@ -11,30 +11,30 @@ db_pass = os.environ.get("DB_PASS")
 
 
 
-def access_app_data(mode, logger, *args):
+def access_app_data(mode, logger_instance, *args):
     """
     Summary:
         Function to either load or dump data from or to json file (mc_app_data.json).
     Args:
         'r'/'w' (str): Accepts only either 'r' for json.load or 'w' for json.dump.
-        logger (object): Inherits logger instance in script where function is imported into for logging consistency.
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency.
     Returns:
         json data: app_data dictionary.
     """    
     if mode not in ('r','w'):
         raise ValueError("Error, Mode accepts 'r' and 'w' only")
     
-    config = read_config(logger)
+    config = read_config(logger_instance)
     app_data_path = config.get('AppData', 'app_data_path')
     
     with open(app_data_path, mode) as app_data_file: 
         if mode == "r":
-            logger.info("Loading app data from JSON file.")
+            logger_instance.info("Loading app data from JSON file.")
             return json.load(app_data_file)
         elif mode == "w":
-            logger.info("Writing app data to JSON file.")
+            logger_instance.info("Writing app data to JSON file.")
             json.dump(args[0], app_data_file, indent=4) # args[0] means the first in *args. 
-            logger.info("App data written to JSON file.")
+            logger_instance.info("App data written to JSON file.")
 
 
 
@@ -44,12 +44,12 @@ def read_config(logger_instance=None):
     Summary:
         Reads config.ini file to obtain file paths, settings and other configurations therein. 
     Args:
-        logger (object): Inherits logger instance in script where function is imported into for logging consistency.
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency.
     Returns:
         config (instance/object): Usage: config.get('file_section_header', 'required_variable_name')
     """    
     if logger_instance is None:
-        # If logger is not provided, create a new logger
+        # If logger_instance is not provided, create a new logger_instance
         logger_instance = logging.getLogger(__name__)
 
     config = configparser.ConfigParser()
@@ -65,7 +65,7 @@ def read_config(logger_instance=None):
 
 
 # Encoding from us-ascii to utf-8
-def data_encoding(input_file, output_file, logger):
+def data_encoding(input_file, output_file, logger_instance):
     """
     Summary:
         Converts input_file (csv or other data format) from us-ascii encoding to utf-8 encoding
@@ -73,7 +73,7 @@ def data_encoding(input_file, output_file, logger):
     Args:
         input_file (str): Absolute file path
         output_file (str): Absolute file path
-        logger (object): Inherits logger instance in script where function is imported into for logging consistency. 
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency. 
     """    
     input_encoding = 'us-ascii'
     output_encoding = 'utf-8'
@@ -86,26 +86,26 @@ def data_encoding(input_file, output_file, logger):
                         target_file.write(line)
                         count += 1
                     except Exception as write_error:
-                        logger.error(f"Line {line_number}: Error writing to {output_file}: {write_error}")
-                logger.info(f"Successfully encoded and written {count} lines output file.")
+                        logger_instance.error(f"Line {line_number}: Error writing to {output_file}: {write_error}")
+                logger_instance.info(f"Successfully encoded and written {count} lines output file.")
     except Exception as read_error:
-        logger.error(f"Encounterred an error reading {input_file}: {read_error}") 
+        logger_instance.error(f"Encounterred an error reading {input_file}: {read_error}") 
 
 
 
 
-def delete_file(file_path, logger):
+def delete_file(file_path, logger_instance):
     """
     Summary:
         Deletes specified file. 
     Args:
         file_path (str): Absolute file path
-        logger (object): Inherits logger instance in script where function is imported into for logging consistency.
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency.
     """    
     try:
         os.remove(file_path)
-        logger.info(f"File {file_path} deleted.")
+        logger_instance.info(f"File {file_path} deleted.")
     except FileNotFoundError as e:
-        logger.error(f"File {file_path} not found: {e}")
+        logger_instance.error(f"File {file_path} not found: {e}")
     except Exception as e:
-        logger.error(f" Error deleting file {file_path}: {e}")
+        logger_instance.error(f" Error deleting file {file_path}: {e}")

@@ -4,9 +4,7 @@ from datetime import datetime, timedelta
 
 from src.utils.credentials import get_cursor
 from src.utils.file_paths import access_app_data
-from src.utils.my_logging import mc_logger
 
-logger = mc_logger(log_name='mgt_report_log', log_level='INFO', log_file='mgt_report.log')
 
 # Update rent stopdate according to rent paid by tenant
 update_rentals_stopdate = """
@@ -33,9 +31,8 @@ order by U.UnitCode;
 """
 
 # Calculating mgt period in days
-def get_mgt_period(rentstart_str, rentstop_str, period_start, period_stop):
+def get_mgt_period(rentstart_str, rentstop_str, period_start, period_stop, logger_instance):
     # The logic below ensures date difference returns complete days of the month without excess for periods that start mid month.
-    logger.info("Calculating management period")
     if rentstop_str > period_start: # Checks for active rent.
         mgt_period_stop = min(rentstop_str, period_stop) # If rent terminates before end of mgt period, mgt fee is calculated till rent termination.
         if rentstart_str > period_start: # If rent starts after mgt period start then mgt fee is calculated from rent start.
@@ -49,26 +46,26 @@ def get_mgt_period(rentstart_str, rentstop_str, period_start, period_stop):
     
     return period
 
-def days_in_year_function(mgt_start):
+def days_in_year_function(mgt_start, logger_instance):
     days_in_year = 366 if mgt_start.year % 4 == 0 and (mgt_start.year % 100 != 0 or mgt_start.year % 400 == 0) else 365
-    logger.info(f"Days in year is {days_in_year} days")
+    logger_instance.info(f"Days in year is {days_in_year} days")
     return days_in_year
 
-def mc1_mgt_report(pool, mgt_start, mgt_stop):
+def mc1_mgt_report(pool, mgt_start, mgt_stop, logger_instance):
     # Obtain pool connection if available or add connection then obtain pool connection.
-    connection, cursor = get_cursor(pool, logger)
+    connection, cursor = get_cursor(pool, logger_instance)
 
     # Start MySQL event scheduler so any trigger affected by this operation will execute. 
     cursor.execute("SET GLOBAL event_scheduler = ON;")
-    logger.info("Event scheduler is started")
+    logger_instance.info("Event scheduler is started")
     
     # Retrieve relevant fixed values from mc_app_data.json file
     try:
-        app_data = access_app_data('r', logger)
+        app_data = access_app_data('r', logger_instance)
         mgt_net_summary = app_data['bills']['mgt']
         mgt_fee_percent = app_data['rates']['mgt_fee_%']
     except Exception as e:
-        logger.exception("Unable to load app data")
+        logger_instance.exception("Unable to load app data")
     
     # Mgt period start & stop gives the option of specifiying dates or None (default) values in the main function call.
     # If None values then current month start and end date will be used. Convert to date objects to avoid incomplete day count. 
@@ -79,7 +76,7 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
     # create variable to hold table data as list of lits with the first being the header
     mgtfee_table_data = [['UNIT', 'TENANT', 'RENT START', 'RENT STOP', 'RENT(N)', 'FEE/DAY', 'DAYS', 'MGT FEE(N)']]
     total_mgt_fee = 0
-    days_in_year = days_in_year_function(mgt_start)
+    days_in_year = days_in_year_function(mgt_start, logger_instance)
 
     try: 
         cursor.execute(update_rentals_stopdate)
@@ -88,13 +85,17 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
         records = cursor.fetchall()
         
         if records:
-            logger.info("Records have been retrieved, ready for processing.")
+            logger_instance.info("Records have been retrieved, ready for processing.\n")
+
+            logger_instance.info(F"{'UNIT':5}  :  {'TENANT':17}  :  {'RENT START':10}  :  {'RENT STOP':10}  : {'RENT PRICE':11} : {'RENT/DAY':6} : {'DAYS':2} :   {'MGT FEE':11}")
+            logger_instance.info("----------------------------------------------------------------------------------------------------------")
+
             for record in records:
                 unit, tenant, rentstart, rentstop, rentprice = record[:5]            
                 rentstart_str = (datetime.strptime(str(rentstart), '%Y-%m-%d')) # Convert date strings to date objects         
                 rentstop_str = (datetime.strptime(str(rentstop), '%Y-%m-%d')) # Convert date strings to date objects 
                 
-                period = get_mgt_period(rentstart_str, rentstop_str, mgt_start, mgt_stop)
+                period = get_mgt_period(rentstart_str, rentstop_str, mgt_start, mgt_stop, logger_instance)
             
                 if period > 0: # 0 period indicates inactive rent and will be omitted by the continue in else clause.
                     mgtfee_per_day = (rentprice * mgt_fee_percent / 100) / days_in_year # Calculating mgt fee per day
@@ -105,10 +106,14 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
                     mgtfee_for_period = f"{mgtfee_for_period:,.2f}" # Formatting digits
                 
                     mgtfee_table_data.append([unit, tenant, rentstart, rentstop, rentprice, mgtfee_per_day, period, mgtfee_for_period])
-                    logger.info(f"{unit} : {tenant} : {rentstart} : {rentstop} : {rentprice} : {mgtfee_per_day} : {period} : {mgtfee_for_period}")
+
+                    logger_instance.info(f"{unit:5}  :  {tenant:17}  :  {rentstart}  :  {rentstop}  :  {rentprice:9}  :  {mgtfee_per_day:6}  :  {period:2}  :   {mgtfee_for_period:11}")
                 else:
                     continue
-            logger.info(f"{total_mgt_fee:,.2f}") # Formatting digits
+
+            logger_instance.info("----------------------------------------------------------------------------------------------------------")
+
+            logger_instance.info(f"{'Total management fee':89}  :  {total_mgt_fee:10,.2f}\n") # Formatting digits
 
             # Updating app data json file.
             try:
@@ -117,20 +122,20 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop):
                 mgt_net_summary['bill_start_date'] = mgt_start.strftime('%Y-%m-%d')
                 mgt_net_summary['bill_stop_date'] = mgt_stop.strftime('%Y-%m-%d')
 
-                access_app_data('w', logger, app_data)
+                access_app_data('w', logger_instance, app_data)
             except Exception as e:
-                logger.exception("Unable to dump app data to file")
+                logger_instance.exception("Unable to dump app data to file")
 
             mgtfee_summary_dict = {"total_mgt_fee":total_mgt_fee, "period_start":mgt_start}
             return mgtfee_table_data, mgtfee_summary_dict
         else:
-            logger.info("No record found")
+            logger_instance.info("No record found")
             mgtfee_summary_dict = {"total_mgt_fee":total_mgt_fee, "period_start":mgt_start}
             return mgtfee_table_data, mgtfee_summary_dict
     except Exception as e:
-        logger.exception("An error occurred while processing nsc report: {e}")
+        logger_instance.exception("An error occurred while processing nsc report: {e}")
     finally:
         #Close cursor
         cursor.close()
         connection.close()
-        logger.info("Connection and cursor closed.\n")
+        logger_instance.info("Connection and cursor closed.\n")

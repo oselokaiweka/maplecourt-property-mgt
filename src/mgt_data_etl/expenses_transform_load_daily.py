@@ -13,7 +13,7 @@ from src.utils.my_logging import mc_logger
 logger = mc_logger(log_name='etl_daily_log', log_level='DEBUG', log_file='etl_daily.log')
 plus_hour = (datetime.now())+(timedelta(hours=1)) # Current time plus one hour.
 
-def extract_mc_transaction(sender, start_date, stop_date, subject):
+def extract_mc_transaction(sender, start_date, stop_date, subject, logger_instance):
     """
     Summary:
         Retrieves records of transactions pertaining to maple court property management
@@ -27,7 +27,7 @@ def extract_mc_transaction(sender, start_date, stop_date, subject):
         records (tuple): Comprises of date-time, alert type, amount, reference and current balance. 
     """    
     try:
-        email_data = read_email(sender, start_date, stop_date, subject, logger)
+        email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
 
         records = []
 
@@ -42,26 +42,26 @@ def extract_mc_transaction(sender, start_date, stop_date, subject):
                 reference = ' '.join(body[body.index('Remarks')+ 1: body.index('Time')])
                 current_bal = Decimal(body[body.index('Current')+4].replace(',',''))
             except Exception as e:
-                logger.error(f"Error extracting email data with subject: {subject}, error: {e}")
+                logger_instance.error(f"Error extracting email data with subject: {subject}, error: {e}")
 
             records.append((date_time , alert_type , amount , reference , current_bal))
 
         records = sorted(records, reverse = False) #Sorting the record so it inserts from the oldest to the newest.
-        logger.info('Records Extracted, Transformed and ready for Loading...\n')
+        logger_instance.info('Records Extracted, Transformed and ready for Loading...\n')
         
         return records
                 
     except Exception as e:
-        logger.error(f"Rescheduling process due to error retrieving email data:\n{e}")
+        logger_instance.error(f"Rescheduling process due to error retrieving email data:\n{e}")
         # Reschedule cron job to retry script after 1 hour:
         SYS_USER = sys_user
         job_comment = 'etl_daily'
         schedule = '{minute} {hour} * * *'.format(minute=plus_hour.minute, hour=plus_hour.hour)
-        reschedule_cron_job(SYS_USER, job_comment, schedule, logger)
+        reschedule_cron_job(SYS_USER, job_comment, schedule, logger_instance)
         sys.exit()
 
 
-def data_insert(records, stop_date1):
+def data_insert(records, stop_date1, logger_instance):
     """
     Summary:
         Inserts records of transactions pertaining to maple court property management
@@ -71,13 +71,13 @@ def data_insert(records, stop_date1):
         records (tuple): Extracted email records
     """    
     if records:
-        logger.info("Inserting records into maplecourt.Cashflow db table...")
+        logger_instance.info("Inserting records into maplecourt.Cashflow db table...")
         try:
-            pool = pool_connection(logger)
-            connection, cursor = get_cursor(pool, logger)
+            pool = pool_connection(logger_instance)
+            connection, cursor = get_cursor(pool, logger_instance)
 
             cursor.execute("SET GLOBAL event_scheduler =  ON;")
-            logger.info('Event scheduler is started\n')
+            logger_instance.info('Event scheduler is started\n')
 
             insert_query = """insert into Cashflow 
             (Date, Type, Amount, Reference, CurrentBal) 
@@ -103,42 +103,42 @@ def data_insert(records, stop_date1):
                     cursor.execute(insert_query, record)
                     insert_count += 1
                 except Exception as e:
-                    logger.error(f"Error inserting record: {e.args[1]}")
+                    logger_instance.error(f"Error inserting record: {e.args[1]}")
 
             connection.commit()
-            logger.info(f'ETL complete!\nTotal of {insert_count} records where successfully inserted\n')
+            logger_instance.info(f'ETL complete!\nTotal of {insert_count} records where successfully inserted\n')
 
             try:                
                 # Update start_date value with stop_date value so next time the script runs it will begin from where it stopped in the last run.
                 app_data['expenses_daily_etl']['start_date'] = stop_date1
-                access_app_data('w', logger, app_data)
-                logger.info("Next ETL operation has been scheduled for tomorrow.")
+                access_app_data('w', logger_instance, app_data)
+                logger_instance.info("Next ETL operation has been scheduled for tomorrow.")
             except Exception as e:
-                logger.exception(f"Unable to reschedule the start date, however data duplication is resticted in database")
+                logger_instance.exception(f"Unable to reschedule the start date, however data duplication is resticted in database")
 
         except Exception as e:
-            logger.error(f"Inserting records failed! Rescheduling process by 1 hour Error: {e}")
+            logger_instance.error(f"Inserting records failed! Rescheduling process by 1 hour Error: {e}")
             # Reschedule cron job to retry script after 1 hour:
             SYS_USER = sys_user
             job_comment = 'etl_daily'
             schedule = '{minute} {hour} * * *'.format(minute=plus_hour.minute, hour=plus_hour.hour)
-            reschedule_cron_job(SYS_USER, job_comment, schedule, logger)
+            reschedule_cron_job(SYS_USER, job_comment, schedule, logger_instance)
             sys.exit()
         
         finally: 
             if connection.is_connected():
                 cursor.close()
                 connection.close()
-                logger.info("Database cursor and connection are closed")
+                logger_instance.info("Database cursor and connection are closed")
 
     else:
-        logger.info("Insert process terminated - No new record for insert.\n")
+        logger_instance.info("Insert process terminated - No new record for insert.\n")
     
     # Reschedule cron job to 11am everyday.
     SYS_USER = sys_user
     job_comment = 'etl_daily'
     schedule = '0 11 * * *'
-    reschedule_cron_job(SYS_USER, job_comment, schedule, logger)
+    reschedule_cron_job(SYS_USER, job_comment, schedule, logger_instance)
     
 
 if __name__ == "__main__":
@@ -159,8 +159,8 @@ if __name__ == "__main__":
         subject = config.get('Email', 'daily_etl_subject')
 
         # Execute data extraction, transformation and insertion.
-        records = extract_mc_transaction(sender, start_date, stop_date, subject)
-        data_insert(records, stop_date)
+        records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+        data_insert(records, stop_date, logger)
 
     except Exception as e:
         logger.exception(f"Encountered and error: {e}")
