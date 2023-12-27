@@ -1,6 +1,6 @@
-PROCESS RUN TIMESTAMP...........................................................................: 2023-12-26 16:00:02.034702
+PROCESS RUN TIMESTAMP...........................................................................: 2023-12-27 02:00:02.530611
 
-Stop date is set for: 2023/12/26
+Stop date is set for: 2023/12/27
 
 Read mc_config.ini successful
 Loading app data from JSON file.
@@ -15,4 +15,4 @@ Retrieving email(s)
 Rescheduling process due to error retrieving email data:
 'NoneType' object is not iterable
 The 'etl_daily' cron job has been successfully reset as follows:
-0 17 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+0 3 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
