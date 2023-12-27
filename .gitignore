@@ -13,4 +13,5 @@ images
 start_date.txt
 signature.png
 /data
-app_logs/main_report.log
+mc_config.ini
+/app_logs/main_report.log
