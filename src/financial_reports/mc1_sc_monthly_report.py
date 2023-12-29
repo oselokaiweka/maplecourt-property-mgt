@@ -28,8 +28,10 @@ load_new_service_charge_data = """
                     min(ID) as ID
                 from maplecourt.Statement_biz
                 where Type =  'Debit'
-                and ((lower(Reference) like '%mc1sc%')
-                or (lower(Reference) like '%mc1%_sc%'))
+                and (
+                    (lower(Reference) like '%mc1sc%') or
+                    (lower(Reference) like '%mc1%_sc%')
+                )
                 and lower(Reference) not like '%mc1%nsc%'
                 and date(Date) between %s and %s
                 group by Description, date(Date)
@@ -70,7 +72,7 @@ from maplecourt.MC1sc_expenses where date between %s and %s;
 """
    
 
-def mc1_sc_report(pool, sc_start, logger_instance):
+def mc1_sc_report(pool, sc_start, filters, logger_instance):
     # Obtain pool connection if available or add connection then obtain pool connection.
     connection, cursor = get_cursor(pool, logger_instance)
 
@@ -97,14 +99,17 @@ def mc1_sc_report(pool, sc_start, logger_instance):
 
         if records:
             logger_instance.info("Records retrieved and ready for processing.")
+
+            # Filter records based on key words.
+            filtered_records = [record for record in records if all(filter not in record[2].split() for filter in filters)]
             serial_num = 0
             columns = cursor.column_names
-            subtotal = sum(record[3] for record in records) 
+            subtotal = sum(record[3] for record in filtered_records) 
             sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
 
             logger_instance.info(f'S/N  :  {columns[0]:5}  :  {columns[1]:10}  :  {columns[2]:45}  :  {columns[3]}')
             logger_instance.info('-----------------------------------------------------------------------------------------------')
-            for record in records:
+            for record in filtered_records:
                 # Format date to display date only
                 id = 'S0' + str(record[0])
                 date = record[1].strftime('%Y-%m-%d')

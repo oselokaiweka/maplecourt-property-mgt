@@ -1886,3 +1886,411 @@ Arguments: (TransportError(ConnectionError(MaxRetryError("HTTPSConnectionPool(ho
 'NoneType' object is not iterable
 2023-12-27 02:00:20,365 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
 0 3 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+2023-12-28 03:50:35,812 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-28 03:50:35,814 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-28 03:50:35.814176
+
+2023-12-28 03:50:35,814 - etl_daily_log - INFO - Stop date is set for: 2023/12/28
+
+2023-12-28 03:50:35,814 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-28 03:50:35,815 - etl_daily_log - INFO - Loading app data from JSON file.
+2023-12-28 03:50:35,816 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+2023-12-28 03:50:35,817 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-28 03:50:35,819 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+2023-12-28 03:50:35,819 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-28 03:50:35,819 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-28 03:50:35,820 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 174, in _new_conn
+    conn = connection.create_connection(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/connection.py", line 72, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/usr/lib/python3.10/socket.py", line 955, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 1042, in _validate_conn
+    conn.connect()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 358, in connect
+    self.sock = conn = self._new_conn()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 186, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    retries = retries.increment(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 193, in __call__
+    response = self.session.request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 565, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 41, in get_google_credentials
+    creds.refresh(Request())
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/credentials.py", line 335, in refresh
+    ) = reauth.refresh_grant(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/reauth.py", line 324, in refresh_grant
+    response_status_ok, response_data, retryable_error = _client._token_endpoint_request_no_throw(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 213, in _token_endpoint_request_no_throw
+    request_succeeded, response_data, retryable_error = _perform_request()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 189, in _perform_request
+    response = request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 199, in __call__
+    six.raise_from(new_exc, caught_exc)
+  File "<string>", line 3, in raise_from
+google.auth.exceptions.TransportError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 46, in get_google_credentials
+    logger_instance.error("Failed to refresh credentials:", e)
+Message: 'Failed to refresh credentials:'
+Arguments: (TransportError(ConnectionError(MaxRetryError("HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))"))),)
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 174, in _new_conn
+    conn = connection.create_connection(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/connection.py", line 72, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/usr/lib/python3.10/socket.py", line 955, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 1042, in _validate_conn
+    conn.connect()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 358, in connect
+    self.sock = conn = self._new_conn()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 186, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    retries = retries.increment(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 193, in __call__
+    response = self.session.request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 565, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 41, in get_google_credentials
+    creds.refresh(Request())
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/credentials.py", line 335, in refresh
+    ) = reauth.refresh_grant(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/reauth.py", line 324, in refresh_grant
+    response_status_ok, response_data, retryable_error = _client._token_endpoint_request_no_throw(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 213, in _token_endpoint_request_no_throw
+    request_succeeded, response_data, retryable_error = _perform_request()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 189, in _perform_request
+    response = request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 199, in __call__
+    six.raise_from(new_exc, caught_exc)
+  File "<string>", line 3, in raise_from
+google.auth.exceptions.TransportError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 46, in get_google_credentials
+    logger_instance.error("Failed to refresh credentials:", e)
+Message: 'Failed to refresh credentials:'
+Arguments: (TransportError(ConnectionError(MaxRetryError("HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7f7f209014e0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))"))),)
+2023-12-28 03:50:45,861 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2023-12-28 03:50:45,869 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-28 03:50:45,872 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F28+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+2023-12-28 03:50:45,872 - google_auth_httplib2 - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-28 03:50:55,953 - etl_daily_log - ERROR - Error while reading email: Unable to find the server at oauth2.googleapis.com
+2023-12-28 03:50:55,954 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+2023-12-28 03:50:55,972 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+50 4 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+2023-12-28 04:50:01,795 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-28 04:50:01,795 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-28 04:50:01.795926
+
+2023-12-28 04:50:01,796 - etl_daily_log - INFO - Stop date is set for: 2023/12/28
+
+2023-12-28 04:50:01,796 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-28 04:50:01,796 - etl_daily_log - INFO - Loading app data from JSON file.
+2023-12-28 04:50:01,796 - etl_daily_log - INFO - Start date is set for: 2023/12/24
+
+2023-12-28 04:50:01,797 - etl_daily_log - INFO - Read mc_config.ini successful
+2023-12-28 04:50:01,798 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+2023-12-28 04:50:01,798 - etl_daily_log - INFO - Trying to refresh credentials...
+2023-12-28 04:50:01,798 - google.auth.transport.requests - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-28 04:50:01,799 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 174, in _new_conn
+    conn = connection.create_connection(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/connection.py", line 72, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/usr/lib/python3.10/socket.py", line 955, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 1042, in _validate_conn
+    conn.connect()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 358, in connect
+    self.sock = conn = self._new_conn()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 186, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    retries = retries.increment(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 193, in __call__
+    response = self.session.request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 565, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 41, in get_google_credentials
+    creds.refresh(Request())
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/credentials.py", line 335, in refresh
+    ) = reauth.refresh_grant(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/reauth.py", line 324, in refresh_grant
+    response_status_ok, response_data, retryable_error = _client._token_endpoint_request_no_throw(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 213, in _token_endpoint_request_no_throw
+    request_succeeded, response_data, retryable_error = _perform_request()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 189, in _perform_request
+    response = request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 199, in __call__
+    six.raise_from(new_exc, caught_exc)
+  File "<string>", line 3, in raise_from
+google.auth.exceptions.TransportError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 46, in get_google_credentials
+    logger_instance.error("Failed to refresh credentials:", e)
+Message: 'Failed to refresh credentials:'
+Arguments: (TransportError(ConnectionError(MaxRetryError("HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))"))),)
+--- Logging error ---
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 174, in _new_conn
+    conn = connection.create_connection(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/connection.py", line 72, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+  File "/usr/lib/python3.10/socket.py", line 955, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 386, in _make_request
+    self._validate_conn(conn)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 1042, in _validate_conn
+    conn.connect()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 358, in connect
+    self.sock = conn = self._new_conn()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connection.py", line 186, in _new_conn
+    raise NewConnectionError(
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    retries = retries.increment(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 193, in __call__
+    response = self.session.request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/requests/adapters.py", line 565, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 41, in get_google_credentials
+    creds.refresh(Request())
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/credentials.py", line 335, in refresh
+    ) = reauth.refresh_grant(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/reauth.py", line 324, in refresh_grant
+    response_status_ok, response_data, retryable_error = _client._token_endpoint_request_no_throw(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 213, in _token_endpoint_request_no_throw
+    request_succeeded, response_data, retryable_error = _perform_request()
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/oauth2/_client.py", line 189, in _perform_request
+    response = request(
+  File "/home/oseloka/pyprojects/maplecourt_py/venv_mc/lib/python3.10/site-packages/google/auth/transport/requests.py", line 199, in __call__
+    six.raise_from(new_exc, caught_exc)
+  File "<string>", line 3, in raise_from
+google.auth.exceptions.TransportError: HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/logging/__init__.py", line 1100, in emit
+    msg = self.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 943, in format
+    return fmt.format(record)
+  File "/usr/lib/python3.10/logging/__init__.py", line 678, in format
+    record.message = record.getMessage()
+  File "/usr/lib/python3.10/logging/__init__.py", line 368, in getMessage
+    msg = msg % self.args
+TypeError: not all arguments converted during string formatting
+Call stack:
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 162, in <module>
+    records = extract_mc_transaction(sender, start_date, stop_date, subject, logger)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/expenses_transform_load_daily.py", line 30, in extract_mc_transaction
+    email_data = read_email(sender, start_date, stop_date, subject, logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/comms.py", line 60, in read_email
+    service = get_google_credentials(logger_instance)
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/utils/credentials.py", line 46, in get_google_credentials
+    logger_instance.error("Failed to refresh credentials:", e)
+Message: 'Failed to refresh credentials:'
+Arguments: (TransportError(ConnectionError(MaxRetryError("HTTPSConnectionPool(host='oauth2.googleapis.com', port=443): Max retries exceeded with url: /token (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7fdecc0fd2d0>: Failed to establish a new connection: [Errno -3] Temporary failure in name resolution'))"))),)
+2023-12-28 04:50:11,812 - googleapiclient.discovery_cache - INFO - file_cache is only supported with oauth2client<4.0.0
+2023-12-28 04:50:11,814 - etl_daily_log - INFO - Retrieving email(s)
+2023-12-28 04:50:11,816 - googleapiclient.discovery - DEBUG - URL being requested: GET https://gmail.googleapis.com/gmail/v1/users/me/messages?q=from%3A%27GeNS%40gtbank.com%27+after%3A2023%2F12%2F24+before%3A2023%2F12%2F28+subject%3A%27GeNS+Transaction+%2A%27&alt=json
+2023-12-28 04:50:11,816 - google_auth_httplib2 - DEBUG - Making request: POST https://oauth2.googleapis.com/token
+2023-12-28 04:50:21,888 - etl_daily_log - ERROR - Error while reading email: Unable to find the server at oauth2.googleapis.com
+2023-12-28 04:50:21,888 - etl_daily_log - ERROR - Rescheduling process due to error retrieving email data:
+'NoneType' object is not iterable
+2023-12-28 04:50:21,920 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+50 5 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily

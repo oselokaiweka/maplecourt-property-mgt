@@ -28,9 +28,10 @@ if __name__ == '__main__':
 
     try:
         # SERVICE CHARGE FUNCTION 
+        filters = ['REHAB', 'CLEARED', 'NOV']
         sc_start = date1 # Use month start if None is specified. 
         logger.info("Processing service charge report.")
-        sc_table_data, sc_summary_dict = mc1_sc_report(pool, sc_start, logger)
+        sc_table_data, sc_summary_dict = mc1_sc_report(pool, sc_start, filters, logger)
         logger.info("Processing service charge report completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing sc report")
@@ -38,7 +39,7 @@ if __name__ == '__main__':
 
     try:   
         # NON-SERVICE CHARGE FUNCTION
-        filters = ['CLEARED']
+        filters = ['REHAB', 'CLEARED']
         start_date = date1
         logger.info("\nProcessing non-service charge report.")
         nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, start_date, filters, logger)

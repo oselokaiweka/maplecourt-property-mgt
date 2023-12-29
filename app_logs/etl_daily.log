@@ -1,6 +1,6 @@
-PROCESS RUN TIMESTAMP...........................................................................: 2023-12-27 02:00:02.530611
+PROCESS RUN TIMESTAMP...........................................................................: 2023-12-28 04:50:01.795926
 
-Stop date is set for: 2023/12/27
+Stop date is set for: 2023/12/28
 
 Read mc_config.ini successful
 Loading app data from JSON file.
@@ -9,10 +9,9 @@ Start date is set for: 2023/12/24
 Read mc_config.ini successful
 Failed to obtain valid creddentials
 Trying to refresh credentials...
-Credentials refreshed successfully.
-
 Retrieving email(s)
+Error while reading email: Unable to find the server at oauth2.googleapis.com
 Rescheduling process due to error retrieving email data:
 'NoneType' object is not iterable
 The 'etl_daily' cron job has been successfully reset as follows:
-0 3 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+50 5 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily

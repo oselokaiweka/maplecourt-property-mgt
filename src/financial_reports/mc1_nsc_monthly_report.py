@@ -95,7 +95,7 @@ def mc1_nsc_report(pool, nsc_start, filters, logger_instance):
         if records:
             logger_instance.info("Records retrieved for processing.\n")
             # Filter records based on specific description
-            filtered_records = [record for record in records if all(filter not in record[2] for filter in filters)]
+            filtered_records = [record for record in records if all(filter not in record[2].split() for filter in filters)]
             nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
             subtotal_1 = sum(record[3] for record in filtered_records)
             subtotal_2 = 0 # ub-total after applying 10% markup
@@ -110,7 +110,7 @@ def mc1_nsc_report(pool, nsc_start, filters, logger_instance):
                 formatted_date = record[1].strftime('%Y-%m-%d')
                 description = record[2]
                 amount = float(record[3])
-                amount2 = 100 * floor(amount * 1.1 / 100) if '.' not in description else amount # Applying 10% markup to the nearest 100 on amount
+                amount2 = 100 * floor(amount * 1.1 / 100) if '.' not in description.split() else amount # Applying 10% markup to the nearest 100 on amount
                 subtotal_2 += amount2
                 amount2f = f"{amount2:,.2f}" # Formating digits to two decimal places.
                 nsc_table_data.append([serial_num, id, formatted_date, description, amount2f])

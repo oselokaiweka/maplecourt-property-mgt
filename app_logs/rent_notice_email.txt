@@ -134,3 +134,29 @@ Traceback (most recent call last):
   File "/usr/lib/python3.10/logging/__init__.py", line 2182, in shutdown
     h.flush()
 TypeError: 'bool' object is not callable
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+2023-12-27 11:45:01,763 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-27 11:45:01,763 - rent_notice_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-27 11:45:01.763448
+
+2023-12-27 11:45:01,765 - rent_notice_log - INFO - MySQL process is already running.
+2023-12-27 11:45:01,920 - rent_notice_log - INFO - MySQL connection pool created.
+2023-12-27 11:45:01,921 - rent_notice_log - INFO - Connected to mc_pool pool successfully
+
+2023-12-27 11:45:01,923 - rent_notice_log - INFO - Read mc_config.ini successful
+2023-12-27 11:45:01,924 - rent_notice_log - INFO - Checking for upcoming rent...
+2023-12-27 11:45:01,925 - rent_notice_log - INFO - No upcoming rent found.
+2023-12-27 11:45:01,925 - rent_notice_log - INFO - Connection and cursor closed.
+
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+2023-12-29 11:45:01,782 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-29 11:45:01,783 - rent_notice_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-29 11:45:01.783130
+
+2023-12-29 11:45:01,785 - rent_notice_log - INFO - MySQL process is already running.
+2023-12-29 11:45:01,942 - rent_notice_log - INFO - MySQL connection pool created.
+2023-12-29 11:45:01,943 - rent_notice_log - INFO - Connected to mc_pool pool successfully
+
+2023-12-29 11:45:01,943 - rent_notice_log - INFO - Read mc_config.ini successful
+2023-12-29 11:45:01,943 - rent_notice_log - INFO - Checking for upcoming rent...
+2023-12-29 11:45:01,944 - rent_notice_log - INFO - No upcoming rent found.
+2023-12-29 11:45:01,946 - rent_notice_log - INFO - Connection and cursor closed.
+
