@@ -20,7 +20,7 @@ if __name__ == '__main__':
         date1 = '2023-12-01'
         date2 = '2023-12-31'
         logger.info("Processing management fee report.")
-        mgtfee_table_data, mgtfee_summary_dict = mc1_mgt_report(pool, date1, date2, logger)
+        mgtfee_table_data = mc1_mgt_report(pool, date1, date2, logger)
         logger.info("Processing management fee report completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing mgt report")
@@ -28,9 +28,10 @@ if __name__ == '__main__':
 
     try:
         # SERVICE CHARGE FUNCTION 
+        filters = ['REHAB', 'CLEARED', 'NOV']
         sc_start = date1 # Use month start if None is specified. 
         logger.info("Processing service charge report.")
-        sc_table_data, sc_summary_dict = mc1_sc_report(pool, sc_start, logger)
+        sc_table_data = mc1_sc_report(pool, sc_start, filters, logger)
         logger.info("Processing service charge report completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing sc report")
@@ -38,10 +39,10 @@ if __name__ == '__main__':
 
     try:   
         # NON-SERVICE CHARGE FUNCTION
-        filters = ['CLEARED']
+        filters = ['REHAB', 'CLEARED']
         start_date = date1
         logger.info("\nProcessing non-service charge report.")
-        nsc_table_data, nsc_summary_dict = mc1_nsc_report(pool, start_date, filters, logger)
+        nsc_table_data = mc1_nsc_report(pool, start_date, filters, logger)
         logger.info("Processing non-service charge report completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing nsc report")
@@ -69,9 +70,9 @@ if __name__ == '__main__':
     try:
         # GENERATE PDF FUNCTION
         logger.info("Generating report pdf document.")
-        generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
-                    mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
-                    sc_table_data, sc_summary_dict, # <<< SC VARIABLES
+        generate_pdf(nsc_table_data, # <<< NSC VARIABLES
+                    mgtfee_table_data, # <<< MGT FEE VARIABLES
+                    sc_table_data, # <<< SC VARIABLES
                     date1, # <<< START DATE
                     logger) # <<< LOGGER
         logger.info("Generating report pdf document completed successfully.\n")

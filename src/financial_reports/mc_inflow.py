@@ -118,23 +118,41 @@ def get_landlord_inflow(pool, inf_start, logger_instance):
         records = cursor.fetchall()
 
         if records:
+            columns = cursor.column_names
+            logger_instance.info("The following payments have been received:\n")
+
+            logger_instance.info(f"  {columns[0]:2}  :  {columns[1]:30}  : {columns[3]:10} :  {columns[4]:10}")
+            logger_instance.info("---------------------------------------------------------------------")
+            for record in records:
+                logger_instance.info(f"{record[0]:4}  :  {record[1]:30}  :  {record[3]:5}     :  {record[4]:-10,.2f}")
             MC1L1_payments = [record for record in records if record[2] == 1 and record[3] == 1 and int(record[0]) > last_payment_id]
             MC2L1_payments = [record for record in records if record[2] == 1 and record[3] == 2 and int(record[0]) > last_payment_id]
             MC2L2_payments = [record for record in records if record[2] == 2 and record[3] == 2 and int(record[0]) > last_payment_id]
             MC2L3_payments = [record for record in records if record[2] == 3 and record[3] == 2 and int(record[0]) > last_payment_id]
             
             if MC1L1_payments:
+                logger_instance.info(f"\nThe records for MC1 include:")
+                for record in MC1L1_payments:
+                    logger_instance.info(f"{record[0]:4}  :  {record[1]:30}  :  {record[3]:5}     :  {record[4]:-10,.2f}")
+
+                total_current_payment = round(sum(float(record[4]) for record in MC1L1_payments), 2)
+                logger_instance.info(f"Total MC1 payment recieved: {total_current_payment}")
+
                 last_payment_id = max(int(record[0]) for record in MC1L1_payments) #Update last_payment_id to Max id from payment records processed.
+
                 payments_data['last_payment_id'] = last_payment_id
-                payments_data['available_balance'] = round(sum(float(record[4]) for record in MC1L1_payments) + available_balance, 2)
+                payments_data['available_balance'] = round(total_current_payment + available_balance, 2)
+                logger_instance.info(f"Updated Available balance: {payments_data['available_balance']}")
                 payments_data['date_processed'] = datetime.now().strftime('%Y-%m-%d [%H:%M:%S]')
                 try:
                     access_app_data('w', logger_instance, app_data) # See file_paths.py
                 except Exception as e:
                     logger_instance.exception("Unable to access app data in write mode")
             else:
+                logger_instance.info("There are no new payments for MC1")
                 pass
         else:
+            logger_instance.info("No new payments received.")
             pass
         
     except Exception as e:

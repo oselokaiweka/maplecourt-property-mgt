@@ -117,21 +117,36 @@ def mc1_mgt_report(pool, mgt_start, mgt_stop, logger_instance):
 
             # Updating app data json file.
             try:
-                # Update json file
-                mgt_net_summary['bill_total'] = round(total_mgt_fee,2)
+                # Update json file if mgt_start is after app data stop date to avoid duplicate processing
+                if mgt_start > datetime.strptime(mgt_net_summary['bill_stop_date'], '%Y-%m-%d'):
+                    mgt_net_summary['balance_brought_f'] = mgt_net_summary['bill_outstanding'] # Push any outstanding from previous payment processing to balance_brought_f.
+                    mgt_net_summary['bill_outstanding'] = mgt_net_summary['bill_total'] # Set bill outstanding to last months bill total ready for received payment processing.
+                    mgt_net_summary['bill_total'] = round(total_mgt_fee,2) # New bill total will be processed with payment of new invoice being created.
+                    mgt_net_summary['bill_start_date'] = mgt_start.strftime('%Y-%m-%d')
+                    mgt_net_summary['bill_stop_date'] = mgt_stop.strftime('%Y-%m-%d')
+
+                    access_app_data('w', logger_instance, app_data)
+                else:
+                    logger_instance.exception("Report for the period has been processed already.")
+
+            except Exception as e:
+                logger_instance.exception("Unable to dump app data to file")
+
+            return mgtfee_table_data
+        else:
+            logger_instance.info("No record found")
+            # Update json file if mgt_start is after app data stop date to avoid duplicate processing
+            if mgt_start > datetime.strptime(mgt_net_summary['bill_stop_date'], '%Y-%m-%d'):
+                mgt_net_summary['balance_brought_f'] = mgt_net_summary['bill_outstanding'] # Push any outstanding from previous payment processing to balance_brought_f.
+                mgt_net_summary['bill_outstanding'] = mgt_net_summary['bill_total'] # Set bill outstanding to last months bill total ready for received payment processing.
+                mgt_net_summary['bill_total'] = 0.0 # New bill total will be processed with payment of new invoice being created.
                 mgt_net_summary['bill_start_date'] = mgt_start.strftime('%Y-%m-%d')
                 mgt_net_summary['bill_stop_date'] = mgt_stop.strftime('%Y-%m-%d')
 
                 access_app_data('w', logger_instance, app_data)
-            except Exception as e:
-                logger_instance.exception("Unable to dump app data to file")
-
-            mgtfee_summary_dict = {"total_mgt_fee":total_mgt_fee, "period_start":mgt_start}
-            return mgtfee_table_data, mgtfee_summary_dict
-        else:
-            logger_instance.info("No record found")
-            mgtfee_summary_dict = {"total_mgt_fee":total_mgt_fee, "period_start":mgt_start}
-            return mgtfee_table_data, mgtfee_summary_dict
+            else:
+                logger_instance.exception("Report for the period has been processed already.")
+            return mgtfee_table_data
     except Exception as e:
         logger_instance.exception("An error occurred while processing nsc report: {e}")
     finally:

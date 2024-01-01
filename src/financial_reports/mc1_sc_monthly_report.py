@@ -28,8 +28,10 @@ load_new_service_charge_data = """
                     min(ID) as ID
                 from maplecourt.Statement_biz
                 where Type =  'Debit'
-                and ((lower(Reference) like '%mc1sc%')
-                or (lower(Reference) like '%mc1%_sc%'))
+                and (
+                    (lower(Reference) like '%mc1sc%') or
+                    (lower(Reference) like '%mc1%_sc%')
+                )
                 and lower(Reference) not like '%mc1%nsc%'
                 and date(Date) between %s and %s
                 group by Description, date(Date)
@@ -70,7 +72,7 @@ from maplecourt.MC1sc_expenses where date between %s and %s;
 """
    
 
-def mc1_sc_report(pool, sc_start, logger_instance):
+def mc1_sc_report(pool, sc_start, filters, logger_instance):
     # Obtain pool connection if available or add connection then obtain pool connection.
     connection, cursor = get_cursor(pool, logger_instance)
 
@@ -97,14 +99,17 @@ def mc1_sc_report(pool, sc_start, logger_instance):
 
         if records:
             logger_instance.info("Records retrieved and ready for processing.")
+
+            # Filter records based on key words.
+            filtered_records = [record for record in records if all(filter not in record[2].split() for filter in filters)]
             serial_num = 0
             columns = cursor.column_names
-            subtotal = sum(record[3] for record in records) 
+            subtotal = sum(record[3] for record in filtered_records) 
             sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
 
             logger_instance.info(f'S/N  :  {columns[0]:5}  :  {columns[1]:10}  :  {columns[2]:45}  :  {columns[3]}')
             logger_instance.info('-----------------------------------------------------------------------------------------------')
-            for record in records:
+            for record in filtered_records:
                 # Format date to display date only
                 id = 'S0' + str(record[0])
                 date = record[1].strftime('%Y-%m-%d')
@@ -125,26 +130,35 @@ def mc1_sc_report(pool, sc_start, logger_instance):
             logger_instance.info(f"{'Grand total':78}  :  {grand_total:-10,.2f}")
             
             try:
-                # Update json file
-                sc_net_summary['bill_total'] = round(grand_total,2)
+                # Update json file if nsc_start is after app data stop date to avoid duplicate processing
+                if sc_start > datetime.strptime(sc_net_summary['bill_stop_date'], '%Y-%m-%d'):
+                    sc_net_summary['bill_subtotal'] = round(subtotal, 2)
+                    sc_net_summary['bill_total'] = round(grand_total, 2)
+                    sc_net_summary['bill_start_date'] = sc_start.strftime('%Y-%m-%d')
+                    sc_net_summary['bill_stop_date'] = sc_stop.strftime('%Y-%m-%d')
+
+                    access_app_data('w', logger_instance, app_data)
+                else:
+                    logger_instance.exception("Report for the period has been processed already.")
+            except Exception as e:
+                logger_instance.exception("Unable to dump app data to file.")
+            
+            return sc_table_data
+        else:
+            logger_instance.info('No records retrieved.\n')
+            sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
+
+            # Update json file if nsc_start is after app data stop date to avoid duplicate processing
+            if sc_start > datetime.strptime(sc_net_summary['bill_stop_date'], '%Y-%m-%d'):
+                sc_net_summary['bill_subtotal'] = 0.0
+                sc_net_summary['bill_total'] = 0.0
                 sc_net_summary['bill_start_date'] = sc_start.strftime('%Y-%m-%d')
                 sc_net_summary['bill_stop_date'] = sc_stop.strftime('%Y-%m-%d')
 
                 access_app_data('w', logger_instance, app_data)
-            except Exception as e:
-                logger_instance.exception("Unable to dump app data to file.")
-            
-            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
-            return sc_table_data, sc_summary_dict
-        else:
-            logger_instance.info('No records retrieved.\n')
-            sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
-            subtotal = 0.0
-            management_fee = 0.0
-            grand_total = 0.0
-            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
-            
-            return sc_table_data, sc_summary_dict
+            else:
+                logger_instance.exception("Report for the period has been processed already.")
+            return sc_table_data
         
     except Exception as e:
         logger_instance.exception("An error occured while processing sc report: {e}")

@@ -1,6 +1,6 @@
-PROCESS RUN TIMESTAMP...........................................................................: 2023-12-27 02:00:02.530611
+PROCESS RUN TIMESTAMP...........................................................................: 2024-01-01 13:50:02.183689
 
-Stop date is set for: 2023/12/27
+Stop date is set for: 2024/01/01
 
 Read mc_config.ini successful
 Loading app data from JSON file.
@@ -12,7 +12,23 @@ Trying to refresh credentials...
 Credentials refreshed successfully.
 
 Retrieving email(s)
-Rescheduling process due to error retrieving email data:
-'NoneType' object is not iterable
+Retrieved 3 email(s)
+Records Extracted, Transformed and ready for Loading...
+
+Inserting records into maplecourt.Cashflow db table...
+MySQL process is already running.
+MySQL connection pool created.
+Connected to mc_pool pool successfully
+
+Event scheduler is started
+
+ETL complete!
+Total of 3 records where successfully inserted
+
+Read mc_config.ini successful
+Writing app data to JSON file.
+App data written to JSON file.
+Next ETL operation has been scheduled for tomorrow.
+Database cursor and connection are closed
 The 'etl_daily' cron job has been successfully reset as follows:
-0 3 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
+0 11 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily

@@ -95,7 +95,7 @@ def mc1_nsc_report(pool, nsc_start, filters, logger_instance):
         if records:
             logger_instance.info("Records retrieved for processing.\n")
             # Filter records based on specific description
-            filtered_records = [record for record in records if all(filter not in record[2] for filter in filters)]
+            filtered_records = [record for record in records if all(filter not in record[2].split() for filter in filters)]
             nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
             subtotal_1 = sum(record[3] for record in filtered_records)
             subtotal_2 = 0 # ub-total after applying 10% markup
@@ -110,7 +110,7 @@ def mc1_nsc_report(pool, nsc_start, filters, logger_instance):
                 formatted_date = record[1].strftime('%Y-%m-%d')
                 description = record[2]
                 amount = float(record[3])
-                amount2 = 100 * floor(amount * 1.1 / 100) if '.' not in description else amount # Applying 10% markup to the nearest 100 on amount
+                amount2 = 100 * floor(amount * 1.1 / 100) if '.' not in description.split() else amount # Applying 10% markup to the nearest 100 on amount
                 subtotal_2 += amount2
                 amount2f = f"{amount2:,.2f}" # Formating digits to two decimal places.
                 nsc_table_data.append([serial_num, id, formatted_date, description, amount2f])
@@ -129,26 +129,39 @@ def mc1_nsc_report(pool, nsc_start, filters, logger_instance):
             logger_instance.info(f"{'Grand total':93}  :  {nsc_grand_total:-10,.2f}")   
 
             try:
-                # Update json file
-                nsc_net_summary['bill_total'] = round(nsc_grand_total,2)
-                nsc_net_summary['bill_start_date'] = nsc_start.strftime('%Y-%m-%d')
-                nsc_net_summary['bill_stop_date'] = nsc_stop.strftime('%Y-%m-%d')
+                # Update json file if nsc_start is after app data stop date to avoid duplicate processing
+                if nsc_start > datetime.strptime(nsc_net_summary['bill_stop_date'], '%Y-%m-%d'):
+                    nsc_net_summary['balance_brought_f'] = nsc_net_summary['bill_outstanding'] # Push any outstanding from previous payment processing to balance_brought_f.
+                    nsc_net_summary['bill_outstanding'] = nsc_net_summary['bill_total'] # Set bill outstanding to last months bill total ready for received payment processing.
+                    nsc_net_summary['bill_subtotal'] = round(nsc_subtotal, 2) # New bill subtotal will be processed with payment of new invoice being created.
+                    nsc_net_summary['bill_total'] = round(nsc_grand_total,2) # New bill total will be processed with payment of new invoice being created.
+                    nsc_net_summary['bill_start_date'] = nsc_start.strftime('%Y-%m-%d')
+                    nsc_net_summary['bill_stop_date'] = nsc_stop.strftime('%Y-%m-%d')
                 
-                access_app_data('w', logger_instance, app_data)
+                    access_app_data('w', logger_instance, app_data)
+                else:
+                    logger_instance.exception("Report for the period has been processed already.")
             except Exception as e:
                 logger_instance.exception("Unable to update bal brought forward json file.")
                 
-            nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
-            return nsc_table_data, nsc_summary_dict
+            return nsc_table_data
         else:
             logger_instance.info("No records retrieved.\n")
-            nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
-            nsc_subtotal = 0.0
-            nsc_management_fee = 0.0
-            nsc_grand_total = 0.0
-            nsc_summary_dict = {"subtotal":nsc_subtotal, "mgt_fee":nsc_management_fee, "grand_total":nsc_grand_total}                 
+            nsc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']] 
+
+            # Update json file if nsc_start is after app data stop date to avoid duplicate processing
+            if nsc_start > datetime.strptime(nsc_net_summary['bill_stop_date'], '%Y-%m-%d'):            
+                nsc_net_summary['balance_brought_f'] = nsc_net_summary['bill_outstanding'] # Push any outstanding from previous payment processing to balance_brought_f.
+                nsc_net_summary['bill_outstanding'] = nsc_net_summary['bill_total'] # Set bill outstanding to last months bill total ready for received payment processing.
+                nsc_net_summary['bill_subtotal'] = 0.0 # New bill subtotal will be processed with payment of new invoice being created.
+                nsc_net_summary['bill_total'] = 0.0 # New bill total will be processed with payment of new invoice being created.
+                nsc_net_summary['bill_start_date'] = nsc_start.strftime('%Y-%m-%d')
+                nsc_net_summary['bill_stop_date'] = nsc_stop.strftime('%Y-%m-%d')             
             
-            return nsc_table_data, nsc_summary_dict
+                access_app_data('w', logger_instance, app_data)
+            else:
+                logger_instance.exception("Report for the period has been processed already.")
+            return nsc_table_data
         
     except Exception as e:
         logger_instance.exception("An error occured while processing nsc report: {e}")
