@@ -160,3 +160,35 @@ TypeError: 'bool' object is not callable
 2023-12-29 11:45:01,944 - rent_notice_log - INFO - No upcoming rent found.
 2023-12-29 11:45:01,946 - rent_notice_log - INFO - Connection and cursor closed.
 
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+2023-12-31 11:45:01,645 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2023-12-31 11:45:01,646 - rent_notice_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2023-12-31 11:45:01.646290
+
+2023-12-31 11:45:01,647 - rent_notice_log - INFO - MySQL process is already running.
+2023-12-31 11:45:01,813 - rent_notice_log - INFO - MySQL connection pool created.
+2023-12-31 11:45:01,814 - rent_notice_log - INFO - Connected to mc_pool pool successfully
+
+2023-12-31 11:45:01,815 - rent_notice_log - INFO - Read mc_config.ini successful
+2023-12-31 11:45:01,815 - rent_notice_log - INFO - Checking for upcoming rent...
+2023-12-31 11:45:01,816 - rent_notice_log - INFO - No upcoming rent found.
+2023-12-31 11:45:01,817 - rent_notice_log - INFO - Connection and cursor closed.
+
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+2024-01-01 11:45:01,543 - src.utils.file_paths - INFO - Read mc_config.ini successful
+2024-01-01 11:45:01,544 - rent_notice_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2024-01-01 11:45:01.543981
+
+2024-01-01 11:45:01,545 - rent_notice_log - INFO - MySQL process is already running.
+2024-01-01 11:45:01,680 - rent_notice_log - INFO - MySQL connection pool created.
+2024-01-01 11:45:01,681 - rent_notice_log - INFO - Connected to mc_pool pool successfully
+
+2024-01-01 11:45:01,681 - rent_notice_log - INFO - Read mc_config.ini successful
+2024-01-01 11:45:01,681 - rent_notice_log - INFO - Checking for upcoming rent...
+2024-01-01 11:45:01,682 - rent_notice_log - INFO - Upcoming rent data found.
+
+2024-01-01 11:45:01,682 - rent_notice_log - ERROR - An error occured
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 90, in send_upcoming_rent_email
+    tenant_name, email, rent_amount, service_charge, due_date, payment_total = record[:5]
+ValueError: not enough values to unpack (expected 6, got 5)
+2024-01-01 11:45:01,684 - rent_notice_log - INFO - Connection and cursor closed.
+

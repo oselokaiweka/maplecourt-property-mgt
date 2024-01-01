@@ -15,11 +15,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image, Fram
 from src.utils.file_paths import dir_path, access_app_data, read_config
 
 
-def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
-                mgtfee_table_data, mgtfee_summary_dict, # <<< MGT FEE VARIABLES
-                sc_table_data, sc_summary_dict, # <<< SC VARIABLES 
-                period_start, # <<< START DATE 
-                logger_instance): # LOGGER  
+def generate_pdf(nsc_table_data, mgtfee_table_data, sc_table_data, period_start, logger_instance):  
     
     config = read_config(logger_instance)
     file_location = config.get('FilePaths', 'mc1_report_directory')
@@ -66,7 +62,8 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     ]
 
     # Add business logo
-    logo = Image(dir_path+'/resources/static/images/business_logo.png', width=2.1*inch, height=0.8*inch)
+    business_logo = config.get('FilePaths', 'business_logo')
+    logo = Image(business_logo, width=2.1*inch, height=0.8*inch)
     logo.spaceAfter = 5
     logo.hAlign = 'LEFT'
     elements.append(logo)
@@ -96,8 +93,8 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     try:
         app_data = access_app_data('r', logger_instance)
         bills_data = app_data['bills']
-        service_charge = float(app_data['rates']['service_charge'])
-        incidentals =  float(app_data['rates']['incidentals'])
+        rates_data = app_data['rates']
+        payments_data = app_data['payments']
     except Exception as e:
         logger_instance.exception(f"Unable to retrieve app data")
 
@@ -111,23 +108,26 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
 
     summary_table_data = [
         ['SUMMARY', 'REF CODE','AMOUNT(NGN)'],
-        [f"{report_start.replace(month=(report_start.month + 1) % 12 if report_start.month != 11 else 12).strftime('%B').upper()} SERVICE CHARGE:", 'MC1L1 SC', f'{service_charge:,.2f}'],
-        [f"{report_start.replace(month=(report_start.month + 1) % 12 if report_start.month != 11 else 12).strftime('%B').upper()} INCIDENTALS:", 'MC1L1 NSC', f'{incidentals:,.2f}'], 
-        [f"{report_start.strftime('%B').upper()} REIMBURSABLE:", 'MC1L1 NSC', f"{nsc_summary_dict['grand_total']:,.2f}"],
-        [f"{report_start.strftime('%B').upper()} MANAGEMENT FEE:", 'MC1L1 MGT', f"{mgtfee_summary_dict['total_mgt_fee']:,.2f}"],
-        ['PREVIOUS SERVICE CHARGE DEFICIT', 'MC1L1 SC', f"{app_data['rates']['prev_service_charge']-bills_data['sc']['received']:,.2f}"],
-        #['LESS F4 SERVICE CHARGE', 'N/A', f"{app_data['payments']['tenant_sc']:,.2f}"],
-        ['NET TOTAL PAYABLE:', 'MC1L1' ,f"N{service_charge + incidentals + nsc_summary_dict['grand_total'] + mgtfee_summary_dict['total_mgt_fee'] + app_data['rates']['prev_service_charge']-bills_data['sc']['received'] - app_data['payments']['tenant_sc']:,.2f}"]
+        [f"{report_start.replace(month=(report_start.month + 1) % 12 if report_start.month != 11 else 12).strftime('%B').upper()} SERVICE CHARGE:", 'MC1L1 SC', f"{rates_data['service_charge']:,.2f}"],
+        [f"{report_start.replace(month=(report_start.month + 1) % 12 if report_start.month != 11 else 12).strftime('%B').upper()} INCIDENTALS:", 'MC1L1 NSC', f"{rates_data['incidentals']:,.2f}"], 
+        [f"{report_start.strftime('%B').upper()} REIMBURSABLE:", 'MC1L1 NSC', f"{bills_data['nsc']['bill_total']:,.2f}"],
+        [f"{report_start.strftime('%B').upper()} MANAGEMENT FEE:", 'MC1L1 MGT', f"{bills_data['mgt']['bill_total'] + bills_data['mgt']['bill_outstanding']:,.2f}"],
+        ['PREVIOUS SERVICE CHARGE PAYMENT DEFICIT', 'MC1L1 SC', f"{rates_data['service_charge_deficit']:,.2f}"],
+        ['LESS PREVIOUS PAYMENT BALANCE', 'N/A', f"{payments_data['tenant_sc'] + payments_data['available_balance']:,.2f}"],
+        ['NET TOTAL PAYABLE:', 'MC1L1' , f"N{rates_data['service_charge'] + rates_data['incidentals'] + bills_data['nsc']['bill_total'] + bills_data['mgt']['bill_total'] + rates_data['service_charge_deficit'] - payments_data['tenant_sc'] - payments_data['available_balance']:,.2f}"]
     ]
     
     summary_table = Table(summary_table_data, colWidths=[355, 95, 95], hAlign='LEFT')
     summary_table.setStyle(TableStyle(summary_table_style))
-    summary_table.spaceAfter = 15
+    summary_table.spaceAfter = 20
     elements.append(summary_table)
 
+    logger_instance.info("\nMAIN SUMMARY TABLE DATA:")
+    for item in summary_table_data:
+        logger_instance.info(item)
 
     # Building management fee report section
-    mgt_report_title = Paragraph(f"MANAGEMENT FEE [ {mgtfee_summary_dict['period_start'].strftime('%B %Y')} ]", left_aligned_normal_bold)
+    mgt_report_title = Paragraph(f"MANAGEMENT FEE [ {report_start.strftime('%B %Y')} ]", left_aligned_normal_bold)
     mgt_report_title.spaceAfter = 2
     elements.append(mgt_report_title)
 
@@ -145,17 +145,24 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     mgtfee_table.spaceAfter = 0
     elements.append(mgtfee_table)
 
+    logger_instance.info("\nMGT FEE TABLE DATA:")
+    for item in mgtfee_table_data:
+        logger_instance.info(item)
+
     # Create table to display total mgt fee
     total_mgt_fee_data = [
-        ['TOTAL MANAGEMENT FEE FOR PERIOD', f"{mgtfee_summary_dict['total_mgt_fee']:,.2f}"],
+        ['TOTAL MANAGEMENT FEE FOR PERIOD', f"{bills_data['mgt']['bill_total']:,.2f}"],
         ['OUTSTANDING MANAGEMENT FEE', f"{bills_data['mgt']['bill_outstanding']:,.2f}"],
-        ['NET PAYABLE MANAGEMENT FEE', f"{mgtfee_summary_dict['total_mgt_fee'] + bills_data['mgt']['bill_outstanding']:,.2f}" ]
+        ['NET PAYABLE MANAGEMENT FEE', f"{bills_data['mgt']['bill_total'] + bills_data['mgt']['bill_outstanding']:,.2f}" ]
     ]
     total_mgt_fee_table = Table(total_mgt_fee_data, colWidths=[465, 80], hAlign='LEFT')
     total_mgt_fee_table.setStyle(TableStyle(summary_table_style))
-    total_mgt_fee_table.spaceAfter = 15
+    total_mgt_fee_table.spaceAfter = 20
     elements.append(total_mgt_fee_table)
 
+    logger_instance.info("\nMGT FEE summary table data:")
+    for item in total_mgt_fee_data:
+        logger_instance.info(item)
 
     # Building non-service charge report section
     nsc_report_title = Paragraph(f"NON-SERVICE CHARGE REIMBURSABLE EXPENSES - [ {datetime.strptime(bills_data['nsc']['bill_start_date'], '%Y-%m-%d').strftime('%d %b %Y')} to {datetime.strptime(bills_data['nsc']['bill_stop_date'], '%Y-%m-%d').strftime('%d %b %Y')} ]", left_aligned_normal_bold) 
@@ -167,19 +174,27 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     nsc_table.spaceAfter = 0
     elements.append(nsc_table)
 
+    logger_instance.info("\nNSC TABLE DATA:")
+    for item in nsc_table_data:
+        logger_instance.info(item)
+
     # Create a sum_table for sub-total, management_fee and grand_total for nsc table
     sum_table_data = [
-        ['SUB-TOTAL',f"{nsc_summary_dict['subtotal']:,.2f}"],
-        ['7.5% MANAGEMENT FEE', f"{nsc_summary_dict['mgt_fee']:,.2f}"],
-        ['TOTAL REIMBURSABLE EXPENSES FOR PERIOD', f"{nsc_summary_dict['grand_total']:,.2f}"],
-        ['PREVIOUS BALANCE BROUGHT FORWARD', f"{bills_data['nsc']['bill_outstanding']:,.2f}"],
-        ['NET PAYABLE REIMBURSABLE EXPENSES', F"{nsc_summary_dict['grand_total'] + bills_data['nsc']['bill_outstanding']:,.2f}"]
+        ['SUB-TOTAL',f"{bills_data['nsc']['bill_subtotal']:,.2f}"],
+        ['7.5% MANAGEMENT FEE', f"{bills_data['nsc']['bill_subtotal'] * rates_data['mgt_fee_%'] / 100:,.2f}"],
+        ['TOTAL REIMBURSABLE EXPENSES FOR PERIOD', f"{bills_data['nsc']['bill_total']:,.2f}"],
+        ['BALANCE BROUGHT FORWARD', f"{bills_data['nsc']['balance_brought_f']:,.2f}"],
+        ['NET PAYABLE REIMBURSABLE EXPENSES', F"{bills_data['nsc']['bill_total'] + bills_data['nsc']['bill_outstanding']:,.2f}"]
     ]
 
     sum_table = Table(sum_table_data, colWidths=[450, 95], hAlign='LEFT')
     sum_table.setStyle(TableStyle(summary_table_style))
-    sum_table.spaceAfter = 15
+    sum_table.spaceAfter = 20
     elements.append(sum_table)
+
+    logger_instance.info("\nNSC SUMMARY TABLE DATA:")
+    for item in sum_table_data:
+        logger_instance.info(item)
 
     # Building service charge report section
     nsc_report_title = Paragraph(f"SERVICE CHARGE RECURRING EXPENSES - [ {report_start.strftime('%B %Y')} ]", left_aligned_normal_bold) 
@@ -191,21 +206,28 @@ def generate_pdf(nsc_table_data, nsc_summary_dict, # <<< NSC VARIABLES
     sc_table.spaceAfter = 0
     elements.append(sc_table)
 
+    logger_instance.info("\nSC TABLE DATA:")
+    for item in sc_table_data:
+        logger_instance.info(item)
+
     # Create a sum_table for sub-total, management_fee and grand_total for nsc table
     sc_sum_table_data = [
-        ['SUB-TOTAL', f"{sc_summary_dict['subtotal']:,.2f}"],
-        ['7.5% MANAGEMENT FEE', f"{sc_summary_dict['mgt_fee']:,.2f}"],
+        ['SUB-TOTAL', f"{bills_data['sc']['bill_subtotal']:,.2f}"],
+        ['7.5% MANAGEMENT FEE', f"{bills_data['sc']['bill_subtotal'] * rates_data['mgt_fee_%'] / 100:,.2f}"],
         ['TOTAL SERVICE CHARGE EXPENSES FOR PERIOD', f"{bills_data['sc']['bill_total']:,.2f}"],
         ['BALANCE BROUGHT FORWARD', f"{bills_data['sc']['balance_brought_f']:,.2f}"], #f'{all_total - MC1L1_SC_NSC_MGT_LIST[1]:,.2f}'
-        ['TOTAL SERVICE CHARGE AND DIESEL CONTRIBUTION RECEIVED', f"{bills_data['sc']['received'] + app_data['payments']['diesel_contribution']:,.2f}"],
+        ['TOTAL SERVICE CHARGE AND DIESEL CONTRIBUTION RECEIVED', f"{bills_data['sc']['amount_paid'] + app_data['payments']['diesel_contribution']:,.2f}"],
         ['NET TOTAL', f"{bills_data['sc']['bill_outstanding']:,.2f}"]
     ]
 
     sc_sum_table = Table(sc_sum_table_data, colWidths=[450, 95], hAlign='LEFT')
     sc_sum_table.setStyle(TableStyle(summary_table_style))
-    sc_sum_table.spaceAfter = 20
+    sc_sum_table.spaceAfter = 25
     elements.append(sc_sum_table)
 
+    logger_instance.info("\nSC SUMMARY TABLE DATA:")
+    for item in sc_sum_table_data:
+        logger_instance.info(item)
 
     # Add closing remarks / name / designation
     closing_remark1 = Paragraph(f"Kindly make payments in favour of CHROMETRO NIG LTD, GTBank: 0117443245.", left_aligned_normal_bold) 

@@ -130,26 +130,35 @@ def mc1_sc_report(pool, sc_start, filters, logger_instance):
             logger_instance.info(f"{'Grand total':78}  :  {grand_total:-10,.2f}")
             
             try:
-                # Update json file
-                sc_net_summary['bill_total'] = round(grand_total,2)
+                # Update json file if nsc_start is after app data stop date to avoid duplicate processing
+                if sc_start > datetime.strptime(sc_net_summary['bill_stop_date'], '%Y-%m-%d'):
+                    sc_net_summary['bill_subtotal'] = round(subtotal, 2)
+                    sc_net_summary['bill_total'] = round(grand_total, 2)
+                    sc_net_summary['bill_start_date'] = sc_start.strftime('%Y-%m-%d')
+                    sc_net_summary['bill_stop_date'] = sc_stop.strftime('%Y-%m-%d')
+
+                    access_app_data('w', logger_instance, app_data)
+                else:
+                    logger_instance.exception("Report for the period has been processed already.")
+            except Exception as e:
+                logger_instance.exception("Unable to dump app data to file.")
+            
+            return sc_table_data
+        else:
+            logger_instance.info('No records retrieved.\n')
+            sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
+
+            # Update json file if nsc_start is after app data stop date to avoid duplicate processing
+            if sc_start > datetime.strptime(sc_net_summary['bill_stop_date'], '%Y-%m-%d'):
+                sc_net_summary['bill_subtotal'] = 0.0
+                sc_net_summary['bill_total'] = 0.0
                 sc_net_summary['bill_start_date'] = sc_start.strftime('%Y-%m-%d')
                 sc_net_summary['bill_stop_date'] = sc_stop.strftime('%Y-%m-%d')
 
                 access_app_data('w', logger_instance, app_data)
-            except Exception as e:
-                logger_instance.exception("Unable to dump app data to file.")
-            
-            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
-            return sc_table_data, sc_summary_dict
-        else:
-            logger_instance.info('No records retrieved.\n')
-            sc_table_data = [['S/N', 'ID', 'DATE', 'DESCRIPTION', 'AMOUNT(N)']]
-            subtotal = 0.0
-            management_fee = 0.0
-            grand_total = 0.0
-            sc_summary_dict = {"subtotal":subtotal, "mgt_fee":management_fee, "grand_total": grand_total}
-            
-            return sc_table_data, sc_summary_dict
+            else:
+                logger_instance.exception("Report for the period has been processed already.")
+            return sc_table_data
         
     except Exception as e:
         logger_instance.exception("An error occured while processing sc report: {e}")

@@ -1,19 +1,20 @@
 {
     "expenses_daily_etl": {
-        "start_date": "2023/12/24"
+        "start_date": "2024/01/01"
     },
     "rates": {
         "mgt_fee_%": 7.5,
         "prev_service_charge": 320833.0,
         "service_charge": 320833.0,
-        "incidentals": 25000.0
+        "incidentals": 25000.0,
+        "service_charge_deficit": 0.0
     },
     "payments": {
         "tenant_sc": 0.0,
         "last_payment_id": 55,
-        "available_balance": 0.0,
+        "available_balance": 24999.69,
         "diesel_contribution": 350000.0,
-        "date_processed": "2023-12-26 [14:52:57]"
+        "date_processed": "2024-01-01 [15:48:47]"
     },
     "bills": {
         "mgt": {
@@ -23,31 +24,33 @@
             "bill_stop_date": "2023-12-31",
             "balance_brought_f": 0.0,
             "bill_outstanding": 0.0,
-            "date_processed": "2023-12-06 [12:01:43]",
-            "last_payment_id": 9,
-            "amount_paid": 0.0
+            "date_processed": "2024-01-01 [15:48:47]",
+            "last_payment_id": 55,
+            "amount_paid": 123287.67
         },
         "nsc": {
             "bill_name": "non-service_charge",
+            "bill_subtotal": 13200,
             "bill_total": 14190.0,
             "bill_start_date": "2023-12-01",
             "bill_stop_date": "2023-12-31",
             "balance_brought_f": 0.0,
             "bill_outstanding": 0.0,
-            "date_processed": "2023-12-06 [12:01:43]",
-            "last_payment_id": 9,
-            "amount_paid": 0.0
+            "date_processed": "2024-01-01 [15:48:47]",
+            "last_payment_id": 55,
+            "amount_paid": 351148.77
         },
         "sc": {
             "bill_name": "service_charge",
+            "bill_subtotal": 631856.36,
             "bill_total": 679245.59,
             "bill_start_date": "2023-12-01",
             "bill_stop_date": "2023-12-31",
-            "balance_brought_f": 116213.98,
-            "bill_outstanding": -219567.03,
-            "date_processed": "2023-12-26 [14:52:57]",
+            "balance_brought_f": -12594.07,
+            "bill_outstanding": -104929.35,
+            "date_processed": "2024-01-01 [15:48:47]",
             "last_payment_id": 55,
-            "amount_paid": 424252.13
+            "amount_paid": 421580.87
         }
     }
 }

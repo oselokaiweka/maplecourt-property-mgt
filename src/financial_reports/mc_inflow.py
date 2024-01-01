@@ -132,7 +132,7 @@ def get_landlord_inflow(pool, inf_start, logger_instance):
             
             if MC1L1_payments:
                 logger_instance.info(f"\nThe records for MC1 include:")
-                for record in records:
+                for record in MC1L1_payments:
                     logger_instance.info(f"{record[0]:4}  :  {record[1]:30}  :  {record[3]:5}     :  {record[4]:-10,.2f}")
 
                 total_current_payment = round(sum(float(record[4]) for record in MC1L1_payments), 2)

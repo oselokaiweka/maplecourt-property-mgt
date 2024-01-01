@@ -1,4 +1,4 @@
-PROCESS RUN TIMESTAMP...........................................................................: 2023-12-29 11:45:01.783130
+PROCESS RUN TIMESTAMP...........................................................................: 2024-01-01 11:45:01.543981
 
 MySQL process is already running.
 MySQL connection pool created.
@@ -6,6 +6,12 @@ Connected to mc_pool pool successfully
 
 Read mc_config.ini successful
 Checking for upcoming rent...
-No upcoming rent found.
+Upcoming rent data found.
+
+An error occured
+Traceback (most recent call last):
+  File "/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/rent_notice_email.py", line 90, in send_upcoming_rent_email
+    tenant_name, email, rent_amount, service_charge, due_date, payment_total = record[:5]
+ValueError: not enough values to unpack (expected 6, got 5)
 Connection and cursor closed.
 
