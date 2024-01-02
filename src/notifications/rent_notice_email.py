@@ -90,7 +90,8 @@ def send_upcoming_rent_email(logger_instance):
             DATE_ADD(CURDATE(), INTERVAL 1 MONTH),
             DATE_ADD(CURDATE(), INTERVAL 2 MONTH),
             DATE_ADD(CURDATE(), INTERVAL 3 MONTH),
-            DATE_ADD(CURDATE(), INTERVAL 59 DAY)
+            DATE_ADD(CURDATE(), INTERVAL 7 DAY),
+            CURDATE()
         )
     ;
     """
