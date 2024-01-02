@@ -114,7 +114,7 @@ def send_upcoming_rent_email(logger_instance):
 
                 body = create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total, landlord, bank, logger_instance)
                 logger_instance.info(f"Creating email for {tenant_name}...\n")
-                success = send_email("Upcoming Rent Renewal", app_email, email, body, get_google_credentials(logger_instance))
+                success = send_email("Upcoming Rent Renewal", app_email, email, body, logger_instance)
 
                 if success:
                     logger_instance.info(f"Email sent to {tenant_name} successfully!\n")

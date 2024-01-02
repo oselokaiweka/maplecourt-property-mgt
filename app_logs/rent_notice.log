@@ -1,4 +1,4 @@
-PROCESS RUN TIMESTAMP...........................................................................: 2024-01-02 14:45:50.066780
+PROCESS RUN TIMESTAMP...........................................................................: 2024-01-02 17:35:57.317921
 
 Starting MySQL service...
 MySQL connection pool created.
@@ -8,9 +8,16 @@ Read mc_config.ini successful
 Checking for upcoming rent...
 Upcoming rent data found.
 
-('Paul Lasu', 'paullasu@aol.com', 1905000, 395000, datetime.date(2024, 3, 1), 2300000) / 6
+('Paul Lasu', 'paullasu@aol.com', 1905000, 395000, datetime.date(2024, 3, 1), 2300000, 'Enkolar Business Mgt Ltd', 'Zenith Bank - 1015460636') / 8
 Email body created
 Creating email for Paul Lasu...
 
+Valid credentials obtained.
+
+Email 'Upcoming Rent Renewal' sent!
+Email sent to Paul Lasu successfully!
+
+The 'rent_notice_email' cron job has been successfully reset as follows:
+0 10 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications/execute_rent_notice_email.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/rent_notice_email.txt 2>&1 # rent_notice_email
 Connection and cursor closed.
 
