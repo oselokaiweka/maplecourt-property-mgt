@@ -12,7 +12,7 @@ from src.utils.credentials import pool_connection, get_cursor, get_google_creden
 logger = mc_logger(log_name='rent_notice_log', log_level='INFO', log_file='rent_notice.log')
 
 
-def create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total, logger_instance):
+def create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total, landlord, bank, logger_instance):
     """
     Function creates email body for upcoming rent to tenants based on
     provided parameters. 
@@ -23,21 +23,26 @@ def create_email_body(tenant_name, due_date, rent_amount, service_charge, paymen
         rent_amount (decimal): Supplied as variable obtained from database.
         service_charge (decimal): Supplied as variable obtained from database.
         payment_total (decimal): rent_amount + service_charge.
+        landlord (str): Full name of property landlord.
+        bank (str): 'Bank_name - account_number' as one str.
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency.
 
     Returns:
-        Variable: Variable initialized with email body multi-line string. 
+        body: Variable initialized with multi-line email body string. 
     """  
     body = (
         f"Dear {tenant_name},\n\n"
         f"This is a friendly reminder that your tenancy expires on {due_date}.\n"
-        "We are happy with your tenancy and hereby extend you an offer to renew your tenancy as detailed below:\n\n"
-        f"OUTSTANDING RENT:  NGN{rent_amount}\n"
-        f"SERVICE CHARGE:  NGN{service_charge}\n"
-        f"TOTAL:  NGN{payment_total}\n\n"
+        "We are happy with your tenancy and hereby extend you a renewal offer as detailed below:\n\n"
+        f"OUTSTANDING RENT:  NGN{rent_amount:,.2f}\n"
+        f"SERVICE CHARGE:  NGN{service_charge:,.2f}\n"
+        f"TOTAL:  NGN{payment_total:,.2f}\n\n"
         "Kindly respond to this email stating if you will be renewing or not renewing.\n"
-        f"Please note that accepting to renew is accepting to make full payment on or before {due_date}.\n\n"
-        "Failure to respond will be treated as a decline to this offer.\n\n"
-        "Thank you for your prompt response.\n\n"
+        f"Please note that accepting to renew is accepting to make full payment on or before {due_date} to the bank detail below:\n\n"
+        f"ACCOUNT NAME: {landlord}\n"
+        f"ACCOUNT NUMBER: {bank}\n\n"
+        "Failure to respond will be treated as a decline to this offer.\n"
+        "Your prompt response is greatly appreciated.\n\n"
         "Thank You and Best Regards,\n"
         "ADMIN - CHROMETRO NIG\n"
         "MAPLE COURT APARTMENTS"
@@ -53,7 +58,7 @@ def send_upcoming_rent_email(logger_instance):
     sends email notification to the respective tenants from the tenant database table.
 
     Args:
-        pool (object): mysql connection pool object obtained from imported pool_connection function.
+        logger_instance (object): Inherits logger_instance in script where function is imported into for logging consistency.
     """
     # Variables to schedule cron job
     plus_hour = (datetime.now()) + (timedelta(hours=1))  # Current time plus one hour.
@@ -61,16 +66,33 @@ def send_upcoming_rent_email(logger_instance):
 
     # Query statement to fetch records of upcominng rentals that are 1 or 2 or 3 months away.
     upcoming_rent_records = """
-        SELECT concat(T.FirstName,' ',T.LastName) as TenantName, 
-        T.Email, U.RentPrice, U.ServiceCharge, R.StopDate, (U.RentPrice + U.ServiceCharge) as Total
-        FROM Units U inner join Tenants T using (UnitID)
-        inner join Rentals R using (TenantID) 
-        where R.StopDate in (
-            date_add(curdate(), interval 1 month),
-            date_add(curdate(), interval 2 month),
-            date_add(curdate(), interval 3 month),
-            curdate()
-        );
+    SELECT 
+        CONCAT(T.FirstName, ' ', T.LastName) AS TenantName,
+        T.Email,
+        U.RentPrice,
+        U.ServiceCharge,
+        R.StopDate,
+        (U.RentPrice + U.ServiceCharge) AS Total,
+        L.FullName AS Landlord,
+        L.BankDetails AS Bank
+    FROM
+        Rentals R
+            INNER JOIN
+        Tenants T ON R.TenantID = T.TenantID
+            INNER JOIN
+        Units U ON T.UnitID = U.UnitID
+            INNER JOIN
+        Property P ON U.PropertyID = P.ID
+            INNER JOIN
+        Landlords L ON P.LandlordID = L.LandlordID
+    WHERE
+        R.StopDate IN (
+            DATE_ADD(CURDATE(), INTERVAL 1 MONTH),
+            DATE_ADD(CURDATE(), INTERVAL 2 MONTH),
+            DATE_ADD(CURDATE(), INTERVAL 3 MONTH),
+            DATE_ADD(CURDATE(), INTERVAL 59 DAY)
+        )
+    ;
     """
 
     try:
@@ -87,10 +109,10 @@ def send_upcoming_rent_email(logger_instance):
         if records:
             logger_instance.info("Upcoming rent data found.\n")
             for record in records:
-                tenant_name, email, rent_amount, service_charge, due_date, payment_total = record[:5]
+                logger_instance.info(f"{record} / {len(cursor.description)}")
+                tenant_name, email, rent_amount, service_charge, due_date, payment_total, landlord, bank = record[:8]
 
-                body = create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total, logger_instance)
-                
+                body = create_email_body(tenant_name, due_date, rent_amount, service_charge, payment_total, landlord, bank, logger_instance)
                 logger_instance.info(f"Creating email for {tenant_name}...\n")
                 success = send_email("Upcoming Rent Renewal", app_email, email, body, get_google_credentials(logger_instance))
 
