@@ -140,7 +140,7 @@ def mc1_nsc_report(pool, nsc_start, filters, logger_instance):
                 
                     access_app_data('w', logger_instance, app_data)
                 else:
-                    logger_instance.exception("Report for the period has been processed already.")
+                    logger_instance.info("Report for the period has been processed already.")
             except Exception as e:
                 logger_instance.exception("Unable to update bal brought forward json file.")
                 
@@ -160,7 +160,7 @@ def mc1_nsc_report(pool, nsc_start, filters, logger_instance):
             
                 access_app_data('w', logger_instance, app_data)
             else:
-                logger_instance.exception("Report for the period has been processed already.")
+                logger_instance.info("Report for the period has been processed already.")
             return nsc_table_data
         
     except Exception as e:

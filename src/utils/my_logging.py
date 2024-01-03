@@ -1,7 +1,7 @@
 import os
 import logging
 
-from src.utils.file_paths import dir_path, read_config
+from src.utils.file_paths import read_config
 
 def mc_logger(log_name, log_level, log_file=None, logger_instance=None):
     """
@@ -29,21 +29,20 @@ def mc_logger(log_name, log_level, log_file=None, logger_instance=None):
 
     # Configure root logger_instance only if not already configured
     if logger_instance is None or not hasattr(logging, logger_instance):
-        logging.basicConfig(
-            level=getattr(logging, log_level),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
         logger_instance = logging.getLogger(log_name)
+        logger_instance.setLevel(getattr(logging, log_level))
 
         if log_file is not None:
             config = read_config()
             log_file_path = os.path.join(config.get('AppLogs', 'app_logs_directory'), log_file)
             
             file_handler = logging.FileHandler(log_file_path , mode='w')
+            file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             logger_instance.addHandler(file_handler)
         else:
             # If log_file is not specified, log to console.
             console_handler = logging.StreamHandler()
+            console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             logger_instance.addHandler(console_handler)
     
 
