@@ -1,11 +1,11 @@
-2024-01-03 11:45:02,545 - rent_notice_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2024-01-03 11:45:02.545585
+2024-01-08 11:45:01,838 - rent_notice_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2024-01-08 11:45:01.838144
 
-2024-01-03 11:45:02,547 - rent_notice_log - INFO - MySQL process is already running.
-2024-01-03 11:45:02,711 - rent_notice_log - INFO - MySQL connection pool created.
-2024-01-03 11:45:02,711 - rent_notice_log - INFO - Connected to mc_pool pool successfully
+2024-01-08 11:45:01,840 - rent_notice_log - INFO - MySQL process is already running.
+2024-01-08 11:45:01,991 - rent_notice_log - INFO - MySQL connection pool created.
+2024-01-08 11:45:01,991 - rent_notice_log - INFO - Connected to mc_pool pool successfully
 
-2024-01-03 11:45:02,712 - rent_notice_log - INFO - Read mc_config.ini successful
-2024-01-03 11:45:02,712 - rent_notice_log - INFO - Checking for upcoming rent...
-2024-01-03 11:45:02,735 - rent_notice_log - INFO - No upcoming rent found.
-2024-01-03 11:45:02,736 - rent_notice_log - INFO - Connection and cursor closed.
+2024-01-08 11:45:01,992 - rent_notice_log - INFO - Read mc_config.ini successful
+2024-01-08 11:45:01,992 - rent_notice_log - INFO - Checking for upcoming rent...
+2024-01-08 11:45:02,011 - rent_notice_log - INFO - No upcoming rent found.
+2024-01-08 11:45:02,012 - rent_notice_log - INFO - Connection and cursor closed.
 
