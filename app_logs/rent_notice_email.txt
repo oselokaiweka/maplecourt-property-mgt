@@ -193,3 +193,4 @@ ValueError: not enough values to unpack (expected 6, got 5)
 2024-01-01 11:45:01,684 - rent_notice_log - INFO - Connection and cursor closed.
 
 /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
