@@ -1,6 +1,6 @@
 {
     "expenses_daily_etl": {
-        "start_date": "2024/01/03"
+        "start_date": "2024/01/13"
     },
     "rates": {
         "mgt_fee_%": 7.5,
