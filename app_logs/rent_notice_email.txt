@@ -194,3 +194,5 @@ ValueError: not enough values to unpack (expected 6, got 5)
 
 /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
 /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/notifications

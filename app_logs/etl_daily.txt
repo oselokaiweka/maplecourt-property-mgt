@@ -1,0 +1,3 @@
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
+/home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl
