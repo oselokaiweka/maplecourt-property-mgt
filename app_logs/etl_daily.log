@@ -1,34 +1,34 @@
-2024-01-03 11:00:02,638 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2024-01-03 11:00:02.638937
+2024-01-25 11:00:02,575 - etl_daily_log - INFO - PROCESS RUN TIMESTAMP...........................................................................: 2024-01-25 11:00:02.575531
 
-2024-01-03 11:00:02,639 - etl_daily_log - INFO - Stop date is set for: 2024/01/03
+2024-01-25 11:00:02,575 - etl_daily_log - INFO - Stop date is set for: 2024/01/25
 
-2024-01-03 11:00:02,639 - etl_daily_log - INFO - Read mc_config.ini successful
-2024-01-03 11:00:02,639 - etl_daily_log - INFO - Loading app data from JSON file.
-2024-01-03 11:00:02,640 - etl_daily_log - INFO - Start date is set for: 2024/01/01
+2024-01-25 11:00:02,575 - etl_daily_log - INFO - Read mc_config.ini successful
+2024-01-25 11:00:02,576 - etl_daily_log - INFO - Loading app data from JSON file.
+2024-01-25 11:00:02,576 - etl_daily_log - INFO - Start date is set for: 2024/01/24
 
-2024-01-03 11:00:02,640 - etl_daily_log - INFO - Read mc_config.ini successful
-2024-01-03 11:00:02,643 - etl_daily_log - WARNING - Failed to obtain valid creddentials
-2024-01-03 11:00:02,643 - etl_daily_log - INFO - Trying to refresh credentials...
-2024-01-03 11:00:03,870 - etl_daily_log - INFO - Credentials refreshed successfully.
+2024-01-25 11:00:02,577 - etl_daily_log - INFO - Read mc_config.ini successful
+2024-01-25 11:00:02,579 - etl_daily_log - WARNING - Failed to obtain valid creddentials
+2024-01-25 11:00:02,579 - etl_daily_log - INFO - Trying to refresh credentials...
+2024-01-25 11:00:05,194 - etl_daily_log - INFO - Credentials refreshed successfully.
 
-2024-01-03 11:00:03,885 - etl_daily_log - INFO - Retrieving email(s)
-2024-01-03 11:00:16,920 - etl_daily_log - INFO - Retrieved 25 email(s)
-2024-01-03 11:00:16,924 - etl_daily_log - INFO - Records Extracted, Transformed and ready for Loading...
+2024-01-25 11:00:05,206 - etl_daily_log - INFO - Retrieving email(s)
+2024-01-25 11:00:07,108 - etl_daily_log - INFO - Retrieved 3 email(s)
+2024-01-25 11:00:07,110 - etl_daily_log - INFO - Records Extracted, Transformed and ready for Loading...
 
-2024-01-03 11:00:16,924 - etl_daily_log - INFO - Inserting records into maplecourt.Cashflow db table...
-2024-01-03 11:00:16,929 - etl_daily_log - INFO - MySQL process is already running.
-2024-01-03 11:00:17,126 - etl_daily_log - INFO - MySQL connection pool created.
-2024-01-03 11:00:17,126 - etl_daily_log - INFO - Connected to mc_pool pool successfully
+2024-01-25 11:00:07,111 - etl_daily_log - INFO - Inserting records into maplecourt.Cashflow db table...
+2024-01-25 11:00:07,114 - etl_daily_log - INFO - MySQL process is already running.
+2024-01-25 11:00:07,306 - etl_daily_log - INFO - MySQL connection pool created.
+2024-01-25 11:00:07,307 - etl_daily_log - INFO - Connected to mc_pool pool successfully
 
-2024-01-03 11:00:17,127 - etl_daily_log - INFO - Event scheduler is started
+2024-01-25 11:00:07,307 - etl_daily_log - INFO - Event scheduler is started
 
-2024-01-03 11:00:17,734 - etl_daily_log - INFO - ETL complete!
-Total of 25 records where successfully inserted
+2024-01-25 11:00:07,401 - etl_daily_log - INFO - ETL complete!
+Total of 3 records where successfully inserted
 
-2024-01-03 11:00:17,735 - etl_daily_log - INFO - Read mc_config.ini successful
-2024-01-03 11:00:17,736 - etl_daily_log - INFO - Writing app data to JSON file.
-2024-01-03 11:00:17,737 - etl_daily_log - INFO - App data written to JSON file.
-2024-01-03 11:00:17,738 - etl_daily_log - INFO - Next ETL operation has been scheduled for tomorrow.
-2024-01-03 11:00:17,741 - etl_daily_log - INFO - Database cursor and connection are closed
-2024-01-03 11:00:17,779 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
+2024-01-25 11:00:07,401 - etl_daily_log - INFO - Read mc_config.ini successful
+2024-01-25 11:00:07,402 - etl_daily_log - INFO - Writing app data to JSON file.
+2024-01-25 11:00:07,402 - etl_daily_log - INFO - App data written to JSON file.
+2024-01-25 11:00:07,402 - etl_daily_log - INFO - Next ETL operation has been scheduled for tomorrow.
+2024-01-25 11:00:07,403 - etl_daily_log - INFO - Database cursor and connection are closed
+2024-01-25 11:00:07,426 - etl_daily_log - INFO - The 'etl_daily' cron job has been successfully reset as follows:
 0 11 * * * . /home/oseloka/.bash_profile; /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/src/mgt_data_etl/execute_etl_daily.sh >> /home/oseloka/pyprojects/maplecourt_py/MapleCourt_propertyMgt/app_logs/etl_daily.txt 2>&1 # etl_daily
