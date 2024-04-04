@@ -84,7 +84,7 @@ on l.LandlordID = i.LandlordID
 where i.Date between %s and %s;
 """
 
-def get_landlord_inflow(pool, inf_start, logger_instance):
+def get_landlord_inflow(pool, inf_start, inf_stop, logger_instance):
     """
         Function inserts into MC_inflow table with relevant records from Statement_biz table, 
         updates columns of same table according to the reference codes, retrieves relevant records
@@ -103,7 +103,7 @@ def get_landlord_inflow(pool, inf_start, logger_instance):
     logger_instance.info("Event scheduler is started")
 
     inf_start =  datetime.strptime(inf_start, '%Y-%m-%d') if inf_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
-    inf_stop = datetime(inf_start.year + (1 if inf_start.month == 12 else 0), (inf_start.month + 1) % 12 if inf_start.month != 11 else 12, 1) - timedelta(days=1)
+    inf_stop = datetime.strptime(inf_stop, '%Y-%m-%d') if inf_stop is not None else datetime(inf_start.year + (1 if inf_start.month == 12 else 0), (inf_start.month + 1) % 12 if inf_start.month != 11 else 12, 1) - timedelta(days=1)
    
     app_data = access_app_data('r', logger_instance)
     payments_data = app_data['payments']

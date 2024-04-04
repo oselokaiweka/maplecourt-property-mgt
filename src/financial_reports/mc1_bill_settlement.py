@@ -21,8 +21,9 @@ class Bill:
         self.date_processed = datetime.now().strftime('%Y-%m-%d [%H:%M:%S]')
 
 class Payment_purse:
-    def __init__(self, last_payment_id, available_balance, diesel_contribution, tenant_sc) -> None:
+    def __init__(self, last_payment_id, payment_id_override, available_balance, diesel_contribution, tenant_sc) -> None:
         self.last_payment_id = last_payment_id
+        self.payment_id_override = payment_id_override
         self.available_balance = available_balance
         self.diesel_contribution = diesel_contribution
         self.tenant_sc = tenant_sc
@@ -78,12 +79,12 @@ def mc1_settle_bill(logger_instance):
 
     logger_instance.info(f"Processing MC1 expenses for [{bills['mgt']['bill_start_date']}]  to  [{bills['mgt']['bill_stop_date']}]")
 
-    payment_purse = Payment_purse(payments['last_payment_id'], payments['available_balance'], payments['diesel_contribution'], payments['tenant_sc'])
+    payment_purse = Payment_purse(payments['last_payment_id'], payments['payment_id_override'], payments['available_balance'], payments['diesel_contribution'], payments['tenant_sc'])
     rate = Rates(rates['prev_service_charge'], rates['service_charge_deficit'])
     for category_bill, bill_detail in bills.items():
         bill = Bill(bill_detail['bill_name'], bill_detail['bill_total'], bill_detail['balance_brought_f'], bill_detail['bill_outstanding'], bill_detail['amount_paid'], bill_detail['last_payment_id'])
 
-        if payment_purse.last_payment_id > bill.last_payment_id:
+        if payment_purse.last_payment_id > bill.last_payment_id or payment_purse.payment_id_override == 'yes':
             logger_instance.info(f"\nProcessing payment for {bill.bill_name.upper()}....\nCurrent Bill Total: {bill.bill_total:,.2f}\nPrevious outstanding: {bill.outstanding:,.2f}")
             try:
                 pay_bill(bill, payment_purse, rate)
@@ -108,6 +109,6 @@ def mc1_settle_bill(logger_instance):
             logger_instance.info('No new payment to be processed.')
             continue
     logger_instance.info("\nUpdatng app data...")
-
+    payments['payment_id_override'] = 'no'
     access_app_data('w', logger_instance, app_data)
     logger_instance.info("Update complete")

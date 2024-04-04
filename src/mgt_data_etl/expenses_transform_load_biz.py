@@ -30,7 +30,7 @@ def data_transformation(file, logger_instance):
         logger_instance.info('Required columns successfully captured')
 
         # Changing the date format for column 0:
-        df[0] = pd.to_datetime(df[0], format='%d-%b-%Y').dt.strftime('%Y-%m-%d')
+        df[0] = pd.to_datetime(df[0], format='%d-%b-%y').dt.strftime('%Y-%m-%d')
         logger_instance.info('Date formatting successful')
 
         # Converting columns 3, 4, 5 to sql decimal type:

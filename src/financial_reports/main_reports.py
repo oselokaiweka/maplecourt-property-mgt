@@ -17,21 +17,24 @@ if __name__ == '__main__':
 
     try:
         # MANAGEMENT FEE FUNCTION
-        date1 = '2023-12-01'
-        date2 = '2023-12-31'
+        date1 = '2024-03-01'
+        date2 = None
         logger.info("Processing management fee report.")
         mgtfee_table_data = mc1_mgt_report(pool, date1, date2, logger)
         logger.info("Processing management fee report completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing mgt report")
 
-
+    date1 = '2024-03-08'
+    date2 = None
+    date2 = date2 if date2 is not None else datetime.now().strftime('%Y-%m-%d') 
     try:
         # SERVICE CHARGE FUNCTION 
-        filters = ['REHAB', 'CLEARED', 'NOV']
+        filters = ['REHAB', 'CLEARED']
         sc_start = date1 # Use month start if None is specified. 
+        sc_stop = date2 # Use current date if None is specified.
         logger.info("Processing service charge report.")
-        sc_table_data = mc1_sc_report(pool, sc_start, filters, logger)
+        sc_table_data = mc1_sc_report(pool, sc_start, sc_stop, filters, logger)
         logger.info("Processing service charge report completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing sc report")
@@ -40,9 +43,10 @@ if __name__ == '__main__':
     try:   
         # NON-SERVICE CHARGE FUNCTION
         filters = ['REHAB', 'CLEARED']
-        start_date = date1
+        start_date = date1 # Use month start if None is specified. 
+        stop_date = date2 # Use current date if None is specified.
         logger.info("\nProcessing non-service charge report.")
-        nsc_table_data = mc1_nsc_report(pool, start_date, filters, logger)
+        nsc_table_data = mc1_nsc_report(pool, start_date, stop_date, filters, logger)
         logger.info("Processing non-service charge report completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing nsc report")
@@ -51,8 +55,9 @@ if __name__ == '__main__':
     try:
         # INFLOW FUNCTION
         inf_start = date1
+        inf_stop = date2
         logger.info("Processing inflow reports.")
-        inflow_records = get_landlord_inflow(pool, inf_start, logger)
+        inflow_records = get_landlord_inflow(pool, inf_start, inf_stop, logger)
         logger.info("Processing inflow reports completed successfully.\n")
     except Exception as e:
         logger.exception(f"Main error processing inflow report.\n")

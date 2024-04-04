@@ -13,4 +13,4 @@ images
 start_date.txt
 signature.png
 /data
-/app_logs/main_report.log
+/app_logs

@@ -72,7 +72,7 @@ from maplecourt.MC1sc_expenses where date between %s and %s;
 """
    
 
-def mc1_sc_report(pool, sc_start, filters, logger_instance):
+def mc1_sc_report(pool, sc_start, sc_stop, filters, logger_instance):
     # Obtain pool connection if available or add connection then obtain pool connection.
     connection, cursor = get_cursor(pool, logger_instance)
 
@@ -81,7 +81,7 @@ def mc1_sc_report(pool, sc_start, filters, logger_instance):
     logger_instance.info("Event scheduler is started")
 
     sc_start =  datetime.strptime(sc_start, '%Y-%m-%d') if sc_start is not None else datetime.now().replace(day=1) # Use a start date if specified, else use month start
-    sc_stop = datetime(sc_start.year + (1 if sc_start.month == 12 else 0), (sc_start.month + 1) % 12 if sc_start.month != 11 else 12, 1) - timedelta(days=1) # Calculates month end
+    sc_stop = datetime.strptime(sc_stop, '%Y-%m-%d') if sc_stop is not None else datetime(sc_start.year + (1 if sc_start.month == 12 else 0), (sc_start.month + 1) % 12 if sc_start.month != 11 else 12, 1) - timedelta(days=1) # Calculates month end
     # In order to maintain track of total service charge since app start date a json file to write prev_net (used for bal brought forward) at the end of every month is created.
     # To ensure total service charge is available at any point in time, the script also writes a curr_net that adds the prev_net to the months grand total.
     # I adopted this structure to avoid multiple wrong additions to the prev net each time the script is run within the same data period during testing or manual runs.

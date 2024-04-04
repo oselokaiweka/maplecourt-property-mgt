@@ -140,7 +140,7 @@ def data_insert(records, stop_date1, logger_instance):
     schedule = '0 11 * * *'
     reschedule_cron_job(SYS_USER, job_comment, schedule, logger_instance)
     
-
+"""
 if __name__ == "__main__":
     logger.info(f'PROCESS RUN TIMESTAMP...........................................................................: {datetime.now()}\n')
     
@@ -164,3 +164,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         logger.exception(f"Encountered and error: {e}")
+"""
