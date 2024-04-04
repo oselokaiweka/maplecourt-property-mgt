@@ -1,6 +1,6 @@
 {
     "expenses_daily_etl": {
-        "start_date": "2024/01/25"
+        "start_date": "2024/02/18"
     },
     "rates": {
         "mgt_fee_%": 7.5,
@@ -11,46 +11,47 @@
     },
     "payments": {
         "tenant_sc": 0.0,
-        "last_payment_id": 55,
-        "available_balance": 24999.69,
-        "diesel_contribution": 350000.0,
-        "date_processed": "2024-01-01 [15:48:47]"
+        "last_payment_id": 220,
+        "payment_id_override": "no",
+        "available_balance": 74088.25,
+        "diesel_contribution": 400000.0,
+        "date_processed": "2024-04-04 [16:47:03]"
     },
     "bills": {
         "mgt": {
             "bill_name": "mgt_fee",
-            "bill_total": 127397.26,
-            "bill_start_date": "2023-12-01",
-            "bill_stop_date": "2023-12-31",
+            "bill_total": 130225.41,
+            "bill_start_date": "2024-03-01",
+            "bill_stop_date": "2024-03-31",
             "balance_brought_f": 0.0,
             "bill_outstanding": 0.0,
-            "date_processed": "2024-01-01 [15:48:47]",
-            "last_payment_id": 55,
-            "amount_paid": 123287.67
+            "date_processed": "2024-04-04 [16:47:03]",
+            "last_payment_id": 220,
+            "amount_paid": 121823.77
         },
         "nsc": {
             "bill_name": "non-service_charge",
-            "bill_subtotal": 13200,
-            "bill_total": 14190.0,
-            "bill_start_date": "2023-12-01",
-            "bill_stop_date": "2023-12-31",
+            "bill_subtotal": 129100,
+            "bill_total": 138782.5,
+            "bill_start_date": "2024-03-08",
+            "bill_stop_date": "2024-04-04",
             "balance_brought_f": 0.0,
             "bill_outstanding": 0.0,
-            "date_processed": "2024-01-01 [15:48:47]",
-            "last_payment_id": 55,
-            "amount_paid": 351148.77
+            "date_processed": "2024-04-04 [16:47:03]",
+            "last_payment_id": 220,
+            "amount_paid": 72347.5
         },
         "sc": {
             "bill_name": "service_charge",
-            "bill_subtotal": 631856.36,
-            "bill_total": 679245.59,
-            "bill_start_date": "2023-12-01",
-            "bill_stop_date": "2023-12-31",
-            "balance_brought_f": -12594.07,
-            "bill_outstanding": -104929.35,
-            "date_processed": "2024-01-01 [15:48:47]",
-            "last_payment_id": 55,
-            "amount_paid": 421580.87
+            "bill_subtotal": 662853.74,
+            "bill_total": 712567.77,
+            "bill_start_date": "2024-03-08",
+            "bill_stop_date": "2024-04-04",
+            "balance_brought_f": -55097.31,
+            "bill_outstanding": -130936.02,
+            "date_processed": "2024-04-04 [16:47:03]",
+            "last_payment_id": 220,
+            "amount_paid": 388406.48
         }
     }
 }
